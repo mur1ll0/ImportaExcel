@@ -85,7 +85,9 @@ object Form1: TForm1
       'Grupos'
       'SubGrupos'
       'Marcas'
-      'Produtos')
+      'Produtos'
+      'T'#237'tulos a Pagar'
+      'T'#237'tulos a Receber')
   end
   object ButImport: TBitBtn
     AlignWithMargins = True
@@ -201,20 +203,33 @@ object Form1: TForm1
     end
     object Limpar: TMenuItem
       Caption = 'Limpar'
-      object ClieFornGruposSubGruposMarcasProdutos1: TMenuItem
+      object LimpaClieForn: TMenuItem
         Caption = 'Clie/Forn'#13#10
+        OnClick = LimpaClieFornClick
       end
-      object Grupos1: TMenuItem
+      object LimpaGrupos: TMenuItem
         Caption = 'Grupos'#13#10
+        OnClick = LimpaGruposClick
       end
-      object SubGrupos1: TMenuItem
+      object LimpaSubGrupos: TMenuItem
         Caption = 'SubGrupos'#13#10
+        OnClick = LimpaSubGruposClick
       end
-      object Marcas1: TMenuItem
+      object LimpaMarcas: TMenuItem
         Caption = 'Marcas'
+        OnClick = LimpaMarcasClick
       end
-      object Produtos1: TMenuItem
+      object LimpaProdutos: TMenuItem
         Caption = 'Produtos'
+        OnClick = LimpaProdutosClick
+      end
+      object LimpaTituP: TMenuItem
+        Caption = 'T'#237'tulos a Pagar'
+        OnClick = LimpaTituPClick
+      end
+      object LimpaTituR: TMenuItem
+        Caption = 'T'#237'tulos a Receber'
+        OnClick = LimpaTituRClick
       end
     end
   end

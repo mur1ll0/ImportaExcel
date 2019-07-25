@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, Vcl.Buttons, ComObj, IniFiles,
-  Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto;
+  Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto,
+  Vcl.Menus;
 
 type
   TForm1 = class(TForm)
@@ -22,6 +23,16 @@ type
     Connect: TSQLConnection;
     ButSave: TBitBtn;
     SaveDialog1: TSaveDialog;
+    Menu: TMainMenu;
+    t1: TMenuItem;
+    Editar1: TMenuItem;
+    Cabealho1: TMenuItem;
+    Limpar: TMenuItem;
+    ClieFornGruposSubGruposMarcasProdutos1: TMenuItem;
+    Grupos1: TMenuItem;
+    SubGrupos1: TMenuItem;
+    Marcas1: TMenuItem;
+    Produtos1: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -36,6 +47,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure ButImportClick(Sender: TObject);
     procedure ButSaveClick(Sender: TObject);
+    procedure Cabealho1Click(Sender: TObject);
 
 
   private
@@ -50,6 +62,76 @@ var
 
 implementation
 
+
+//Função para carregar apenas o cabeçalho de uma planilha na StringGrid
+function XlsHeaderLoad(AGrid: TStringGrid; AXLSFile: string): Boolean;
+const
+  xlCellTypeLastCell = $0000000B;
+var
+  XLApp, Sheet: OLEVariant;
+  RangeMatrix: Variant;
+  x, y, k, r: Integer;
+begin
+  Result := False;
+  // Create Excel-OLE Object
+  XLApp := CreateOleObject('Excel.Application');
+  try
+    // Hide Excel
+    XLApp.Visible := False;
+
+    // Open the Workbook
+    XLApp.Workbooks.Open(AXLSFile);
+
+    // Sheet := XLApp.Workbooks[1].WorkSheets[1];
+    Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[1];
+
+    // In order to know the dimension of the WorkSheet, i.e the number of rows
+    // and the number of columns, we activate the last non-empty cell of it
+
+    Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Activate;
+    // Get the value of the last row
+    x := XLApp.ActiveCell.Row;
+    // Get the value of the last column
+    y := XLApp.ActiveCell.Column;
+
+    // Assign the Variant associated with the WorkSheet to the Delphi Variant
+    RangeMatrix := XLApp.Range['A1', XLApp.Cells.Item[X, Y]].Value;
+
+
+    //Verificar quantidade de colunas
+    if AGrid.ColCount < y then AGrid.ColCount := y;
+    //Testar se a primeira coluna não é um '0'
+    if RangeMatrix[1, 1] <> '0' then
+    begin
+      //AGrid.ColCount := AGrid.ColCount +1;
+      AGrid.Cells[0,0] := '0';
+    end;
+
+    //Iterar colunas
+    for r := 1 to y do
+    begin
+      AGrid.Cells[r,0] := RangeMatrix[1, r];
+    end;
+
+    // Unassign the Delphi Variant Matrix
+    RangeMatrix := Unassigned;
+
+
+  finally
+    // Quit Excel
+    if not VarIsEmpty(XLApp) then
+    begin
+      // XLApp.DisplayAlerts := False;
+      XLApp.Quit;
+      XLAPP := Unassigned;
+      Sheet := Unassigned;
+      Result := True;
+    end;
+  end;
+end;
+
+
+//Função para carregar planilha na StringGrid
 function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
 const
   xlCellTypeLastCell = $0000000B;
@@ -88,15 +170,16 @@ begin
     // Assign the Variant associated with the WorkSheet to the Delphi Variant
     RangeMatrix := XLApp.Range['A1', XLApp.Cells.Item[X, Y]].Value;
 
+    {
     //  Define the loop for filling in the TStringGrid
     k := 1;
     repeat
       for r := 1 to y do
         AGrid.Cells[(r - 1), (k - 1)] := RangeMatrix[K, R];
       Inc(k, 1);
-    until k > x;
+    until k > x;  }
 
-    {
+
     AGrid.ColCount := AGrid.ColCount +1;
     //Iterar linhas
     for k := 0 to AGrid.RowCount-1 do
@@ -105,9 +188,9 @@ begin
       //Iterar colunas
       for r := 1 to AGrid.ColCount-1 do
       begin
-        AGrid.Cells[r,k] := RangeMatrix[(K+1), (R+1)];
+        AGrid.Cells[r,k] := RangeMatrix[(K+1), r];
       end;
-    end;}
+    end;
 
     // Unassign the Delphi Variant Matrix
     RangeMatrix := Unassigned;
@@ -716,7 +799,7 @@ begin
           end;
 
           //----------------------------------------
-          //Gravar no banco de dadosClieForn
+          //Gravar no banco de dados ClieForn
           try
             try
               //Abrir conexoes
@@ -902,6 +985,10 @@ begin
             begin
               colProd := colProd + ',grup';
               dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end
+            else begin
+              colProd := colProd + ',grup';
+              dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
             end;
           end
           else begin
@@ -916,6 +1003,10 @@ begin
             begin
               colProd := colProd + ',sub_grup';
               dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end
+            else begin
+              colProd := colProd + ',sub_grup';
+              dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
             end;
           end
           else begin
@@ -944,6 +1035,10 @@ begin
             begin
               colProd := colProd + ',marca';
               dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end
+            else begin
+              colProd := colProd + ',marca';
+              dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
             end;
           end
           else begin
@@ -1627,28 +1722,6 @@ begin
 end;
 
 
-//Deletar Linha da StringGrid
-procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
-var
-  i: Integer;
-begin
-  for i := ARow to Grid.RowCount - 2 do
-    Grid.Rows[i].Assign(Grid.Rows[i + 1]);
-  Grid.RowCount := Grid.RowCount - 1;
-end;
-
-
-//Deletar coluna na StringGrid
-procedure DeleteCol(Grid: TStringGrid; ACol: Integer);
-var
-  i: Integer;
-begin
-  for i := ACol to Grid.ColCount - 2 do
-    Grid.Cols[i].Assign(Grid.Cols[i + 1]);
-  Grid.ColCount := Grid.ColCount - 1;
-end;
-
-
 //Função para salvar StringGrid em um array de string
 function StringGridToArray(Grid: TStringGrid): Integer;
 var
@@ -1671,6 +1744,48 @@ begin
   end;
 
 end;
+
+
+
+//Carregar Cabeçalho de outra tabela nesta tabela
+procedure TForm1.Cabealho1Click(Sender: TObject);
+var
+  arquivo: string;
+
+begin
+  if OpenDialog1.Execute then
+  begin
+    ExtractFilePath(Application.ExeName);
+    arquivo :=  OpenDialog1.FileName;
+
+    StringGridToArray(StringGrid1);
+    XlsHeaderLoad(StringGrid1,arquivo);
+
+  end;
+end;
+
+
+//Deletar Linha da StringGrid
+procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
+var
+  i: Integer;
+begin
+  for i := ARow to Grid.RowCount - 2 do
+    Grid.Rows[i].Assign(Grid.Rows[i + 1]);
+  Grid.RowCount := Grid.RowCount - 1;
+end;
+
+
+//Deletar coluna na StringGrid
+procedure DeleteCol(Grid: TStringGrid; ACol: Integer);
+var
+  i: Integer;
+begin
+  for i := ACol to Grid.ColCount - 2 do
+    Grid.Cols[i].Assign(Grid.Cols[i + 1]);
+  Grid.ColCount := Grid.ColCount - 1;
+end;
+
 
 //Evento ao apertar Botão Delete na StringGrid
 procedure TForm1.StringGrid1KeyDown(Sender: TObject; var Key: Word;

@@ -27,6 +27,12 @@ type
     t1: TMenuItem;
     Editar1: TMenuItem;
     Cabealho1: TMenuItem;
+    Limpar: TMenuItem;
+    LimpaClieForn: TMenuItem;
+    LimpaGrupos: TMenuItem;
+    LimpaSubGrupos: TMenuItem;
+    LimpaMarcas: TMenuItem;
+    LimpaProdutos: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -42,6 +48,7 @@ type
     procedure ButImportClick(Sender: TObject);
     procedure ButSaveClick(Sender: TObject);
     procedure Cabealho1Click(Sender: TObject);
+    procedure LimpaClieFornClick(Sender: TObject);
 
 
   private
@@ -95,11 +102,14 @@ begin
     //Verificar quantidade de colunas
     if AGrid.ColCount < y then AGrid.ColCount := y;
     //Testar se a primeira coluna não é um '0'
-    if RangeMatrix[1, 1] <> '0' then AGrid.ColCount := AGrid.ColCount +1;
+    if RangeMatrix[1, 1] <> '0' then
+    begin
+      //AGrid.ColCount := AGrid.ColCount +1;
+      AGrid.Cells[0,0] := '0';
+    end;
 
-    AGrid.Cells[0,0] := '0';
     //Iterar colunas
-    for r := 1 to AGrid.ColCount-1 do
+    for r := 1 to y do
     begin
       AGrid.Cells[r,0] := RangeMatrix[1, r];
     end;
@@ -1756,6 +1766,30 @@ begin
 end;
 
 
+//Limpar dados de clientes e fornecedores do banco
+procedure TForm1.LimpaClieFornClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from clieforn;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de clientes e fornecedores.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
 //Deletar Linha da StringGrid
 procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
 var
@@ -2006,6 +2040,7 @@ begin
     end;
   end;
 end;
+
 
 
 procedure TForm1.StringGrid1Click(Sender: TObject);

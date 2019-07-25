@@ -28,11 +28,13 @@ type
     Editar1: TMenuItem;
     Cabealho1: TMenuItem;
     Limpar: TMenuItem;
-    ClieFornGruposSubGruposMarcasProdutos1: TMenuItem;
-    Grupos1: TMenuItem;
-    SubGrupos1: TMenuItem;
-    Marcas1: TMenuItem;
-    Produtos1: TMenuItem;
+    LimpaClieForn: TMenuItem;
+    LimpaGrupos: TMenuItem;
+    LimpaSubGrupos: TMenuItem;
+    LimpaMarcas: TMenuItem;
+    LimpaProdutos: TMenuItem;
+    LimpaTituP: TMenuItem;
+    LimpaTituR: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -48,6 +50,13 @@ type
     procedure ButImportClick(Sender: TObject);
     procedure ButSaveClick(Sender: TObject);
     procedure Cabealho1Click(Sender: TObject);
+    procedure LimpaClieFornClick(Sender: TObject);
+    procedure LimpaGruposClick(Sender: TObject);
+    procedure LimpaSubGruposClick(Sender: TObject);
+    procedure LimpaMarcasClick(Sender: TObject);
+    procedure LimpaProdutosClick(Sender: TObject);
+    procedure LimpaTituPClick(Sender: TObject);
+    procedure LimpaTituRClick(Sender: TObject);
 
 
   private
@@ -371,6 +380,58 @@ begin
 end;
 
 
+//FUNÇÃO PARA RECONHECER SE JA EXISTE O CODIGO DO TITULO PAGAR OU NAO
+function temCodTituloP(Codigo: String): Boolean;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select tp.codi from titup tp where tp.codi = :PCODI');
+    queryTemp.ParamByName('PCODI').AsString := Codigo;
+    queryTemp.Open;
+
+    if queryTemp.IsEmpty = True then
+      Result := False
+    else
+      Result := True;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
+//FUNÇÃO PARA RECONHECER SE JA EXISTE O CODIGO DO TITULO RECEBER OU NAO
+function temCodTituloR(Codigo: String): Boolean;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select tr.codi from titur tr where tr.codi = :PCODI');
+    queryTemp.ParamByName('PCODI').AsString := Codigo;
+    queryTemp.Open;
+
+    if queryTemp.IsEmpty = True then
+      Result := False
+    else
+      Result := True;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
 //IMPORTAR DADOS
 procedure TForm1.ButImportClick(Sender: TObject);
 var
@@ -387,7 +448,9 @@ var
   colGrupo, dadosGrupo: String;
   colSubGrupo, dadosSubGrupo: String;
   colMarca, dadosMarca: String;
-  i,k,status,max: integer;
+  colTituP, dadosTituP: string;
+  colTituR, dadosTituR: string;
+  i,k,status,max,count: integer;
 
 begin
 
@@ -1570,6 +1633,89 @@ begin
         end
 
         //----------------------------------------------------------------------------
+        //Importar Títulos a Pagar
+        else if SelectImport.Text = 'Títulos a Pagar' then
+        begin
+          //ShowMessage('Importar Títulos a Pagar');
+
+          Form2.atualizaStatus('Títulos a Pagar '+IntToStr(k));
+
+          colTituP := '';
+          dadosTituP := '';
+
+          //Carregar informações para importar
+          //-------------------------------------------------------
+
+          //CODI (CODIGO)
+          i:=BuscaColuna(StringGrid1,'codi');
+          if (i<>-1) then
+          begin
+            //Testar se ja existir o código do título e inserir uma barra.
+            count := 0;
+            while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
+            begin
+              count := count+1;
+              StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
+            end;
+
+            colTituP := colTituP + 'codi';
+            dadosTituP := dadosTituP + '''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituP := colTituP + 'codi';
+            dadosTituP := dadosTituP + IntToStr(k);
+          end;
+
+
+          for i := 0 to StringGrid1.ColCount-1 do
+          begin
+            //DESCR (DESCRICAO)
+            if (LowerCase(StringGrid1.Cells[i,0])='descr') then
+            begin
+              colMarca := colMarca + ',descr';
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,30));
+              dadosMarca := dadosMarca + ',''' + temp + '''';
+            end
+            ;
+
+          //Fim do For das colunas
+          end;
+
+          //----------------------------------------
+          //Gravar no banco de Títulos a Pagar
+          try
+            try
+              //Abrir conexoes
+              Connect.Open;
+              SQL := TSQLDataSet.Create(Application);
+              SQL.SQLConnection := Connect;
+
+              //Executar INSERT
+              Form2.atualizaStatus('Inserindo dados na tabela MARCA.');
+              SQL.CommandText := 'insert into marca ('+ colMarca +') values ' + '(' + dadosMarca + ');';
+              SQL.ExecSQL;
+
+            except
+              on e: exception do
+              begin
+                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                status := 0;
+                SQL.Free;
+                Connect.Close;
+                break; //Quebra o for
+              end;
+            end;
+
+          finally
+            SQL.Free;
+            Connect.Close;
+          end;
+
+        end
+
+        //----------------------------------------------------------------------------
         //OUTRAS OPÇÕES DE IMPORTAÇÃO COLOCAR AQUI
 
         ;
@@ -1762,6 +1908,188 @@ begin
     XlsHeaderLoad(StringGrid1,arquivo);
 
   end;
+end;
+
+
+//Limpar dados de clientes e fornecedores do banco
+procedure TForm1.LimpaClieFornClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from clieforn;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de clientes e fornecedores.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de grupos do banco
+procedure TForm1.LimpaGruposClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from grup_prod;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_grup_prod_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de grupos.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de marcas do banco
+procedure TForm1.LimpaMarcasClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from marca;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de marcas.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de produtos do banco
+procedure TForm1.LimpaProdutosClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from prod;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'delete from prod_ajus;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'delete from itens;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_ITENS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_MVA_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ADICIONAIS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_AJUS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_CUSTOS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_FORN_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ICMS_ST_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_TRIBUTOS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de produtos.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de subgrupos do banco
+procedure TForm1.LimpaSubGruposClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from sub_grup_prod;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_sub_grup_prod_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de subgrupos.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de Titulos a pagar do banco
+procedure TForm1.LimpaTituPClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from titup;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de Títulos a Pagar.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de Titulos a receber do banco
+procedure TForm1.LimpaTituRClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from titur;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de Títulos a Receber.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
 end;
 
 
@@ -2015,6 +2343,7 @@ begin
     end;
   end;
 end;
+
 
 
 procedure TForm1.StringGrid1Click(Sender: TObject);

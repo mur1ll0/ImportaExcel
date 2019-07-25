@@ -27,6 +27,12 @@ type
     t1: TMenuItem;
     Editar1: TMenuItem;
     Cabealho1: TMenuItem;
+    Limpar: TMenuItem;
+    LimpaClieForn: TMenuItem;
+    LimpaGrupos: TMenuItem;
+    LimpaSubGrupos: TMenuItem;
+    LimpaMarcas: TMenuItem;
+    LimpaProdutos: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -42,6 +48,11 @@ type
     procedure ButImportClick(Sender: TObject);
     procedure ButSaveClick(Sender: TObject);
     procedure Cabealho1Click(Sender: TObject);
+    procedure LimpaClieFornClick(Sender: TObject);
+    procedure LimpaGruposClick(Sender: TObject);
+    procedure LimpaSubGruposClick(Sender: TObject);
+    procedure LimpaMarcasClick(Sender: TObject);
+    procedure LimpaProdutosClick(Sender: TObject);
 
 
   private
@@ -97,7 +108,7 @@ begin
     //Testar se a primeira coluna não é um '0'
     if RangeMatrix[1, 1] <> '0' then
     begin
-      AGrid.ColCount := AGrid.ColCount +1;
+      //AGrid.ColCount := AGrid.ColCount +1;
       AGrid.Cells[0,0] := '0';
     end;
 
@@ -1759,6 +1770,145 @@ begin
 end;
 
 
+//Limpar dados de clientes e fornecedores do banco
+procedure TForm1.LimpaClieFornClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from clieforn;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de clientes e fornecedores.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de grupos do banco
+procedure TForm1.LimpaGruposClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from grup_prod;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_grup_prod_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de grupos.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de marcas do banco
+procedure TForm1.LimpaMarcasClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from marca;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de marcas.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
+//Limpar dados de produtos do banco
+procedure TForm1.LimpaProdutosClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from prod;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'delete from prod_ajus;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'delete from itens;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_ITENS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_MVA_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ADICIONAIS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_AJUS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_CUSTOS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_FORN_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ICMS_ST_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+  SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_TRIBUTOS_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de produtos.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+//Limpar dados de subgrupos do banco
+procedure TForm1.LimpaSubGruposClick(Sender: TObject);
+var
+  SQL: TSQLDataSet;
+begin
+  //Abrir conexoes
+  Connect.Open;
+  SQL := TSQLDataSet.Create(Application);
+  SQL.SQLConnection := Connect;
+
+  SQL.CommandText := 'delete from sub_grup_prod;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'ALTER SEQUENCE GEN_sub_grup_prod_ID RESTART WITH 0;';
+  SQL.ExecSQL;
+
+  ShowMessage('Limpado dados de subgrupos.');
+
+  //Fechar conexoes
+  SQL.Free;
+  Connect.Close;
+end;
+
+
 //Deletar Linha da StringGrid
 procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
 var
@@ -2009,6 +2159,7 @@ begin
     end;
   end;
 end;
+
 
 
 procedure TForm1.StringGrid1Click(Sender: TObject);

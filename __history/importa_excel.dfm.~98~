@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Anchors = []
-  BiDiMode = bdRightToLeftNoAlign
+  BiDiMode = bdLeftToRight
   Caption = 'Importa Excel'
   ClientHeight = 600
   ClientWidth = 1004
@@ -12,6 +12,7 @@ object Form1: TForm1
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  Menu = Menu
   OldCreateOrder = False
   ParentBiDiMode = False
   Position = poDesigned
@@ -36,10 +37,12 @@ object Form1: TForm1
     Width = 988
     Height = 528
     Anchors = [akLeft, akTop, akRight, akBottom]
+    BiDiMode = bdLeftToRight
     ColCount = 3
     FixedColor = clBlack
     RowCount = 3
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSizing, goColSizing, goRowMoving, goColMoving, goEditing]
+    ParentBiDiMode = False
     TabOrder = 1
     OnClick = StringGrid1Click
     OnDblClick = StringGrid1DblClick
@@ -70,7 +73,7 @@ object Form1: TForm1
     OnClick = BtnAbrirClick
   end
   object SelectImport: TComboBox
-    Left = 848
+    Left = 851
     Top = 2
     Width = 145
     Height = 21
@@ -86,8 +89,8 @@ object Form1: TForm1
   end
   object ButImport: TBitBtn
     AlignWithMargins = True
-    Left = 917
-    Top = 28
+    Left = 921
+    Top = 29
     Width = 75
     Height = 25
     Anchors = [akTop, akRight]
@@ -180,5 +183,42 @@ object Form1: TForm1
   object SaveDialog1: TSaveDialog
     Left = 192
     Top = 32
+  end
+  object Menu: TMainMenu
+    BiDiMode = bdLeftToRight
+    ParentBiDiMode = False
+    Left = 232
+    Top = 32
+    object t1: TMenuItem
+      Caption = 'Carregar'
+      object Cabealho1: TMenuItem
+        Caption = 'Cabe'#231'alho'
+        OnClick = Cabealho1Click
+      end
+    end
+    object Editar1: TMenuItem
+      Caption = 'Editar'
+    end
+    object Limpar: TMenuItem
+      Caption = 'Limpar'
+      object LimpaClieForn: TMenuItem
+        Caption = 'Clie/Forn'#13#10
+        OnClick = LimpaClieFornClick
+      end
+      object LimpaGrupos: TMenuItem
+        Caption = 'Grupos'#13#10
+        OnClick = LimpaGruposClick
+      end
+      object LimpaSubGrupos: TMenuItem
+        Caption = 'SubGrupos'#13#10
+        OnClick = LimpaSubGruposClick
+      end
+      object LimpaMarcas: TMenuItem
+        Caption = 'Marcas'
+      end
+      object LimpaProdutos: TMenuItem
+        Caption = 'Produtos'
+      end
+    end
   end
 end
