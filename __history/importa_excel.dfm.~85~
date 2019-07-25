@@ -1,0 +1,180 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Anchors = [akLeft, akTop, akRight, akBottom]
+  Caption = 'Importa Excel'
+  ClientHeight = 746
+  ClientWidth = 1024
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesigned
+  DesignSize = (
+    1024
+    746)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object BtnLoad: TBitBtn
+    AlignWithMargins = True
+    Left = 8
+    Top = 41
+    Width = 75
+    Height = 25
+    Anchors = []
+    Caption = 'Carregar'
+    TabOrder = 0
+    OnClick = BtnLoadClick
+  end
+  object StringGrid1: TStringGrid
+    Left = 8
+    Top = 72
+    Width = 1008
+    Height = 657
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    ColCount = 3
+    FixedColor = clBlack
+    RowCount = 3
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSizing, goColSizing, goRowMoving, goColMoving, goEditing]
+    TabOrder = 1
+    OnClick = StringGrid1Click
+    OnDblClick = StringGrid1DblClick
+    OnKeyDown = StringGrid1KeyDown
+    OnMouseDown = StringGrid1MouseDown
+  end
+  object FilePath: TEdit
+    AlignWithMargins = True
+    Left = 89
+    Top = 8
+    Width = 288
+    Height = 21
+    Anchors = []
+    TabOrder = 2
+    Text = 'Caminho da planilha (CSV, XLS, XLSX, etc)'
+  end
+  object BtnAbrir: TBitBtn
+    AlignWithMargins = True
+    Left = 8
+    Top = 8
+    Width = 75
+    Height = 25
+    Anchors = []
+    Caption = 'Abrir...'
+    TabOrder = 3
+    OnClick = BtnAbrirClick
+  end
+  object SelectImport: TComboBox
+    Left = 871
+    Top = 8
+    Width = 145
+    Height = 21
+    Anchors = []
+    TabOrder = 4
+    Text = 'Tipo de Importa'#231#227'o'
+    Items.Strings = (
+      'Clie/Forn'
+      'Grupos'
+      'SubGrupos'
+      'Marcas'
+      'Produtos')
+  end
+  object ButImport: TBitBtn
+    AlignWithMargins = True
+    Left = 941
+    Top = 35
+    Width = 75
+    Height = 25
+    Anchors = []
+    Caption = 'Importar'
+    TabOrder = 5
+    OnClick = ButImportClick
+  end
+  object DBPath: TEdit
+    Left = 473
+    Top = 8
+    Width = 288
+    Height = 21
+    Anchors = []
+    TabOrder = 6
+    Text = 'Caminho da base de dados (FDB)'
+  end
+  object ButOpenDB: TBitBtn
+    Left = 392
+    Top = 8
+    Width = 75
+    Height = 25
+    Anchors = []
+    Caption = 'Abrir...'
+    TabOrder = 7
+    OnClick = BtnOpenDB
+  end
+  object ButSave: TBitBtn
+    AlignWithMargins = True
+    Left = 112
+    Top = 41
+    Width = 75
+    Height = 25
+    Anchors = []
+    Caption = 'Salvar'
+    TabOrder = 8
+    OnClick = ButSaveClick
+  end
+  object OpenDialog1: TOpenDialog
+    Options = [ofEnableSizing]
+    Left = 80
+    Top = 40
+  end
+  object OpenDialog2: TOpenDialog
+    Options = [ofEnableSizing]
+    Left = 688
+  end
+  object Connect: TSQLConnection
+    DriverName = 'Firebird'
+    Params.Strings = (
+      'DriverUnit=Data.DBXFirebird'
+      
+        'DriverPackageLoader=TDBXDynalinkDriverLoader,DbxCommonDriver210.' +
+        'bpl'
+      
+        'DriverAssemblyLoader=Borland.Data.TDBXDynalinkDriverLoader,Borla' +
+        'nd.Data.DbxCommonDriver,Version=21.0.0.0,Culture=neutral,PublicK' +
+        'eyToken=91d62ebb5b0d1b1b'
+      
+        'MetaDataPackageLoader=TDBXFirebirdMetaDataCommandFactory,DbxFire' +
+        'birdDriver210.bpl'
+      
+        'MetaDataAssemblyLoader=Borland.Data.TDBXFirebirdMetaDataCommandF' +
+        'actory,Borland.Data.DbxFirebirdDriver,Version=21.0.0.0,Culture=n' +
+        'eutral,PublicKeyToken=91d62ebb5b0d1b1b'
+      'GetDriverFunc=getSQLDriverINTERBASE'
+      'LibraryName=dbxfb.dll'
+      'LibraryNameOsx=libsqlfb.dylib'
+      'VendorLib=fbclient.dll'
+      'VendorLibWin64=fbclient.dll'
+      'VendorLibOsx=/Library/Frameworks/Firebird.framework/Firebird'
+      'Database=DBPath'
+      'User_Name=sysdba'
+      'Password=masterkey'
+      'Role=RoleName'
+      'MaxBlobSize=-1'
+      'LocaleCode=0000'
+      'IsolationLevel=ReadCommitted'
+      'SQLDialect=3'
+      'CommitRetain=False'
+      'WaitOnLocks=True'
+      'TrimChar=False'
+      'BlobSize=-1'
+      'ErrorResourceFile='
+      'RoleName=RoleName'
+      'ServerCharSet='
+      'Trim Char=False')
+    Left = 728
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 192
+    Top = 40
+  end
+end
