@@ -1143,8 +1143,17 @@ begin
           i:=BuscaColuna(StringGrid1,'qtd');
           if (i<>-1) then
           begin
+            if StringGrid1.Cells[i,k]='' then
+            begin
+              temp := '0';
+            end
+            else begin
+              temp := StringGrid1.Cells[i,k];
+            end;
+            temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+            temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+            dadosItens := dadosItens + ',' + temp;
             colItens := colItens + ',qtd';
-            dadosItens := dadosItens + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
           end
           else begin
             colItens := colItens + ',qtd';
@@ -2002,9 +2011,9 @@ begin
 
     Sheet.Name := 'String Grid';
 
-    for col := 0 to stringGrid.ColCount - 1 do
+    for col := 1 to stringGrid.ColCount - 1 do
       for row := 0 to stringGrid.RowCount - 1 do
-        Sheet.Cells[row + 1, col + 1] := stringGrid.Cells[col, row];
+        Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
     try
       XLApp.Workbooks[1].SaveAs(FileName);
       Result := True;
