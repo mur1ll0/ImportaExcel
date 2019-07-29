@@ -432,6 +432,45 @@ begin
 end;
 
 
+//FUNÇÃO PARA RETORNAR CODIGO DO CLIE/FORN PELO NOME
+function getCodiClieForn(clieforn: String): Integer;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
+    queryTemp.ParamByName('PNOME').AsString := clieforn;
+    queryTemp.Open;
+
+    Result := queryTemp.FieldByName('CODI').AsInteger;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
+function IsNumeric(S : String) : Boolean;
+begin
+  Result := True;
+  Try
+     StrToInt(S);
+  Except
+    Result := False;
+  end;
+end;
+
+
+
+//FIM DAS FUNÇÕES ANTES DA IMPORTAÇÃO
+//------------------------------------------------------------------------------
+
+
 //IMPORTAR DADOS
 procedure TForm1.ButImportClick(Sender: TObject);
 var
@@ -470,7 +509,9 @@ begin
       begin
 
         //Se clicou em cancelar, quebra o laço das linhas e finaliza importação.
-        if Form2.Active=False then break;
+        //if Form2.Active=False then break; - Usando Active, se minimizar a tela cancela.
+        if Form2.Visible=False then break;
+
 
         //Atualizar Status
         Form2.atualizaItens(k,StringGrid1.RowCount-1);
@@ -842,7 +883,7 @@ begin
                 dadosClieForn := dadosClieForn + ',''' + temp + '''';
               end;
             end
-            //TIPO_CAD (A=AMBOS, C=CLIENTE, F=FORNECEDOR)
+            //TIPOCAD (A=AMBOS, C=CLIENTE, F=FORNECEDOR)
             else if (LowerCase(StringGrid1.Cells[i,0])='tipocad') then
             begin
               temp := StringGrid1.Cells[i,k];
@@ -1141,8 +1182,17 @@ begin
           i:=BuscaColuna(StringGrid1,'qtd');
           if (i<>-1) then
           begin
+            if StringGrid1.Cells[i,k]='' then
+            begin
+              temp := '0';
+            end
+            else begin
+              temp := StringGrid1.Cells[i,k];
+            end;
+            temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+            temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+            dadosItens := dadosItens + ',' + temp;
             colItens := colItens + ',qtd';
-            dadosItens := dadosItens + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
           end
           else begin
             colItens := colItens + ',qtd';
@@ -1219,7 +1269,10 @@ begin
             else if (LowerCase(StringGrid1.Cells[i,0])='ncm') then
             begin
               colProd := colProd + ',ncm';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              temp := stringreplace(StringGrid1.Cells[i,k], '''', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(temp)) + '''';
             end
             //CEST
             else if (LowerCase(StringGrid1.Cells[i,0])='cest') then
@@ -1358,9 +1411,6 @@ begin
               SQL.ExecSQL;
               Form2.atualizaStatus('Inserindo dados na tabela MVA.');
               SQL.CommandText := 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
-              SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
               SQL.ExecSQL;
               Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
               SQL.CommandText := 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');';
@@ -1687,19 +1737,28 @@ begin
           end
           else begin
             colTituP := colTituP + ',empr';
-            dadosTituP := dadosTituP + 'gen_id(gen_clieforn_id,0)';
+            dadosTituP := dadosTituP + ',1';
           end;
 
           //FORN (FORNECEDOR)
           i:=BuscaColuna(StringGrid1,'forn');
           if (i<>-1) then
           begin
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
+            begin
+              temp := IntToStr(getCodiClieForn(temp));
+              //Se não encontrar a string, colocar ultimo cliente cadastrado
+              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+            end;
+            //Se for números vai direto
             colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + StringGrid1.Cells[i,k] + '''';
+            dadosTituP := dadosTituP + ',''' + temp + '''';
           end
           else begin
             colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + '1' + '''';
+            dadosTituP := dadosTituP + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -1882,6 +1941,252 @@ begin
         end
 
         //----------------------------------------------------------------------------
+        //Importar Títulos a Receber
+        else if SelectImport.Text = 'Títulos a Receber' then
+        begin
+          //ShowMessage('Importar Títulos a Receber');
+
+          Form2.atualizaStatus('Títulos a Receber '+IntToStr(k));
+
+          colTituR := '';
+          dadosTituR := '';
+
+          //Carregar informações para importar
+          //-------------------------------------------------------
+
+          //CODI (CODIGO)
+          i:=BuscaColuna(StringGrid1,'codi');
+          if (i<>-1) then
+          begin
+            //Testar se ja existir o código do título e inserir uma barra.
+            count := 0;
+            while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
+            begin
+              count := count+1;
+              StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
+            end;
+
+            colTituR := colTituR + 'codi';
+            dadosTituR := dadosTituR + '''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituR := colTituR + 'codi';
+            dadosTituR := dadosTituR + IntToStr(k);
+          end;
+
+          //EMPR (EMPRESA)
+          i:=BuscaColuna(StringGrid1,'empr');
+          if (i<>-1) then
+          begin
+            colTituR := colTituR + ',empr';
+            dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituR := colTituR + ',empr';
+            dadosTituR := dadosTituR + ',1';
+          end;
+
+          //CLIE (CLIENTE)
+          i:=BuscaColuna(StringGrid1,'clie');
+          if (i<>-1) then
+          begin
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
+            begin
+              temp := IntToStr(getCodiClieForn(temp));
+              //Se não encontrar a string, colocar ultimo cliente cadastrado
+              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+            end;
+            //Se for números vai direto
+            colTituR := colTituR + ',clie';
+            dadosTituR := dadosTituR + ',''' + temp + '''';
+          end
+          else begin
+            colTituR := colTituR + ',clie';
+            dadosTituR := dadosTituR + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+          end;
+
+          //LOCA_COBR (LOCAL DE COBRANÇA)
+          i:=BuscaColuna(StringGrid1,'loca_cobr');
+          if (i<>-1) then
+          begin
+            colTituR := colTituR + ',loca_cobr';
+            dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituR := colTituR + ',loca_cobr';
+            dadosTituR := dadosTituR + ',''' + '1' + '''';
+          end;
+
+          //CART (TIPO DE CARTEIRA)
+          i:=BuscaColuna(StringGrid1,'cart');
+          if (i<>-1) then
+          begin
+            colTituR := colTituR + ',cart';
+            dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituR := colTituR + ',cart';
+            dadosTituR := dadosTituR + ',''' + '1' + '''';
+          end;
+
+          //OPER (OPERAÇÃO DO PLANO DE CONTAS)
+          i:=BuscaColuna(StringGrid1,'oper');
+          if (i<>-1) then
+          begin
+            colTituR := colTituR + ',oper';
+            dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituR := colTituR + ',oper';
+            dadosTituR := dadosTituR + ',''' + '002' + '''';
+          end;
+
+          //C_FUNC (FUNCIONÁRIO)
+          i:=BuscaColuna(StringGrid1,'c_func');
+          if (i<>-1) then
+          begin
+            colTituR := colTituR + ',c_func';
+            dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+          end
+          else begin
+            colTituR := colTituR + ',c_func';
+            dadosTituR := dadosTituR + ',''' + '1' + '''';
+          end;
+
+
+          for i := 0 to StringGrid1.ColCount-1 do
+          begin
+            //DATA (Data de criação do título)
+            if (LowerCase(StringGrid1.Cells[i,0])='data') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length = 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                colTituR := colTituR + ',data';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com data do titulo
+                //Se os caracteres da data do titulo forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                colTituR := colTituR + ',data';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
+            end
+            //VENC (Data de vencimento do título)
+            else if (LowerCase(StringGrid1.Cells[i,0])='venc') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length = 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                colTituR := colTituR + ',venc';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com data do titulo
+                //Se os caracteres da data do titulo forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                colTituR := colTituR + ',venc';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
+            end
+            //VALO (Valor do título)
+            else if (LowerCase(StringGrid1.Cells[i,0])='valo') then
+            begin
+              colTituR := colTituR + ',valo';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+              dadosTituR := dadosTituR + ',' + temp;
+
+              //Testar se existe coluna saldo, se não existir joga o valor da VALO
+              count:=BuscaColuna(StringGrid1,'sald');
+              if (count<>-1) then
+              begin
+                colTituR := colTituR + ',sald';
+                if StringGrid1.Cells[count,k]='' then
+                begin
+                  temp2 := '0';
+                end
+                else begin
+                  temp2 := StringGrid1.Cells[count,k];
+                end;
+                temp2 := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+                temp2 := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+                dadosTituR := dadosTituR + ',' + temp2;
+              end
+              else begin
+                colTituR := colTituR + ',sald';
+                dadosTituR := dadosTituR + ',' + temp;
+              end;
+            end
+            //HIST (HISTORICO)
+            else if (LowerCase(StringGrid1.Cells[i,0])='hist') then
+            begin
+              colTituR := colTituR + ',hist';
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,150));
+              dadosTituR := dadosTituR + ',''' + temp + '''';
+            end
+            ;
+
+          //Fim do For das colunas
+          end;
+
+          //----------------------------------------
+          //Gravar no banco de Títulos a Receber
+          try
+            try
+              //Abrir conexoes
+              Connect.Open;
+              SQL := TSQLDataSet.Create(Application);
+              SQL.SQLConnection := Connect;
+
+              //Executar INSERT
+              Form2.atualizaStatus('Inserindo dados na tabela TITUR.');
+              SQL.CommandText := 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');';
+              SQL.ExecSQL;
+
+            except
+              on e: exception do
+              begin
+                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                status := 0;
+                SQL.Free;
+                Connect.Close;
+                break; //Quebra o for
+              end;
+            end;
+
+          finally
+            SQL.Free;
+            Connect.Close;
+          end;
+
+        end
+
+        //----------------------------------------------------------------------------
         //OUTRAS OPÇÕES DE IMPORTAÇÃO COLOCAR AQUI
 
         ;
@@ -1918,12 +2223,17 @@ begin
         end;
 
         //Atualizar MARGEM1
+        Form2.atualizaStatus('Ajustando MARGENS.');
         SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
         SQL.ExecSQL;
         SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
         SQL.ExecSQL;
         //Atualizar MARGEM2
         SQL.CommandText := 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;';
+        SQL.ExecSQL;
+        //Criar registro na PROD_AJUS
+        Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
+        SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
         SQL.ExecSQL;
       end
 
@@ -1997,9 +2307,9 @@ begin
 
     Sheet.Name := 'String Grid';
 
-    for col := 0 to stringGrid.ColCount - 1 do
+    for col := 1 to stringGrid.ColCount - 1 do
       for row := 0 to stringGrid.RowCount - 1 do
-        Sheet.Cells[row + 1, col + 1] := stringGrid.Cells[col, row];
+        Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
     try
       XLApp.Workbooks[1].SaveAs(FileName);
       Result := True;
