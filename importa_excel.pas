@@ -455,6 +455,7 @@ begin
 end;
 
 
+//Função que tenta transformar a string em numero e retorna TRUE se conseguir
 function IsNumeric(S : String) : Boolean;
 begin
   Result := True;
@@ -465,6 +466,29 @@ begin
   end;
 end;
 
+
+//Função para testar colunas com mesmo nome
+function checkCol(grid: TStringGrid) : Boolean;
+var
+  i,j: Integer;
+  temp: string;
+begin
+  Result := True;
+  for i := 1 to grid.ColCount-1 do
+  begin
+    temp := grid.Cells[i,0];
+    for j := 1 to grid.ColCount-1 do
+    begin
+      if i=j then Continue;
+      if grid.Cells[j,0]=temp then
+      begin
+        ShowMessage('Colunas com mesmo nome ('+temp+'): '+IntToStr(i)+' e '+IntToStr(j));
+        Result := False;
+        Exit;
+      end;
+    end;
+  end;
+end;
 
 
 //FIM DAS FUNÇÕES ANTES DA IMPORTAÇÃO
@@ -492,6 +516,10 @@ var
   i,k,status,max,count: integer;
 
 begin
+  //Incicialmente, testar se existem colunas com mesmo nome
+  if checkCol(StringGrid1)=False then Exit;
+  //Se não tiver colunas iguais, segue importação.
+
 
   //Status se esta OK ou se tem erro, setado como OK
   status := 1;

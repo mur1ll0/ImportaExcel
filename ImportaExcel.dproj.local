@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2019/07/12 09:01:40.000.067,=C:\Users\murileo\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2019/07/12 09:05:43.000.763,C:\Users\murileo\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\murileo\Desktop\Importar Excel\importa_excel.dfm</Transaction>
+    <Transaction>2019/07/12 09:05:43.000.763,C:\Users\murileo\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\murileo\Desktop\Importar Excel\importa_excel.pas</Transaction>
+    <Transaction>2019/07/12 09:06:16.000.138,C:\Users\murileo\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\murileo\Desktop\Importar Excel\Project1.dproj</Transaction>
+    <Transaction>2019/07/16 09:02:53.000.275,=C:\Users\murileo\Desktop\Importar Excel\Unit2.pas</Transaction>
+    <Transaction>2019/07/16 09:06:30.000.106,C:\Users\murileo\Desktop\Importar Excel\importando.pas=C:\Users\murileo\Desktop\Importar Excel\Unit2.pas</Transaction>
+    <Transaction>2019/07/16 09:06:30.000.106,C:\Users\murileo\Desktop\Importar Excel\importando.dfm=C:\Users\murileo\Desktop\Importar Excel\Unit2.dfm</Transaction>
+    <Transaction>2019/07/30 08:38:17.666,C:\Users\murileo\Desktop\Importa Excel\ImportaExcel.dproj=C:\Users\murileo\Desktop\Importa Excel\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
