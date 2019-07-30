@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, Vcl.Buttons, ComObj, IniFiles,
   Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto,
-  Vcl.Menus;
+  Vcl.Menus, empresa;
 
 type
   TForm1 = class(TForm)
@@ -39,6 +39,7 @@ type
     AdicionarLinha: TMenuItem;
     DeletarColuna: TMenuItem;
     DeletarLinha: TMenuItem;
+    DadosEmpr: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -65,6 +66,7 @@ type
     procedure AdicionarLinhaClick(Sender: TObject);
     procedure DeletarColunaClick(Sender: TObject);
     procedure DeletarLinhaClick(Sender: TObject);
+    procedure DadosEmprClick(Sender: TObject);
 
 
   private
@@ -2977,6 +2979,20 @@ begin
     StringGrid1.Row := Row;
   end;
 
+end;
+
+
+//Botão abrir cadastro da empresa
+procedure TForm1.DadosEmprClick(Sender: TObject);
+begin
+  if DBPath.Text = 'Caminho da base de dados - FDB' then
+  begin
+    ShowMessage('Selecione a base de dados primeiro!');
+  end
+  else begin
+    //Criar tela de loading
+    Form3.Show;
+  end;
 end;
 
 

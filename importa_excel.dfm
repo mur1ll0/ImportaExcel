@@ -197,6 +197,10 @@ object Form1: TForm1
         Caption = 'Cabe'#231'alho'
         OnClick = Cabealho1Click
       end
+      object DadosEmpr: TMenuItem
+        Caption = 'Dados da Empresa'
+        OnClick = DadosEmprClick
+      end
     end
     object Editar1: TMenuItem
       Caption = 'Editar'
