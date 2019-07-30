@@ -200,6 +200,22 @@ object Form1: TForm1
     end
     object Editar1: TMenuItem
       Caption = 'Editar'
+      object AdicionarColuna: TMenuItem
+        Caption = 'Adicionar Coluna (F1)'
+        OnClick = AdicionarColunaClick
+      end
+      object AdicionarLinha: TMenuItem
+        Caption = 'Adicionar Linha (F3)'
+        OnClick = AdicionarLinhaClick
+      end
+      object DeletarColuna: TMenuItem
+        Caption = 'Deletar Coluna (Del)'
+        OnClick = DeletarColunaClick
+      end
+      object DeletarLinha: TMenuItem
+        Caption = 'Deletar Linha (Del)'
+        OnClick = DeletarLinhaClick
+      end
     end
     object Limpar: TMenuItem
       Caption = 'Limpar'

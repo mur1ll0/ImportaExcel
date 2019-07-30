@@ -35,6 +35,10 @@ type
     LimpaProdutos: TMenuItem;
     LimpaTituP: TMenuItem;
     LimpaTituR: TMenuItem;
+    AdicionarColuna: TMenuItem;
+    AdicionarLinha: TMenuItem;
+    DeletarColuna: TMenuItem;
+    DeletarLinha: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -57,6 +61,10 @@ type
     procedure LimpaProdutosClick(Sender: TObject);
     procedure LimpaTituPClick(Sender: TObject);
     procedure LimpaTituRClick(Sender: TObject);
+    procedure AdicionarColunaClick(Sender: TObject);
+    procedure AdicionarLinhaClick(Sender: TObject);
+    procedure DeletarColunaClick(Sender: TObject);
+    procedure DeletarLinhaClick(Sender: TObject);
 
 
   private
@@ -217,6 +225,7 @@ begin
     end;
   end;
 end;
+
 
 //Função para criar caixa de diálogos
 function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
@@ -2339,6 +2348,7 @@ begin
       for row := 0 to stringGrid.RowCount - 1 do
         Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
     try
+      Sheet.Columns.Autofit;
       XLApp.Workbooks[1].SaveAs(FileName);
       Result := True;
     except
@@ -2619,7 +2629,51 @@ begin
 end;
 
 
-//Evento ao apertar Botão Delete na StringGrid
+//Inserir coluna na StringGrid
+procedure InsertCol(Grid: TStringGrid);
+var
+  i,j: Integer;
+  temp: string;
+begin
+    Grid.ColCount := Grid.ColCount + 1;
+    i:= Grid.ColCount;
+    while i>Grid.Col do
+    begin
+      for j := 0 to Grid.RowCount do
+      begin
+        temp := Grid.Cells[i,j];
+        Grid.Cells[i,j] := Grid.Cells[i-1,j];
+      end;
+      i:= i-1;
+    end;
+    for j := 0 to Grid.RowCount do
+        Grid.Cells[i,j] := '';
+  end;
+
+
+//Inserir linha na StringGrid
+procedure InsertRow(Grid: TStringGrid);
+var
+  i,j: Integer;
+  temp: string;
+begin
+    Grid.RowCount := Grid.RowCount + 1;
+    i:= Grid.RowCount;
+    while i>Grid.Row do
+    begin
+      for j := 0 to Grid.ColCount do
+      begin
+        temp := Grid.Cells[j,i];
+        Grid.Cells[j,i] := Grid.Cells[j,i-1];
+      end;
+      i:= i-1;
+    end;
+    for j := 0 to Grid.ColCount do
+        Grid.Cells[j,i] := '';
+  end;
+
+
+//Evento ao apertar Botões do Teclado na StringGrid
 procedure TForm1.StringGrid1KeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
@@ -2695,19 +2749,7 @@ begin
   if (Key=VK_F1) then
   begin
     StringGridToArray(StringGrid1);
-    StringGrid1.ColCount := StringGrid1.ColCount + 1;
-    i:= StringGrid1.ColCount;
-    while i>StringGrid1.Col do
-    begin
-      for j := 0 to StringGrid1.RowCount do
-      begin
-        temp := StringGrid1.Cells[i,j];
-        StringGrid1.Cells[i,j] := StringGrid1.Cells[i-1,j];
-      end;
-      i:= i-1;
-    end;
-    for j := 0 to StringGrid1.RowCount do
-        StringGrid1.Cells[i,j] := '';
+    InsertCol(StringGrid1);
 
     //Redimensionar colunas
     for i := 0 to StringGrid1.ColCount - 1 do
@@ -2718,20 +2760,51 @@ begin
   if (Key=VK_F3) then
   begin
     StringGridToArray(StringGrid1);
-    StringGrid1.RowCount := StringGrid1.RowCount + 1;
-    i:= StringGrid1.RowCount;
-    while i>StringGrid1.Row do
-    begin
-      for j := 0 to StringGrid1.ColCount do
-      begin
-        temp := StringGrid1.Cells[j,i];
-        StringGrid1.Cells[j,i] := StringGrid1.Cells[j,i-1];
-      end;
-      i:= i-1;
-    end;
-    for j := 0 to StringGrid1.ColCount do
-        StringGrid1.Cells[j,i] := '';
+    InsertRow(StringGrid1);
   end;
+end;
+
+
+//Botão Adicionar Coluna na StringGrid
+procedure TForm1.AdicionarColunaClick(Sender: TObject);
+var
+  i: Integer;
+begin
+  StringGridToArray(StringGrid1);
+  InsertCol(StringGrid1);
+
+  //Redimensionar colunas
+  for i := 0 to StringGrid1.ColCount - 1 do
+    AutoSizeCol(StringGrid1, i);
+end;
+
+
+//Botão Adicionar Linha na StringGrid
+procedure TForm1.AdicionarLinhaClick(Sender: TObject);
+begin
+  StringGridToArray(StringGrid1);
+  InsertRow(StringGrid1);
+end;
+
+
+//Botão Deletar Coluna na StringGrid
+procedure TForm1.DeletarColunaClick(Sender: TObject);
+var
+  i: Integer;
+begin
+  StringGridToArray(StringGrid1);
+  DeleteCol(StringGrid1, StringGrid1.Col);
+  //Redimensionar colunas
+  for i := 0 to StringGrid1.ColCount - 1 do
+    AutoSizeCol(StringGrid1, i);
+end;
+
+
+//Botão Deletar Linha na StringGrid
+procedure TForm1.DeletarLinhaClick(Sender: TObject);
+begin
+  StringGridToArray(StringGrid1);
+  DeleteRow(StringGrid1, StringGrid1.Row);
 end;
 
 
