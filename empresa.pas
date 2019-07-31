@@ -170,6 +170,140 @@ begin
                       'WHERE (CODI = '+''''+empr.Text+''''+');';
       SQL.ExecSQL;
 
+      //Comando para tributação de entrada
+      SQL.CommandText := 'delete from ASSOC_CST_CSOSN_XML;';
+      SQL.ExecSQL;
+
+      if simples.Checked then
+      begin
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (1, '+''''+'00'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (2, '+''''+'10'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (3, '+''''+'20'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (4, '+''''+'30'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (5, '+''''+'40'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (6, '+''''+'41'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (7, '+''''+'50'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (8, '+''''+'51'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (9, '+''''+'60'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (10, '+''''+'70'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (11, '+''''+'90'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (12, '+''''+'101'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (13, '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (14, '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (15, '+''''+'201'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (16, '+''''+'202'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (17, '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (18, '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (19, '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (20, '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (21, '+''''+'900'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+      end
+      else begin
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                         'VALUES (1, '+''''+'00'+''''+', '+''''+'00'+''''+', NULL, '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (2, '+''''+'10'+''''+', '+''''+'60'+''''+', NULL, '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (3, '+''''+'20'+''''+', '+''''+'20'+''''+', NULL, '+''''+'20'+''''+', '+''''+'20'+''''+', '+''''+'20'+''''+', '+''''+'20'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (4, '+''''+'30'+''''+', '+''''+'30'+''''+', NULL, '+''''+'30'+''''+', '+''''+'30'+''''+', '+''''+'30'+''''+', '+''''+'30'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (5, '+''''+'40'+''''+', '+''''+'40'+''''+', NULL, '+''''+'40'+''''+', '+''''+'40'+''''+', '+''''+'40'+''''+', '+''''+'40'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (6, '+''''+'41'+''''+', '+''''+'41'+''''+', NULL, '+''''+'41'+''''+', '+''''+'41'+''''+', '+''''+'41'+''''+', '+''''+'41'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (7, '+''''+'50'+''''+', '+''''+'50'+''''+', NULL, '+''''+'50'+''''+', '+''''+'50'+''''+', '+''''+'50'+''''+', '+''''+'50'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (8, '+''''+'51'+''''+', '+''''+'51'+''''+', NULL, '+''''+'51'+''''+', '+''''+'51'+''''+', '+''''+'51'+''''+', '+''''+'51'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (9, '+''''+'60'+''''+', '+''''+'60'+''''+', NULL, '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (10, '+''''+'70'+''''+', '+''''+'70'+''''+', NULL, '+''''+'70'+''''+', '+''''+'70'+''''+', '+''''+'70'+''''+', '+''''+'70'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (11, '+''''+'90'+''''+', '+''''+'90'+''''+', NULL, '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (12, '+''''+'101'+''''+', '+''''+'00'+''''+', NULL, '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (13, '+''''+'102'+''''+', '+''''+'00'+''''+', NULL, '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (14, '+''''+'103'+''''+', '+''''+'00'+''''+', NULL, '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'00'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', '+''''+'103'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (15, '+''''+'201'+''''+', '+''''+'60'+''''+', NULL, '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (16, '+''''+'202'+''''+', '+''''+'60'+''''+', NULL, '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (17, '+''''+'203'+''''+', '+''''+'60'+''''+', NULL, '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', '+''''+'203'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (18, '+''''+'300'+''''+', '+''''+'30'+''''+', NULL, '+''''+'30'+''''+', '+''''+'30'+''''+', '+''''+'30'+''''+', '+''''+'30'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', '+''''+'300'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (19, '+''''+'400'+''''+', '+''''+'40'+''''+', NULL, '+''''+'40'+''''+', '+''''+'40'+''''+', '+''''+'40'+''''+', '+''''+'40'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', '+''''+'400'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (20, '+''''+'500'+''''+', '+''''+'60'+''''+', NULL, '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'60'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', '+''''+'500'+''''+', 1);';
+        SQL.ExecSQL;
+        SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
+                                 'VALUES (21, '+''''+'900'+''''+', '+''''+'90'+''''+', NULL, '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
+      end;
+
     except
       on e: exception do
       begin
@@ -181,7 +315,7 @@ begin
     SQL.Free;
     Form1.Connect.Close;
     ShowMessage('Dados da empresa salvos.');
-    Form3.Visible := False;
+    Form3.Close;
   end;
 end;
 
