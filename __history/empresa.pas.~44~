@@ -57,10 +57,10 @@ implementation
 uses importa_excel;
 
 
-//Botão Cancelar (Sair)
+//Botão Cancelar (Sair) sem matar a tela, para que as informações permanecam ali
 procedure TForm3.cancelClick(Sender: TObject);
 begin
-  Form3.Close;
+  Form3.Visible := False;
 end;
 
 

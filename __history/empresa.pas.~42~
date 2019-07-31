@@ -57,10 +57,10 @@ implementation
 uses importa_excel;
 
 
-//Botão Cancelar (Sair)
+//Botão Cancelar (Sair) sem matar a tela, para que as informações permanecam ali
 procedure TForm3.cancelClick(Sender: TObject);
 begin
-  Form3.Close;
+  Form3.Visible := False;
 end;
 
 
@@ -136,9 +136,6 @@ begin
 
   //Formatar CNPJ
   cgc := Trim(cnpj.Text);
-  cgc := stringreplace(cgc, '-', '',[rfReplaceAll, rfIgnoreCase]);
-  cgc := stringreplace(cgc, '/', '',[rfReplaceAll, rfIgnoreCase]);
-  cgc := stringreplace(cgc, '.', '',[rfReplaceAll, rfIgnoreCase]);
   cgc := (Copy(cgc,1,2))+ '.' + (Copy(cgc,3,3)) + '.' + (Copy(cgc,6,3)) + '/' + (Copy(cgc,9,4)) + '-' + (Copy(cgc,13,2));
 
   //Tratar ' na razao social e nome fantasia
@@ -160,7 +157,7 @@ begin
                           'UF = '+''''+UpperCase(uf.Text)+''''+','+
                           'IE = '+''''+UpperCase(inscr.Text)+''''+','+
                           'FONE1 = '+''''+UpperCase(fone.Text)+''''+','+
-                          'MAIL = '+''''+LowerCase(mail.Text)+''''+','+
+                          'MAIL = '+''''+UpperCase(mail.Text)+''''+','+
                           'CGC = '+''''+cgc+''''+','+
                           'CEP = '+''''+UpperCase(cep.Text)+''''+','+
                           'NOME_FANTASIA = '+''''+fant+''''+','+

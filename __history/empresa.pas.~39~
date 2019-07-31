@@ -57,10 +57,10 @@ implementation
 uses importa_excel;
 
 
-//Botão Cancelar (Sair)
+//Botão Cancelar (Sair) sem matar a tela, para que as informações permanecam ali
 procedure TForm3.cancelClick(Sender: TObject);
 begin
-  Form3.Close;
+  Form3.Visible := False;
 end;
 
 
@@ -88,12 +88,14 @@ end;
 //Ao criar formulario, carregar dados
 procedure TForm3.FormActivate(Sender: TObject);
 var
-  crt,cidade: string;
+  crt: string;
 begin
   //Carregar valores do banco
   razaoSocial.Text := query('select d.razao from dados_empre d where d.codi='+empr.Text+';');
   nomeFantasia.Text := query('select d.nome_fantasia from dados_empre d where d.codi='+empr.Text+';');
   ende.Text := query('select d.endereco from dados_empre d where d.codi='+empr.Text+';');
+  cida.Text := query('select d.cidade from dados_empre d where d.codi='+empr.Text+';');
+  uf.Text := query('select d.uf from dados_empre d where d.codi='+empr.Text+';');
   inscr.Text := query('select d.ie from dados_empre d where d.codi='+empr.Text+';');
   fone.Text := query('select d.fone1 from dados_empre d where d.codi='+empr.Text+';');
   mail.Text := query('select d.mail from dados_empre d where d.codi='+empr.Text+';');
@@ -101,10 +103,6 @@ begin
   cep.Text := query('select d.cep from dados_empre d where d.codi='+empr.Text+';');
   bair.Text := query('select d.bairro from dados_empre d where d.codi='+empr.Text+';');
   crt := query('select d.crt from dados_empre d where d.codi='+empr.Text+';');
-
-  cidade := query('select d.codi_cida from dados_empre d where d.codi='+empr.Text+';');
-  cida.Text := query('select c.cid_desc from cidade c where c.cid_codi='+cidade+';');
-  uf.Text := query('select c.cid_uf from cidade c where c.cid_codi='+cidade+';');
 
   if (crt='1') then
   begin
@@ -136,9 +134,6 @@ begin
 
   //Formatar CNPJ
   cgc := Trim(cnpj.Text);
-  cgc := stringreplace(cgc, '-', '',[rfReplaceAll, rfIgnoreCase]);
-  cgc := stringreplace(cgc, '/', '',[rfReplaceAll, rfIgnoreCase]);
-  cgc := stringreplace(cgc, '.', '',[rfReplaceAll, rfIgnoreCase]);
   cgc := (Copy(cgc,1,2))+ '.' + (Copy(cgc,3,3)) + '.' + (Copy(cgc,6,3)) + '/' + (Copy(cgc,9,4)) + '-' + (Copy(cgc,13,2));
 
   //Tratar ' na razao social e nome fantasia
@@ -157,10 +152,9 @@ begin
                           'RAZAO = '+''''+razao+''''+','+
                           'ENDERECO = '+''''+UpperCase(ende.Text)+''''+','+
                           'CIDADE = '+''''+UpperCase(cida.Text)+''''+','+
-                          'UF = '+''''+UpperCase(uf.Text)+''''+','+
                           'IE = '+''''+UpperCase(inscr.Text)+''''+','+
                           'FONE1 = '+''''+UpperCase(fone.Text)+''''+','+
-                          'MAIL = '+''''+LowerCase(mail.Text)+''''+','+
+                          'MAIL = '+''''+UpperCase(mail.Text)+''''+','+
                           'CGC = '+''''+cgc+''''+','+
                           'CEP = '+''''+UpperCase(cep.Text)+''''+','+
                           'NOME_FANTASIA = '+''''+fant+''''+','+
@@ -180,8 +174,6 @@ begin
   finally
     SQL.Free;
     Form1.Connect.Close;
-    ShowMessage('Dados da empresa salvos.');
-    Form3.Visible := False;
   end;
 end;
 

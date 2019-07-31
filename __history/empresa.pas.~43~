@@ -57,10 +57,10 @@ implementation
 uses importa_excel;
 
 
-//Botão Cancelar (Sair)
+//Botão Cancelar (Sair) sem matar a tela, para que as informações permanecam ali
 procedure TForm3.cancelClick(Sender: TObject);
 begin
-  Form3.Close;
+  Form3.Visible := False;
 end;
 
 
@@ -160,7 +160,7 @@ begin
                           'UF = '+''''+UpperCase(uf.Text)+''''+','+
                           'IE = '+''''+UpperCase(inscr.Text)+''''+','+
                           'FONE1 = '+''''+UpperCase(fone.Text)+''''+','+
-                          'MAIL = '+''''+LowerCase(mail.Text)+''''+','+
+                          'MAIL = '+''''+UpperCase(mail.Text)+''''+','+
                           'CGC = '+''''+cgc+''''+','+
                           'CEP = '+''''+UpperCase(cep.Text)+''''+','+
                           'NOME_FANTASIA = '+''''+fant+''''+','+
