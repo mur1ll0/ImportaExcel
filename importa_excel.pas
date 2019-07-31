@@ -73,6 +73,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    class function buscaCidade(Cidade, UF: string): Integer;
   end;
 
 var
@@ -363,7 +364,7 @@ end;
 
 
 //Função para buscar a cidade no banco.
-function buscaCidade(Cidade, UF: string): Integer;
+class function TForm1.buscaCidade(Cidade, UF: string): Integer;
 var
   queryTemp: TSQLQuery;
 
@@ -959,7 +960,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               Form2.atualizaStatus('Inserindo dados na tabela CLIEFORN.');
@@ -1432,7 +1433,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               //Executar INSERTs
@@ -1463,8 +1464,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1540,7 +1539,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               //Executar INSERT
@@ -1553,8 +1552,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1630,7 +1627,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               //Executar INSERT
@@ -1643,8 +1640,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1707,7 +1702,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               //Executar INSERT
@@ -1720,8 +1715,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1953,7 +1946,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               //Executar INSERT
@@ -1966,8 +1959,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -2199,7 +2190,7 @@ begin
             try
               //Abrir conexoes
               Connect.Open;
-              SQL := TSQLDataSet.Create(Application);
+              SQL := TSQLDataSet.Create(Nil);
               SQL.SQLConnection := Connect;
 
               //Executar INSERT
@@ -2212,8 +2203,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -2237,7 +2226,7 @@ begin
 
       //Abrir conexoes
       Connect.Open;
-      SQL := TSQLDataSet.Create(Application);
+      SQL := TSQLDataSet.Create(Nil);
       SQL.SQLConnection := Connect;
 
       if SelectImport.Text='Clie/Forn' then
@@ -2434,7 +2423,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from clieforn;';
@@ -2458,7 +2447,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from grup_prod;';
@@ -2482,7 +2471,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from marca;';
@@ -2506,7 +2495,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from prod;';
@@ -2550,7 +2539,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from sub_grup_prod;';
@@ -2574,7 +2563,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from titup;';
@@ -2595,7 +2584,7 @@ var
 begin
   //Abrir conexoes
   Connect.Open;
-  SQL := TSQLDataSet.Create(Application);
+  SQL := TSQLDataSet.Create(Nil);
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from titur;';
