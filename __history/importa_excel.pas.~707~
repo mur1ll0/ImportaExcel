@@ -73,7 +73,7 @@ type
     { Private declarations }
   public
     { Public declarations }
-    function buscaCidade(Cidade, UF: string): Integer;
+    class function buscaCidade(Cidade, UF: string): Integer;
   end;
 
 var
@@ -363,8 +363,48 @@ begin
 end;
 
 
+//Função para cadastrar cliente/fornecedor no banco de dados. Retorna Gen_ID
+class function cadastraClieForn(colClieForn,dadosClieForn: string): Integer;
+var
+  gen_id: Integer;
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+
+    //Desativar Trigger das cidades
+    queryTemp.CommandText := 'ALTER TRIGGER clieforn_biu0 INACTIVE;';
+    queryTemp.ExecSQL;
+    //Executar INSERT
+    queryTemp.CommandText := 'insert into clieforn ('+ colClieForn +') values ' + '(' + dadosClieForn + ');';
+    queryTemp.ExecSQL;
+    //Reativar Trigger das cidades
+    queryTemp.CommandText := 'ALTER TRIGGER clieforn_biu0 ACTIVE;';
+    queryTemp.ExecSQL;
+
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select c.codi from clieforn c where c.codi = gen_id(gen_clieforn_id,0);');
+    queryTemp.Open;
+  finally
+    if queryTemp.IsEmpty then
+    begin
+      Result := -1;
+    end
+    else begin
+      Result := queryTemp.FieldByName('CODI').AsInteger;
+    end;
+    queryTemp.Close;
+    Form1.Connect.Close;
+  end;
+end;
+
+
 //Função para buscar a cidade no banco.
-function buscaCidade(Cidade, UF: string): Integer;
+class function TForm1.buscaCidade(Cidade, UF: string): Integer;
 var
   queryTemp: TSQLQuery;
 
@@ -1552,8 +1592,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1642,8 +1680,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1719,8 +1755,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -1787,16 +1821,25 @@ begin
             if not (IsNumeric(temp)) then
             begin
               temp := IntToStr(getCodiClieForn(temp));
-              //Se não encontrar a string, colocar ultimo cliente cadastrado
-              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+              //Se não encontrar a string, cadastrar fornecedor
+              if temp='0' then begin
+                colTituP := colTituP + ',forn';
+                dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                colTituP := colTituP + ',forn';
+                dadosTituP := dadosTituP + ',''' + temp + '''';
+              end;
+            end
+            else begin
+              //Se for números vai direto
+              colTituP := colTituP + ',forn';
+              dadosTituP := dadosTituP + ',''' + temp + '''';
             end;
-            //Se for números vai direto
-            colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + temp + '''';
           end
           else begin
             colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+            dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -1965,8 +2008,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;
@@ -2034,15 +2075,24 @@ begin
             begin
               temp := IntToStr(getCodiClieForn(temp));
               //Se não encontrar a string, colocar ultimo cliente cadastrado
-              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+              if temp='0' then begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
+            end
+            else begin
+              //Se for números vai direto
+              colTituR := colTituR + ',clie';
+              dadosTituR := dadosTituR + ',''' + temp + '''';
             end;
-            //Se for números vai direto
-            colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',''' + temp + '''';
           end
           else begin
             colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+            dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -2211,8 +2261,6 @@ begin
               begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
-                SQL.Free;
-                Connect.Close;
                 break; //Quebra o for
               end;
             end;

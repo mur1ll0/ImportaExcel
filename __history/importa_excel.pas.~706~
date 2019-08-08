@@ -1,4 +1,4 @@
-public unit importa_excel;
+unit importa_excel;
 
 interface
 
@@ -73,6 +73,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    class function buscaCidade(Cidade, UF: string): Integer;
   end;
 
 var
@@ -362,8 +363,50 @@ begin
 end;
 
 
+//Função para cadastrar cliente/fornecedor no banco de dados.
+class function cadastraClieForn(colClieForn,dadosClieForn: string): Integer;
+var
+  SQL: TSQLDataSet;
+
+begin
+  try
+    try
+      //Abrir conexoes
+      Form1.Connect.Open;
+      SQL := TSQLDataSet.Create(Nil);
+      SQL.SQLConnection := Form1.Connect;
+
+      //Desativar Trigger das cidades
+      SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 INACTIVE;';
+      SQL.ExecSQL;
+      //Executar INSERT
+      SQL.CommandText := 'insert into clieforn ('+ colClieForn +') values ' + '(' + dadosClieForn + ');';
+      SQL.ExecSQL;
+      //Reativar Trigger das cidades
+      SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 ACTIVE;';
+      SQL.ExecSQL;
+
+    except
+      on e: exception do
+      begin
+        ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+        Result := 0;
+        SQL.Free;
+        Form1.Connect.Close;
+        break; //Quebra o for
+      end;
+    end;
+
+  finally
+    SQL.Free;
+    Form1.Connect.Close;
+    Result := 1;
+  end;
+end;
+
+
 //Função para buscar a cidade no banco.
-function buscaCidade(Cidade, UF: string): Integer;
+class function TForm1.buscaCidade(Cidade, UF: string): Integer;
 var
   queryTemp: TSQLQuery;
 
@@ -1780,16 +1823,25 @@ begin
             if not (IsNumeric(temp)) then
             begin
               temp := IntToStr(getCodiClieForn(temp));
-              //Se não encontrar a string, colocar ultimo cliente cadastrado
-              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+              //Se não encontrar a string, colocar ultimo fornecedor cadastrado
+              if temp='0' then begin
+                colTituP := colTituP + ',forn';
+                dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                colTituP := colTituP + ',forn';
+                dadosTituP := dadosTituP + ',''' + temp + '''';
+              end;
+            end
+            else begin
+              //Se for números vai direto
+              colTituP := colTituP + ',forn';
+              dadosTituP := dadosTituP + ',''' + temp + '''';
             end;
-            //Se for números vai direto
-            colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + temp + '''';
           end
           else begin
             colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+            dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -2025,15 +2077,24 @@ begin
             begin
               temp := IntToStr(getCodiClieForn(temp));
               //Se não encontrar a string, colocar ultimo cliente cadastrado
-              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+              if temp='0' then begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
+            end
+            else begin
+              //Se for números vai direto
+              colTituR := colTituR + ',clie';
+              dadosTituR := dadosTituR + ',''' + temp + '''';
             end;
-            //Se for números vai direto
-            colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',''' + temp + '''';
           end
           else begin
             colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+            dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)

@@ -363,6 +363,54 @@ begin
 end;
 
 
+//Função para cadastrar cliente/fornecedor no banco de dados. Retorna Gen_ID
+function cadastraClieForn(colClieForn,dadosClieForn: string): Integer;
+var
+  gen_id: Integer;
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    try
+      Form1.Connect.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQL.Clear;
+
+      //Desativar Trigger das cidades
+      queryTemp.CommandText := 'ALTER TRIGGER clieforn_biu0 INACTIVE;';
+      queryTemp.ExecSQL;
+      //Executar INSERT
+      queryTemp.CommandText := 'insert into clieforn ('+ colClieForn +') values ' + '(' + dadosClieForn + ');';
+      queryTemp.ExecSQL;
+      //Reativar Trigger das cidades
+      queryTemp.CommandText := 'ALTER TRIGGER clieforn_biu0 ACTIVE;';
+      queryTemp.ExecSQL;
+
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select c.codi from clieforn c where c.codi = gen_id(gen_clieforn_id,0);');
+      queryTemp.Open;
+
+    except
+      on e: exception do
+      begin
+        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      end;
+    end;
+  finally
+    if queryTemp.IsEmpty then
+    begin
+      Result := -1;
+    end
+    else begin
+      Result := queryTemp.FieldByName('CODI').AsInteger;
+    end;
+    queryTemp.Close;
+    Form1.Connect.Close;
+  end;
+end;
+
+
 //Função para buscar a cidade no banco.
 class function TForm1.buscaCidade(Cidade, UF: string): Integer;
 var
@@ -451,15 +499,25 @@ var
 
 begin
   try
-    Form1.Connect.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
-    queryTemp.ParamByName('PNOME').AsString := clieforn;
-    queryTemp.Open;
+    try
+      Form1.Connect.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQL.Clear;
+      //queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
+      //queryTemp.ParamByName('PNOME').AsString := clieforn;
+      queryTemp.CommandText := 'select c.codi from clieforn c where c.nome = ' + clieforn + ';';
+      queryTemp.ExecSQL;
+      queryTemp.Open;
 
-    Result := queryTemp.FieldByName('CODI').AsInteger;
+      Result := queryTemp.FieldByName('CODI').AsInteger;
+
+    except
+      on e: exception do
+      begin
+        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      end;
+    end;
   finally
     queryTemp.Free;
     Form1.Connect.Close;
@@ -1777,20 +1835,38 @@ begin
           if (i<>-1) then
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
-              temp := IntToStr(getCodiClieForn(temp));
-              //Se não encontrar a string, colocar ultimo cliente cadastrado
-              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+              temp2 := IntToStr(getCodiClieForn(''''+temp+''''));
+              //Se não encontrar a string, cadastrar fornecedor
+              if temp2='0' then begin
+                temp2 := IntToStr(cadastraClieForn('nome',''''+temp+''''));
+              end;
+              colTituP := colTituP + ',forn';
+              dadosTituP := dadosTituP + ',''' + temp2 + '''';
+            end
+            else begin
+              //Se for números, considera como código
+              temp2 := IntToStr(getCodiClieForn('(select c.nome from clieforn c where c.codi = '+temp+')'));
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              if temp2='0' then begin
+                colTituP := colTituP + ',forn';
+                dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                //Se achar o código, usamos o código
+                colTituP := colTituP + ',forn';
+                dadosTituP := dadosTituP + ',''' + temp + '''';
+              end;
             end;
-            //Se for números vai direto
-            colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + temp + '''';
           end
           else begin
+            //Se não tiver fornecedor, colocar o generator.
             colTituP := colTituP + ',forn';
-            dadosTituP := dadosTituP + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+            dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -2021,20 +2097,38 @@ begin
           if (i<>-1) then
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
-              temp := IntToStr(getCodiClieForn(temp));
-              //Se não encontrar a string, colocar ultimo cliente cadastrado
-              if temp='0' then temp := 'gen_id(gen_clieforn_id,0)';
+              temp2 := IntToStr(getCodiClieForn(''''+temp+''''));
+              //Se não encontrar a string, cadastrar cliente
+              if temp2='0' then begin
+                temp2 := IntToStr(cadastraClieForn('nome',''''+temp+''''));
+              end;
+              colTituR := colTituR + ',clie';
+              dadosTituR := dadosTituR + ',''' + temp2 + '''';
+            end
+            else begin
+              //Se for números, considera como código
+              temp2 := IntToStr(getCodiClieForn('(select c.nome from clieforn c where c.codi = '+temp+')'));
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              if temp2='0' then begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                //Se achar o código, usamos o código
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
             end;
-            //Se for números vai direto
-            colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',''' + temp + '''';
           end
           else begin
+            //Se não tiver fornecedor, colocar o generator.
             colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',''' + 'gen_id(gen_clieforn_id,0)' + '''';
+            dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
