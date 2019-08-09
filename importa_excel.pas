@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, Vcl.Buttons, ComObj, IniFiles,
   Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto,
-  Vcl.Menus, empresa;
+  Vcl.Menus, empresa, Colunas, System.StrUtils;
 
 type
   TForm1 = class(TForm)
@@ -40,6 +40,7 @@ type
     DeletarColuna: TMenuItem;
     DeletarLinha: TMenuItem;
     DadosEmpr: TMenuItem;
+    Colunas: TMenuItem;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
@@ -48,7 +49,6 @@ type
     procedure BtnOpenDB(Sender: TObject);
     procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure StringGrid1Click(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
     procedure StringGrid1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -67,6 +67,7 @@ type
     procedure DeletarColunaClick(Sender: TObject);
     procedure DeletarLinhaClick(Sender: TObject);
     procedure DadosEmprClick(Sender: TObject);
+    procedure ColunasClick(Sender: TObject);
 
 
   private
@@ -190,16 +191,6 @@ begin
     // Assign the Variant associated with the WorkSheet to the Delphi Variant
     RangeMatrix := XLApp.Range['A1', XLApp.Cells.Item[X, Y]].Value;
 
-    {
-    //  Define the loop for filling in the TStringGrid
-    k := 1;
-    repeat
-      for r := 1 to y do
-        AGrid.Cells[(r - 1), (k - 1)] := RangeMatrix[K, R];
-      Inc(k, 1);
-    until k > x;  }
-
-
     AGrid.ColCount := AGrid.ColCount +1;
     //Iterar linhas
     for k := 0 to AGrid.RowCount-1 do
@@ -226,6 +217,35 @@ begin
       Sheet := Unassigned;
       Result := True;
     end;
+  end;
+end;
+
+
+//Função para carregar CSV na StringGrid
+procedure CSV_To_StringGrid(StringGrid1: TStringGrid; AFileName: TFileName);
+var
+  oFileStrings:TStringList;
+  oRowStrings:TStringList;
+  i:integer;
+begin
+  oFileStrings := TStringList.Create;
+  oRowStrings := TStringList.Create;
+  try
+    oFileStrings.LoadFromFile(AFileName);
+    StringGrid1.RowCount := oFileStrings.Count;
+    for i := 0 to oFileStrings.Count - 1 do
+    begin
+      oRowStrings.Clear;
+      oRowStrings.Delimiter := ';';
+      oRowStrings.DelimitedText := oFileStrings[i];
+      oRowStrings.Insert(0,IntToStr(i));
+      if oRowStrings.Count > StringGrid1.ColCount then
+        StringGrid1.ColCount := oRowStrings.Count;
+      StringGrid1.Rows[i].Assign(oRowStrings);
+    end;
+  finally
+    oFileStrings.Free;
+    oRowStrings.Free;
   end;
 end;
 
@@ -314,10 +334,23 @@ end;
 procedure TForm1.BtnLoadClick(Sender: TObject);
 var
   i: integer;
+  fileExt :string;
 
 begin
-  //Carregar Excel na StringGrid
-  Xls_To_StringGrid(StringGrid1, FilePath.Text);
+  //Carregar extensão do arquivo
+  fileExt := ExtractFileExt(FilePath.Text);
+
+  //Carregar arquivo de acordo com a extensão
+  if (fileExt='.xls') or (fileExt='.xlsx') then
+  begin
+    //Carregar Excel na StringGrid
+    Xls_To_StringGrid(StringGrid1, FilePath.Text);
+  end
+  else if (fileExt='.csv') then
+  begin
+    //Carregar CSV na StringGrid
+    CSV_To_StringGrid(StringGrid1, FilePath.Text);
+  end;
 
   //Redimensionar colunas
   for i := 0 to StringGrid1.ColCount - 1 do
@@ -478,6 +511,84 @@ begin
     queryTemp.SQLConnection := Form1.Connect;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select tr.codi from titur tr where tr.codi = :PCODI');
+    queryTemp.ParamByName('PCODI').AsString := Codigo;
+    queryTemp.Open;
+
+    if queryTemp.IsEmpty = True then
+      Result := False
+    else
+      Result := True;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
+//FUNÇÃO PARA RECONHECER SE JA EXISTE O CODIGO DO GRUPO OU NAO
+function temGrupo(Codigo: String): Boolean;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select g.codi from grup_prod g where g.codi = :PCODI');
+    queryTemp.ParamByName('PCODI').AsString := Codigo;
+    queryTemp.Open;
+
+    if queryTemp.IsEmpty = True then
+      Result := False
+    else
+      Result := True;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
+//FUNÇÃO PARA RECONHECER SE JA EXISTE O CODIGO DO SUB GRUPO OU NAO
+function temSubGrup(Codigo: String): Boolean;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select sg.codi from sub_grup_prod sg where sg.codi = :PCODI');
+    queryTemp.ParamByName('PCODI').AsString := Codigo;
+    queryTemp.Open;
+
+    if queryTemp.IsEmpty = True then
+      Result := False
+    else
+      Result := True;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
+//FUNÇÃO PARA RECONHECER SE JA EXISTE O CODIGO DA MARCA OU NAO
+function temMarca(Codigo: String): Boolean;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    Form1.Connect.Open;
+    queryTemp := TSQLQuery.Create(nil);
+    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQL.Clear;
+    queryTemp.SQL.Add('select m.codi from marca m where m.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
     queryTemp.Open;
 
@@ -1197,8 +1308,17 @@ begin
           begin
             if (StringGrid1.Cells[i,k]<>'') then
             begin
-              colProd := colProd + ',grup';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              //Se grupo existir, usa codigo, senao usa generator
+              if temGrupo(StringGrid1.Cells[i,k]) then
+              begin
+                colProd := colProd + ',grup';
+                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+              end
+              else begin
+                colProd := colProd + ',grup';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
+              end;
+
             end
             else begin
               colProd := colProd + ',grup';
@@ -1215,8 +1335,16 @@ begin
           begin
             if (StringGrid1.Cells[i,k]<>'') then
             begin
-              colProd := colProd + ',sub_grup';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              //Se sub grupo existir, usa codigo, senao usa generator
+              if temSubGrup(StringGrid1.Cells[i,k]) then
+              begin
+                colProd := colProd + ',sub_grup';
+                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+              end
+              else begin
+                colProd := colProd + ',sub_grup';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
+              end;
             end
             else begin
               colProd := colProd + ',sub_grup';
@@ -1247,8 +1375,16 @@ begin
           begin
             if (StringGrid1.Cells[i,k]<>'') then
             begin
-              colProd := colProd + ',marca';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              //Se marca existir, usa codigo, senao usa generator
+              if temMarca(StringGrid1.Cells[i,k]) then
+              begin
+                colProd := colProd + ',marca';
+                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+              end
+              else begin
+                colProd := colProd + ',marca';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+              end;
             end
             else begin
               colProd := colProd + ',marca';
@@ -1342,26 +1478,34 @@ begin
             //REFE (Referencia)
             else if (LowerCase(StringGrid1.Cells[i,0])='refe') then
             begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
               colProd := colProd + ',refe';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              dadosProd := dadosProd + ',''' + temp + '''';
             end
             //REFE_ORIGINAL (Referencia Original)
             else if (LowerCase(StringGrid1.Cells[i,0])='refe_original') then
             begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
               colProd := colProd + ',refe_original';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              dadosProd := dadosProd + ',''' + temp + '''';
             end
             //CODI_BARRA (Codigo de barras unitario)
             else if (LowerCase(StringGrid1.Cells[i,0])='codi_barra') then
             begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, ',', ' ',[rfReplaceAll, rfIgnoreCase]);
               colProd := colProd + ',codi_barra';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              dadosProd := dadosProd + ',''' + temp + '''';
             end
             //CODI_BARRA_COM (Codigo de barras embalagem)
             else if (LowerCase(StringGrid1.Cells[i,0])='codi_barra_com') then
             begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, ',', ' ',[rfReplaceAll, rfIgnoreCase]);
               colProd := colProd + ',codi_barra_com';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              dadosProd := dadosProd + ',''' + temp + '''';
             end
             //NCM
             else if (LowerCase(StringGrid1.Cells[i,0])='ncm') then
@@ -2491,6 +2635,21 @@ begin
 end;
 
 
+//Mostrar quias as colunas estão disponíveis para importar
+procedure TForm1.ColunasClick(Sender: TObject);
+begin
+  if SelectImport.Text = 'Tipo de Importação' then
+  begin
+    ShowMessage('Selecione o Tipo de Importação primeiro!');
+  end
+  else begin
+    //Criar tela de colunas
+    Form4.LabelTipoImp.Caption := SelectImport.Text;
+    Form4.LabelTipoImp.Left := (Form4.Width - Form4.LabelTipoImp.Width ) div 2;
+    Form4.Show;
+  end;
+end;
+
 
 //Carregar Cabeçalho de outra tabela nesta tabela
 procedure TForm1.Cabealho1Click(Sender: TObject);
@@ -2766,7 +2925,7 @@ var
   temp: string;
 begin
 
-  //RECONHECER CTRL+Z
+   //RECONHECER CTRL+Z
    if ((Shift = [ssCtrl]) and (Key = 90)) then
    begin
     if Length(gridTemp) > 1 then
@@ -3005,35 +3164,31 @@ begin
       for i := 0 to StringGrid1.ColCount - 1 do
         AutoSizeCol(StringGrid1, i);
     end;
+  end
+  else //Left Click
+  if Button = mbLeft then
+  begin
+    //Testar qual coluna clicou
+    PMouse := Mouse.CursorPos;
+    PMouse := StringGrid1.ScreenToClient(PMouse);
+    StringGrid1.MouseToCell(PMouse.x, PMouse.y, Col, Row);
+
+    //Voltar as celulas fixas após clicar fora
+    if Row<>0 then
+    begin
+      StringGrid1.FixedRows:=1;
+      //Setar focus
+      StringGrid1.Row := Row;
+    end;
+    if Col<>0 then
+    begin
+      StringGrid1.FixedCols:=1;
+      //Setar focus
+      StringGrid1.Col := Col;
+    end;
   end;
 end;
 
-
-
-procedure TForm1.StringGrid1Click(Sender: TObject);
-  var
-  PMouse: TPoint;
-  Col, Row: integer;
-begin
-
-  //Voltar as celulas fixas após clicar fora
-  PMouse := Mouse.CursorPos;
-  PMouse := StringGrid1.ScreenToClient(PMouse);
-
-  StringGrid1.MouseToCell(PMouse.x, PMouse.y, Col, Row);
-
-  if Row<>0 then
-  begin
-    StringGrid1.Row := Row;
-    StringGrid1.FixedRows:=1;
-  end;
-  if Col<>0 then
-  begin
-    StringGrid1.Col := Col;
-    StringGrid1.FixedCols:=1;
-  end;
-
-end;
 
 procedure TForm1.StringGrid1DblClick(Sender: TObject);
 var

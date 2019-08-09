@@ -44,7 +44,6 @@ object Form1: TForm1
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSizing, goColSizing, goRowMoving, goColMoving, goEditing]
     ParentBiDiMode = False
     TabOrder = 1
-    OnClick = StringGrid1Click
     OnDblClick = StringGrid1DblClick
     OnKeyDown = StringGrid1KeyDown
     OnMouseDown = StringGrid1MouseDown
@@ -200,6 +199,10 @@ object Form1: TForm1
       object DadosEmpr: TMenuItem
         Caption = 'Dados da Empresa'
         OnClick = DadosEmprClick
+      end
+      object Colunas: TMenuItem
+        Caption = 'Colunas'
+        OnClick = ColunasClick
       end
     end
     object Editar1: TMenuItem
