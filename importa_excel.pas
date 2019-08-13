@@ -338,7 +338,7 @@ var
 
 begin
   //Carregar extensão do arquivo
-  fileExt := ExtractFileExt(FilePath.Text);
+  fileExt := LowerCase(ExtractFileExt(FilePath.Text));
 
   //Carregar arquivo de acordo com a extensão
   if (fileExt='.xls') or (fileExt='.xlsx') then
@@ -2564,7 +2564,7 @@ var
   XLApp, Sheet: OLEVariant;
 
 begin
-  Result := False;
+  Screen.Cursor := crHourGlass;
   XLApp := CreateOleObject('Excel.Application');
   try
     XLApp.Visible := False;
@@ -2581,9 +2581,10 @@ begin
       XLApp.Workbooks[1].SaveAs(FileName);
       Result := True;
     except
-    // Error ?
+      Result := False
     end;
   finally
+    Screen.Cursor := crDefault;
     if not VarIsEmpty(XLApp) then
     begin
       XLApp.DisplayAlerts := False;
@@ -2595,18 +2596,89 @@ begin
 end;
 
 
-//Salvar StringGrid em planilha
-procedure TForm1.ButSaveClick(Sender: TObject);
+//Função para salvar StringGrid em um arquivo CSV
+function SaveAsCSVFile(Grid: TstringGrid; FileName: string):Boolean;
 var
-  arquivo: string;
+  i, j : Integer;
+  CSV : TStrings;
+  stream : string;
 
 begin
+  Screen.Cursor := crHourGlass;
+  CSV.Delimiter := ' ';
+
+  //Criar StringList
+  CSV := TStringList.Create;
+  Try
+    for i := 0 to Grid.RowCount - 1 do
+    begin
+      stream := '';
+      for j := 1 to Grid.ColCount -1 do
+      begin
+        stream := stream + Grid.Cells[j,i] + ';';
+      end;
+      CSV.Add(stream);
+    end;
+
+    try
+      //Salvar no CSV
+      CSV.SaveToFile(FileName);
+      Result := True;
+    except
+      Result := False;
+    end;
+  Finally
+    Screen.Cursor := crDefault;
+    CSV.Free;
+  End;
+end;
+
+
+//Botão Salvar StringGrid em planilha
+procedure TForm1.ButSaveClick(Sender: TObject);
+var
+  fileExt: string;
+
+begin
+  //Carregar extensão do arquivo
+  fileExt := ExtractFileExt(FilePath.Text);
+
+  //Sugerir extensão inicial
   SaveDialog1.Filter := 'EXCEL files (*.xlsx)|*.XLSX|CSV files (*.csv)|*.CSV';
+  SaveDialog1.DefaultExt := 'xlsx';
+  if (fileExt='.csv') then
+  begin
+    SaveDialog1.Filter := 'CSV files (*.csv)|*.CSV|EXCEL files (*.xlsx)|*.XLSX|';
+    SaveDialog1.DefaultExt := 'csv';
+  end;
+
   if SaveDialog1.Execute then
   begin
-    arquivo := ExtractFilePath(Application.ExeName);
-    if SaveAsExcelFile(StringGrid1, SaveDialog1.FileName) then
-      ShowMessage(SaveDialog1.FileName+sLineBreak+'StringGrid salva com sucesso!');
+    //Carregar extensão do arquivo
+    fileExt := LowerCase(ExtractFileExt(SaveDialog1.FileName));
+    if fileExt='' then
+    begin
+      fileExt := '.'+LowerCase(SaveDialog1.DefaultExt);
+    end;
+
+    //Salvar arquivo de acordo com a extensão
+    if (fileExt='.xls') or (fileExt='.xlsx') then
+    begin
+      //Salvar StringFrid em Excel
+      if SaveAsExcelFile(StringGrid1, SaveDialog1.FileName) then begin
+        ShowMessage(SaveDialog1.FileName+sLineBreak+'StringGrid salva com sucesso!');
+      end
+      else ShowMessage(SaveDialog1.FileName+sLineBreak+'Erro ao salvar StringGrid!');
+    end
+    else if (fileExt='.csv') then
+    begin
+      //Salvar StringGrid em CSV
+      if SaveAsCSVFile(StringGrid1, SaveDialog1.FileName) then begin
+        ShowMessage(SaveDialog1.FileName+sLineBreak+'StringGrid salva com sucesso!');
+      end
+      else ShowMessage(SaveDialog1.FileName+sLineBreak+'Erro ao salvar StringGrid!');
+    end;
+
   end;
 end;
 
@@ -2968,25 +3040,31 @@ begin
   end;
 
   //Teclas para voltar as linhas fixas
-  if ((Key=VK_TAB) or
-   (Key=VK_RETURN) or
-   (Key=VK_ESCAPE) or
-   (Key=VK_UP) or
-   (Key=VK_DOWN)) then
+  if StringGrid1.Col=0 then
   begin
-    StringGrid1.Col:=1;
-    StringGrid1.FixedRows:=1;
+    if (Key=VK_TAB) or
+     (Key=VK_RETURN) or
+     (Key=VK_ESCAPE) or
+     (Key=VK_LEFT) or
+     (Key=VK_RIGHT) then
+    begin
+      if StringGrid1.FixedRows=0 then StringGrid1.Col:=1;
+      StringGrid1.FixedRows:=1;
+    end;
   end;
 
   //Teclas para voltar as colunas fixas
-  if ((Key=VK_TAB) or
-   (Key=VK_RETURN) or
-   (Key=VK_ESCAPE) or
-   (Key=VK_LEFT) or
-   (Key=VK_RIGHT)) then
+  if StringGrid1.Row=0 then
   begin
-    StringGrid1.Row:=1;
-    StringGrid1.FixedCols:=1;
+    if (Key=VK_TAB) or
+     (Key=VK_RETURN) or
+     (Key=VK_ESCAPE) or
+     (Key=VK_LEFT) or
+     (Key=VK_RIGHT) then
+    begin
+      if StringGrid1.FixedCols=0 then StringGrid1.Row:=1;
+      StringGrid1.FixedCols:=1;
+    end;
   end;
 
   //Inserir coluna
