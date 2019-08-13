@@ -62,7 +62,7 @@ begin
    //RECONHECER CTRL+C
    if ((Shift = [ssCtrl]) and (Key = 67)) then
    begin
-     ClipBoard.AsText := ListColunas.Items.Text;
+     ClipBoard.AsText := ListColunas.Items[ListColunas.ItemIndex];
    end;
 end;
 
