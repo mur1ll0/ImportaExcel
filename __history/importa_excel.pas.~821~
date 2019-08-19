@@ -2210,10 +2210,31 @@ begin
           begin
             //Testar se ja existir o código do título e inserir uma barra.
             count := 0;
+            temp := '/';
             while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
             begin
+              if (Length(StringGrid1.Cells[i,k])>15) and (temp='/') then
+              begin
+                for I := 1 to count do
+                begin
+                  StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(count), '',[rfReplaceAll, rfIgnoreCase]);
+                end;
+                count := 0;
+                temp := '-';
+              end
+              else if (Length(StringGrid1.Cells[i,k])>15) and (temp='-') then
+              begin
+                for I := 1 to count do
+                begin
+                  StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '-'+IntToStr(count), '',[rfReplaceAll, rfIgnoreCase]);
+                end;
+                count := 0;
+                temp := '_';
+              end
+              ;
+
               count := count+1;
-              StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
+              StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + temp + IntToStr(count);
             end;
 
             colTituR := colTituR + 'codi';
@@ -3040,25 +3061,31 @@ begin
   end;
 
   //Teclas para voltar as linhas fixas
-  if ((Key=VK_TAB) or
-   (Key=VK_RETURN) or
-   (Key=VK_ESCAPE) or
-   (Key=VK_UP) or
-   (Key=VK_DOWN)) then
+  if StringGrid1.Col=0 then
   begin
-    if StringGrid1.FixedRows=0 then StringGrid1.Col:=1;
-    StringGrid1.FixedRows:=1;
+    if (Key=VK_TAB) or
+     (Key=VK_RETURN) or
+     (Key=VK_ESCAPE) or
+     (Key=VK_LEFT) or
+     (Key=VK_RIGHT) then
+    begin
+      if StringGrid1.FixedRows=0 then StringGrid1.Col:=1;
+      StringGrid1.FixedRows:=1;
+    end;
   end;
 
   //Teclas para voltar as colunas fixas
-  if ((Key=VK_TAB) or
-   (Key=VK_RETURN) or
-   (Key=VK_ESCAPE) or
-   (Key=VK_LEFT) or
-   (Key=VK_RIGHT)) then
+  if StringGrid1.Row=0 then
   begin
-    if StringGrid1.FixedCols=0 then StringGrid1.Row:=1;
-    StringGrid1.FixedCols:=1;
+    if (Key=VK_TAB) or
+     (Key=VK_RETURN) or
+     (Key=VK_ESCAPE) or
+     (Key=VK_LEFT) or
+     (Key=VK_RIGHT) then
+    begin
+      if StringGrid1.FixedCols=0 then StringGrid1.Row:=1;
+      StringGrid1.FixedCols:=1;
+    end;
   end;
 
   //Inserir coluna

@@ -694,7 +694,7 @@ var
   colMarca, dadosMarca: String;
   colTituP, dadosTituP: string;
   colTituR, dadosTituR: string;
-  i,k,status,max,count: integer;
+  i,j,k,status,max,count: integer;
 
 begin
   //Incicialmente, testar se existem colunas com mesmo nome
@@ -1950,6 +1950,11 @@ begin
             count := 0;
             while (temCodTituloP(StringGrid1.Cells[i,k]) = True) do
             begin
+              for j := 1 to count do
+              begin
+                StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+              end;
+
               count := count+1;
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
@@ -2212,6 +2217,11 @@ begin
             count := 0;
             while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
             begin
+              for j := 1 to count do
+              begin
+                StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+              end;
+
               count := count+1;
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
