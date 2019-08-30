@@ -237,6 +237,7 @@ begin
     begin
       oRowStrings.Clear;
       oRowStrings.Delimiter := ';';
+      oRowStrings.StrictDelimiter := True;
       oRowStrings.DelimitedText := oFileStrings[i];
       oRowStrings.Insert(0,IntToStr(i));
       if oRowStrings.Count > StringGrid1.ColCount then

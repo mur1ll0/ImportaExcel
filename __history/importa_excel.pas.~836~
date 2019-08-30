@@ -1303,6 +1303,44 @@ begin
 
           //Grupo, subgrupo, departamento, marca e tipo são obrigatórios, se não tiver colocar padroes
           //GRUP
+          {i:=BuscaColuna(StringGrid1,'clie');
+          if (i<>-1) then
+          begin
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
+            begin
+              temp2 := IntToStr(getCodiClieForn(''''+temp+''''));
+              //Se não encontrar a string, cadastrar cliente
+              if temp2='0' then begin
+                temp2 := IntToStr(cadastraClieForn('nome',''''+temp+''''));
+              end;
+              colTituR := colTituR + ',clie';
+              dadosTituR := dadosTituR + ',''' + temp2 + '''';
+            end
+            else begin
+              //Se for números, considera como código
+              temp2 := IntToStr(getCodiClieForn('(select c.nome from clieforn c where c.codi = '+temp+')'));
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              if temp2='0' then begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                //Se achar o código, usamos o código
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
+            end;
+          end
+          else begin
+            //Se não tiver fornecedor, colocar o generator.
+            colTituR := colTituR + ',clie';
+            dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+          end;
+          ///-----------------------------------------------------------------}
           i:=BuscaColuna(StringGrid1,'grup');
           if (i<>-1) then
           begin

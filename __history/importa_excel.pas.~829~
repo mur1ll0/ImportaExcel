@@ -227,6 +227,7 @@ var
   oFileStrings:TStringList;
   oRowStrings:TStringList;
   i:integer;
+  linha: string;
 begin
   oFileStrings := TStringList.Create;
   oRowStrings := TStringList.Create;
@@ -235,12 +236,15 @@ begin
     StringGrid1.RowCount := oFileStrings.Count;
     for i := 0 to oFileStrings.Count - 1 do
     begin
+      linha := stringreplace(oFileStrings[i], ' ', '¨',[rfReplaceAll, rfIgnoreCase]);
       oRowStrings.Clear;
       oRowStrings.Delimiter := ';';
-      oRowStrings.DelimitedText := oFileStrings[i];
+      oRowStrings.DelimitedText := linha;
+      ShowMessage(oRowStrings.DelimitedText);
       oRowStrings.Insert(0,IntToStr(i));
       if oRowStrings.Count > StringGrid1.ColCount then
         StringGrid1.ColCount := oRowStrings.Count;
+      linha := stringreplace(oRowStrings, '¨', ' ',[rfReplaceAll, rfIgnoreCase]);
       StringGrid1.Rows[i].Assign(oRowStrings);
     end;
   finally
@@ -1303,6 +1307,44 @@ begin
 
           //Grupo, subgrupo, departamento, marca e tipo são obrigatórios, se não tiver colocar padroes
           //GRUP
+          {i:=BuscaColuna(StringGrid1,'clie');
+          if (i<>-1) then
+          begin
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
+            begin
+              temp2 := IntToStr(getCodiClieForn(''''+temp+''''));
+              //Se não encontrar a string, cadastrar cliente
+              if temp2='0' then begin
+                temp2 := IntToStr(cadastraClieForn('nome',''''+temp+''''));
+              end;
+              colTituR := colTituR + ',clie';
+              dadosTituR := dadosTituR + ',''' + temp2 + '''';
+            end
+            else begin
+              //Se for números, considera como código
+              temp2 := IntToStr(getCodiClieForn('(select c.nome from clieforn c where c.codi = '+temp+')'));
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              if temp2='0' then begin
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+              end
+              else begin
+                //Se achar o código, usamos o código
+                colTituR := colTituR + ',clie';
+                dadosTituR := dadosTituR + ',''' + temp + '''';
+              end;
+            end;
+          end
+          else begin
+            //Se não tiver fornecedor, colocar o generator.
+            colTituR := colTituR + ',clie';
+            dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+          end;
+          ///-----------------------------------------------------------------}
           i:=BuscaColuna(StringGrid1,'grup');
           if (i<>-1) then
           begin
@@ -1950,6 +1992,11 @@ begin
             count := 0;
             while (temCodTituloP(StringGrid1.Cells[i,k]) = True) do
             begin
+              for j := 1 to count do
+              begin
+                StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+              end;
+
               count := count+1;
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
@@ -2210,31 +2257,15 @@ begin
           begin
             //Testar se ja existir o código do título e inserir uma barra.
             count := 0;
-            temp := '/';
             while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
             begin
-              if (Length(StringGrid1.Cells[i,k])>=14) and (temp='/') then
+              for j := 1 to count do
               begin
-                for j := 1 to count do
-                begin
-                  StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(count), '',[rfReplaceAll, rfIgnoreCase]);
-                end;
-                count := 0;
-                temp := '-';
-              end
-              else if (Length(StringGrid1.Cells[i,k])>=14) and (temp='-') then
-              begin
-                for j := 1 to count do
-                begin
-                  StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '-'+IntToStr(count), '',[rfReplaceAll, rfIgnoreCase]);
-                end;
-                count := 0;
-                temp := '_';
-              end
-              ;
+                StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+              end;
 
               count := count+1;
-              StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + temp + IntToStr(count);
+              StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
 
             colTituR := colTituR + 'codi';
