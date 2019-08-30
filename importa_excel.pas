@@ -636,6 +636,40 @@ begin
 end;
 
 
+
+//FUNÇÃO PARA CONSULTAS SQL QUE RETORNAM 1 RESULTADO
+function query(sql: String): String;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    try
+      Form1.Connect.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQL.Clear;
+      queryTemp.CommandText := sql;
+      queryTemp.ExecSQL;
+      queryTemp.Open;
+
+      queryTemp.Append;
+
+      Result := queryTemp.Fields[0].AsString;
+
+    except
+      on e: exception do
+      begin
+        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      end;
+    end;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
 //Função que tenta transformar a string em numero e retorna TRUE se conseguir
 function IsNumeric(S : String) : Boolean;
 begin
@@ -1344,6 +1378,29 @@ begin
           i:=BuscaColuna(StringGrid1,'grup');
           if (i<>-1) then
           begin
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
+            begin
+              temp2 := query('select g.codi from grup_prod g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar grupo
+              if temp2='' then begin
+                temp2 := query('insert into grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_grup_prod_id,1),'''+temp+''',1);');
+                ShowMessage(temp);
+              end
+              else begin
+                ShowMessage(temp2);
+              end;
+            end
+            else begin
+              //Se for números, considera como código
+              temp2 := IntToStr(getCodiClieForn('(select c.nome from clieforn c where c.codi = '+temp+')'));
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+            end;
+
+            {
             if (StringGrid1.Cells[i,k]<>'') then
             begin
               //Se grupo existir, usa codigo, senao usa generator
@@ -1361,7 +1418,7 @@ begin
             else begin
               colProd := colProd + ',grup';
               dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
-            end;
+            end; }
           end
           else begin
             colProd := colProd + ',grup';
