@@ -1389,7 +1389,7 @@ begin
               end
               else begin
                 colProd := colProd + ',grup';
-                dadosProd := dadosProd + ',''' + temp + '''';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
 
             end
@@ -1405,7 +1405,7 @@ begin
               //Se encontrar usa o código
               else begin
                 colProd := colProd + ',grup';
-                dadosProd := dadosProd + ',''' + temp + '''';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
             end;
           end;
