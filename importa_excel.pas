@@ -637,6 +637,73 @@ begin
 end;
 
 
+//FUNÇÃO PARA INSERTS SQL
+function queryInsert(sql: string): Integer;
+var
+  gen_id: Integer;
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    try
+      Form1.Connect.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQL.Clear;
+      queryTemp.CommandText := sql;
+      queryTemp.ExecSQL;
+
+    except
+      on e: exception do
+      begin
+        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      end;
+    end;
+  finally
+    if queryTemp.IsEmpty then
+    begin
+      Result := -1;
+    end
+    else begin
+      Result := queryTemp.FieldByName('CODI').AsInteger;
+    end;
+    queryTemp.Close;
+    Form1.Connect.Close;
+  end;
+end;
+
+
+//FUNÇÃO PARA CONSULTAS SQL QUE RETORNAM 1 RESULTADO
+function querySelect(sql: String): String;
+var
+  queryTemp: TSQLQuery;
+
+begin
+  try
+    try
+      Form1.Connect.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQL.Clear;
+      queryTemp.CommandText := sql;
+      queryTemp.ExecSQL;
+      queryTemp.Open;
+
+      Result := queryTemp.Fields[0].AsString;
+
+    except
+      on e: exception do
+      begin
+        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      end;
+    end;
+  finally
+    queryTemp.Free;
+    Form1.Connect.Close;
+  end;
+end;
+
+
 //Função que tenta transformar a string em numero e retorna TRUE se conseguir
 function IsNumeric(S : String) : Boolean;
 begin
@@ -1304,7 +1371,8 @@ begin
 
           //Grupo, subgrupo, departamento, marca e tipo são obrigatórios, se não tiver colocar padroes
           //GRUP
-          {i:=BuscaColuna(StringGrid1,'clie');
+          ///-----------------------------------------------------------------}
+          i:=BuscaColuna(StringGrid1,'grup');
           if (i<>-1) then
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
@@ -1313,126 +1381,151 @@ begin
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
-              temp2 := IntToStr(getCodiClieForn(''''+temp+''''));
-              //Se não encontrar a string, cadastrar cliente
-              if temp2='0' then begin
-                temp2 := IntToStr(cadastraClieForn('nome',''''+temp+''''));
-              end;
-              colTituR := colTituR + ',clie';
-              dadosTituR := dadosTituR + ',''' + temp2 + '''';
-            end
-            else begin
-              //Se for números, considera como código
-              temp2 := IntToStr(getCodiClieForn('(select c.nome from clieforn c where c.codi = '+temp+')'));
-              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
-              if temp2='0' then begin
-                colTituR := colTituR + ',clie';
-                dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
-              end
-              else begin
-                //Se achar o código, usamos o código
-                colTituR := colTituR + ',clie';
-                dadosTituR := dadosTituR + ',''' + temp + '''';
-              end;
-            end;
-          end
-          else begin
-            //Se não tiver fornecedor, colocar o generator.
-            colTituR := colTituR + ',clie';
-            dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
-          end;
-          ///-----------------------------------------------------------------}
-          i:=BuscaColuna(StringGrid1,'grup');
-          if (i<>-1) then
-          begin
-            if (StringGrid1.Cells[i,k]<>'') then
-            begin
-              //Se grupo existir, usa codigo, senao usa generator
-              if temGrupo(StringGrid1.Cells[i,k]) then
-              begin
-                colProd := colProd + ',grup';
-                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
-              end
-              else begin
+              temp2 := querySelect('select g.codi from grup_prod g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar grupo
+              if temp2='' then begin
+                queryInsert('insert into grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_grup_prod_id,1),'''+temp+''',1);');
                 colProd := colProd + ',grup';
                 dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
+              end
+              else begin
+                colProd := colProd + ',grup';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
 
             end
             else begin
-              colProd := colProd + ',grup';
-              dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
+              //Se for números, considera como código
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              temp2 := querySelect('select g.codi from grup_prod g where g.codi = '''+temp+'''');
+              //Se não encontrar o codigo, colocamos o generator
+              if temp2='' then begin
+                colProd := colProd + ',grup';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
+              end
+              //Se encontrar usa o código
+              else begin
+                colProd := colProd + ',grup';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
             end;
-          end
-          else begin
-            colProd := colProd + ',grup';
-            dadosProd := dadosProd + ',''' + '1' + '''';
           end;
           //SUB_GRUP
           i:=BuscaColuna(StringGrid1,'sub_grup');
           if (i<>-1) then
           begin
-            if (StringGrid1.Cells[i,k]<>'') then
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
             begin
-              //Se sub grupo existir, usa codigo, senao usa generator
-              if temSubGrup(StringGrid1.Cells[i,k]) then
-              begin
+              temp2 := querySelect('select g.codi from sub_grup_prod g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar sub grupo
+              if temp2='' then begin
+                queryInsert('insert into sub_grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_sub_grup_prod_id,1),'''+temp+''',1);');
                 colProd := colProd + ',sub_grup';
-                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
               end
               else begin
                 colProd := colProd + ',sub_grup';
-                dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
+
             end
             else begin
-              colProd := colProd + ',sub_grup';
-              dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
+              //Se for números, considera como código
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              temp2 := querySelect('select g.codi from sub_grup_prod g where g.codi = '''+temp+'''');
+              //Se não encontrar o codigo, colocamos o generator
+              if temp2='' then begin
+                colProd := colProd + ',sub_grup';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
+              end
+              //Se encontrar usa o código
+              else begin
+                colProd := colProd + ',sub_grup';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
             end;
-          end
-          else begin
-            colProd := colProd + ',sub_grup';
-            dadosProd := dadosProd + ',''' + '1' + '''';
           end;
           //DEPARTAMENTO
           i:=BuscaColuna(StringGrid1,'departamento');
           if (i<>-1) then
           begin
-            if (StringGrid1.Cells[i,k]<>'')then
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
             begin
-              colProd := colProd + ',codi_departamento';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              temp2 := querySelect('select g.codi from departamento g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar departamento
+              if temp2='' then begin
+                queryInsert('insert into departamento (CODI,DESCR) values (gen_id(gen_departamento_id,1),'''+temp+''');');
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_departamento_id,0)';
+              end
+              else begin
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
+
+            end
+            else begin
+              //Se for números, considera como código
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              temp2 := querySelect('select g.codi from departamento g where g.codi = '''+temp+'''');
+              //Se não encontrar o codigo, colocamos o generator
+              if temp2='' then begin
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_departamento_id,0)';
+              end
+              //Se encontrar usa o código
+              else begin
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
             end;
-          end
-          else begin
-            colProd := colProd + ',codi_departamento';
-            dadosProd := dadosProd + ',''' + '0' + '''';
           end;
           //MARCA
           i:=BuscaColuna(StringGrid1,'marca');
           if (i<>-1) then
           begin
-            if (StringGrid1.Cells[i,k]<>'') then
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
             begin
-              //Se marca existir, usa codigo, senao usa generator
-              if temMarca(StringGrid1.Cells[i,k]) then
-              begin
+              temp2 := querySelect('select g.codi from marca g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar marca
+              if temp2='' then begin
+                queryInsert('insert into marca (CODI,DESCR) values (gen_id(gen_marca_id,1),'''+temp+''');');
                 colProd := colProd + ',marca';
-                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
               end
               else begin
                 colProd := colProd + ',marca';
-                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
+
             end
             else begin
-              colProd := colProd + ',marca';
-              dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+              //Se for números, considera como código
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              temp2 := querySelect('select g.codi from marca g where g.codi = '''+temp+'''');
+              //Se não encontrar o codigo, colocamos o generator
+              if temp2='' then begin
+                colProd := colProd + ',marca';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+              end
+              //Se encontrar usa o código
+              else begin
+                colProd := colProd + ',marca';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
             end;
-          end
-          else begin
-            colProd := colProd + ',marca';
-            dadosProd := dadosProd + ',''' + '0' + '''';
           end;
           //TIPO
           i:=BuscaColuna(StringGrid1,'tipo');
@@ -1636,6 +1729,27 @@ begin
               if (BuscaColuna(StringGrid1,'preco_vista')=-1) then
               begin
                 colProdCust := colProdCust + ',cust_preco_vista';
+                dadosProdCust := dadosProdCust + ',' + temp;
+              end;
+            end
+            //PRECO_VISTA (Preço a Vista)
+            else if (LowerCase(StringGrid1.Cells[i,0])='preco_vista') then
+            begin
+              colProdCust := colProdCust + ',cust_preco_vista';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+              dadosProdCust := dadosProdCust + ',' + temp;
+              //Testar se existe o preco a prazo, se não joga o a vista mesmo
+              if (BuscaColuna(StringGrid1,'preco_prazo')=-1) then
+              begin
+                colProdCust := colProdCust + ',cust_preco_prazo';
                 dadosProdCust := dadosProdCust + ',' + temp;
               end;
             end
