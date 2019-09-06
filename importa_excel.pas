@@ -45,6 +45,7 @@ type
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
     procedure AutoSizeCol(Grid: TStringGrid; Column: integer);
+    procedure RemoveWhiteRows(Grid: TStringGrid);
     procedure BtnLoadClick(Sender: TObject);
     procedure BtnOpenDB(Sender: TObject);
     procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
@@ -62,6 +63,7 @@ type
     procedure LimpaProdutosClick(Sender: TObject);
     procedure LimpaTituPClick(Sender: TObject);
     procedure LimpaTituRClick(Sender: TObject);
+    procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
     procedure AdicionarColunaClick(Sender: TObject);
     procedure AdicionarLinhaClick(Sender: TObject);
     procedure DeletarColunaClick(Sender: TObject);
@@ -159,7 +161,7 @@ const
 var
   XLApp, Sheet: OLEVariant;
   RangeMatrix: Variant;
-  x, y, k, r: Integer;
+  i, j, x, y, k, r: Integer;
 begin
   Result := False;
   // Create Excel-OLE Object
@@ -171,47 +173,60 @@ begin
     // Open the Workbook
     XLApp.Workbooks.Open(AXLSFile);
 
-    // Sheet := XLApp.Workbooks[1].WorkSheets[1];
-    Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[1];
-
-    // In order to know the dimension of the WorkSheet, i.e the number of rows
-    // and the number of columns, we activate the last non-empty cell of it
-
-    Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Activate;
-    // Get the value of the last row
-    x := XLApp.ActiveCell.Row;
-    // Get the value of the last column
-    y := XLApp.ActiveCell.Column;
-
-    // Set Stringgrid's row &col dimensions.
-
-    AGrid.RowCount := x;
-    AGrid.ColCount := y;
-
-    // Assign the Variant associated with the WorkSheet to the Delphi Variant
-    RangeMatrix := XLApp.Range['A1', XLApp.Cells.Item[X, Y]].Value;
-
-    AGrid.ColCount := AGrid.ColCount +1;
-    //Iterar linhas
-    for k := 0 to AGrid.RowCount-1 do
+    AGrid.RowCount := 0;
+    AGrid.ColCount := 1;
+    k := 0;
+    j := 1;
+    //Percorrer os WorkSheets
+    for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
     begin
-      AGrid.Cells[0,k] := IntToStr(k);
-      //Iterar colunas
-      for r := 1 to AGrid.ColCount-1 do
+      Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
+
+      //Retirar Filtros, para que não fique linhas escondidas
+      if (Sheet.AutoFilterMode = True) then
       begin
-        AGrid.Cells[r,k] := RangeMatrix[(K+1), r];
+        Sheet.AutoFilterMode := False;
       end;
+
+      //Receber valores da ultima linha e coluna
+      x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
+      y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
+
+      //Setar tamanho do StringGrid
+      AGrid.RowCount := AGrid.RowCount + x;
+      if y > AGrid.ColCount  then
+      begin
+        AGrid.ColCount := y + 1;
+      end;
+
+      // Assign the Variant associated with the WorkSheet to the Delphi Variant
+      RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
+
+      //Iterar linhas
+      while k < AGrid.RowCount-1 do
+      begin
+        AGrid.Cells[0,k] := IntToStr(k);
+        //Iterar colunas
+        for r := 1 to AGrid.ColCount-1 do
+        begin
+          AGrid.Cells[r,k] := RangeMatrix[j,r];
+        end;
+        k := k + 1;
+        j := j + 1;
+      end;
+
+      //Fazer proximos WorksSheet começar da 2 linha
+      j := 2;
+      AGrid.RowCount := AGrid.RowCount - 1;
     end;
 
+  finally
     // Unassign the Delphi Variant Matrix
     RangeMatrix := Unassigned;
-
-
-  finally
     // Quit Excel
     if not VarIsEmpty(XLApp) then
     begin
-      // XLApp.DisplayAlerts := False;
+      XLApp.DisplayAlerts := False;
       XLApp.Quit;
       XLAPP := Unassigned;
       Sheet := Unassigned;
@@ -331,6 +346,32 @@ begin
 end;
 
 
+//Função para Remover linhas em branco
+procedure TForm1.RemoveWhiteRows(Grid: TStringGrid);
+var
+  i, j: integer;
+  remove: Boolean;
+begin
+  //Percorre linhas
+  for i := 0 to (Grid.RowCount - 1) do begin
+    remove := True;
+    //Percorre colunas
+    for j := 1 to (Grid.ColCount - 1) do begin
+      if Grid.Cells[j,i] <> '' then begin
+        remove := False;
+        Break;
+      end;
+    end;
+
+    if remove = True then begin
+      DeleteRow(StringGrid1, i);
+    end;
+  end;
+
+
+end;
+
+
 //Botão para Carregar arquivo Excel na StringGrid
 procedure TForm1.BtnLoadClick(Sender: TObject);
 var
@@ -356,6 +397,9 @@ begin
   //Redimensionar colunas
   for i := 0 to StringGrid1.ColCount - 1 do
     AutoSizeCol(StringGrid1, i);
+
+  //Remover linhas em branco
+  RemoveWhiteRows(StringGrid1);
 
 end;
 
@@ -726,6 +770,8 @@ begin
   for i := 1 to grid.ColCount-1 do
   begin
     temp := grid.Cells[i,0];
+    if temp='' then Continue;
+
     for j := 1 to grid.ColCount-1 do
     begin
       if i=j then Continue;
@@ -964,6 +1010,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,16));
               if temp.Length > 1 then
               begin
                 colClieForn := colClieForn + ',rg';
@@ -981,6 +1028,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,20));
               if temp.Length > 1 then
               begin
                 colClieForn := colClieForn + ',insc';
@@ -3087,7 +3135,7 @@ end;
 
 
 //Deletar Linha da StringGrid
-procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
+procedure TForm1.DeleteRow(Grid: TStringGrid; ARow: Integer);
 var
   i: Integer;
 begin

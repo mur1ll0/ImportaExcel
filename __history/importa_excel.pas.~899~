@@ -45,6 +45,7 @@ type
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure BtnAbrirClick(Sender: TObject);
     procedure AutoSizeCol(Grid: TStringGrid; Column: integer);
+    procedure RemoveWhiteRows(Grid: TStringGrid);
     procedure BtnLoadClick(Sender: TObject);
     procedure BtnOpenDB(Sender: TObject);
     procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
@@ -62,6 +63,7 @@ type
     procedure LimpaProdutosClick(Sender: TObject);
     procedure LimpaTituPClick(Sender: TObject);
     procedure LimpaTituRClick(Sender: TObject);
+    procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
     procedure AdicionarColunaClick(Sender: TObject);
     procedure AdicionarLinhaClick(Sender: TObject);
     procedure DeletarColunaClick(Sender: TObject);
@@ -159,7 +161,7 @@ const
 var
   XLApp, Sheet: OLEVariant;
   RangeMatrix: Variant;
-  x, y, k, r: Integer;
+  i, j, x, y, k, r: Integer;
 begin
   Result := False;
   // Create Excel-OLE Object
@@ -171,47 +173,60 @@ begin
     // Open the Workbook
     XLApp.Workbooks.Open(AXLSFile);
 
-    // Sheet := XLApp.Workbooks[1].WorkSheets[1];
-    Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[1];
-
-    // In order to know the dimension of the WorkSheet, i.e the number of rows
-    // and the number of columns, we activate the last non-empty cell of it
-
-    Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Activate;
-    // Get the value of the last row
-    x := XLApp.ActiveCell.Row;
-    // Get the value of the last column
-    y := XLApp.ActiveCell.Column;
-
-    // Set Stringgrid's row &col dimensions.
-
-    AGrid.RowCount := x;
-    AGrid.ColCount := y;
-
-    // Assign the Variant associated with the WorkSheet to the Delphi Variant
-    RangeMatrix := XLApp.Range['A1', XLApp.Cells.Item[X, Y]].Value;
-
-    AGrid.ColCount := AGrid.ColCount +1;
-    //Iterar linhas
-    for k := 0 to AGrid.RowCount-1 do
+    AGrid.RowCount := 0;
+    AGrid.ColCount := 1;
+    k := 0;
+    j := 1;
+    //Percorrer os WorkSheets
+    for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
     begin
-      AGrid.Cells[0,k] := IntToStr(k);
-      //Iterar colunas
-      for r := 1 to AGrid.ColCount-1 do
+      Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
+
+      //Retirar Filtros, para que não fique linhas escondidas
+      if (Sheet.AutoFilterMode = True) then
       begin
-        AGrid.Cells[r,k] := RangeMatrix[(K+1), r];
+        Sheet.AutoFilterMode := False;
       end;
+
+      //Receber valores da ultima linha e coluna
+      x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
+      y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
+
+      //Setar tamanho do StringGrid
+      AGrid.RowCount := AGrid.RowCount + x;
+      if y > AGrid.ColCount  then
+      begin
+        AGrid.ColCount := y + 1;
+      end;
+
+      // Assign the Variant associated with the WorkSheet to the Delphi Variant
+      RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
+
+      //Iterar linhas
+      while k < AGrid.RowCount-1 do
+      begin
+        AGrid.Cells[0,k] := IntToStr(k);
+        //Iterar colunas
+        for r := 1 to AGrid.ColCount-1 do
+        begin
+          AGrid.Cells[r,k] := RangeMatrix[j,r];
+        end;
+        k := k + 1;
+        j := j + 1;
+      end;
+
+      //Fazer proximos WorksSheet começar da 2 linha
+      j := 2;
+      AGrid.RowCount := AGrid.RowCount - 1;
     end;
 
+  finally
     // Unassign the Delphi Variant Matrix
     RangeMatrix := Unassigned;
-
-
-  finally
     // Quit Excel
     if not VarIsEmpty(XLApp) then
     begin
-      // XLApp.DisplayAlerts := False;
+      XLApp.DisplayAlerts := False;
       XLApp.Quit;
       XLAPP := Unassigned;
       Sheet := Unassigned;
@@ -237,6 +252,7 @@ begin
     begin
       oRowStrings.Clear;
       oRowStrings.Delimiter := ';';
+      oRowStrings.StrictDelimiter := True;
       oRowStrings.DelimitedText := oFileStrings[i];
       oRowStrings.Insert(0,IntToStr(i));
       if oRowStrings.Count > StringGrid1.ColCount then
@@ -330,6 +346,32 @@ begin
 end;
 
 
+//Função para Remover linhas em branco
+procedure TForm1.RemoveWhiteRows(Grid: TStringGrid);
+var
+  i, j: integer;
+  remove: Boolean;
+begin
+  //Percorre linhas
+  for i := 0 to (Grid.RowCount - 1) do begin
+    remove := True;
+    //Percorre colunas
+    for j := 0 to (Grid.ColCount - 1) do begin
+      if Grid.Cells[j,i] <> '' then begin
+        remove := False;
+        Break;
+      end;
+    end;
+
+    if remove = True then begin
+      DeleteRow(StringGrid1, i);
+    end;
+  end;
+
+
+end;
+
+
 //Botão para Carregar arquivo Excel na StringGrid
 procedure TForm1.BtnLoadClick(Sender: TObject);
 var
@@ -355,6 +397,9 @@ begin
   //Redimensionar colunas
   for i := 0 to StringGrid1.ColCount - 1 do
     AutoSizeCol(StringGrid1, i);
+
+  //Remover linhas em branco
+  RemoveWhiteRows(StringGrid1);
 
 end;
 
@@ -725,6 +770,8 @@ begin
   for i := 1 to grid.ColCount-1 do
   begin
     temp := grid.Cells[i,0];
+    if temp='' then Continue;
+
     for j := 1 to grid.ColCount-1 do
     begin
       if i=j then Continue;
@@ -963,6 +1010,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,16));
               if temp.Length > 1 then
               begin
                 colClieForn := colClieForn + ',rg';
@@ -980,6 +1028,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,20));
               if temp.Length > 1 then
               begin
                 colClieForn := colClieForn + ',insc';
@@ -1397,7 +1446,7 @@ begin
               //Se for números, considera como código
               //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
               temp2 := querySelect('select g.codi from grup_prod g where g.codi = '''+temp+'''');
-              //Se não encontrar o codigo, colcoamos o generator
+              //Se não encontrar o codigo, colocamos o generator
               if temp2='' then begin
                 colProd := colProd + ',grup';
                 dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
@@ -1420,7 +1469,7 @@ begin
             if not (IsNumeric(temp)) then
             begin
               temp2 := querySelect('select g.codi from sub_grup_prod g where g.descr = '''+temp+'''');
-              //Se não encontrar a string, cadastrar grupo
+              //Se não encontrar a string, cadastrar sub grupo
               if temp2='' then begin
                 queryInsert('insert into sub_grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_sub_grup_prod_id,1),'''+temp+''',1);');
                 colProd := colProd + ',sub_grup';
@@ -1452,41 +1501,79 @@ begin
           i:=BuscaColuna(StringGrid1,'departamento');
           if (i<>-1) then
           begin
-            if (StringGrid1.Cells[i,k]<>'')then
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
             begin
-              colProd := colProd + ',codi_departamento';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              temp2 := querySelect('select g.codi from departamento g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar departamento
+              if temp2='' then begin
+                queryInsert('insert into departamento (CODI,DESCR) values (gen_id(gen_departamento_id,1),'''+temp+''');');
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_departamento_id,0)';
+              end
+              else begin
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
+
+            end
+            else begin
+              //Se for números, considera como código
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              temp2 := querySelect('select g.codi from departamento g where g.codi = '''+temp+'''');
+              //Se não encontrar o codigo, colocamos o generator
+              if temp2='' then begin
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_departamento_id,0)';
+              end
+              //Se encontrar usa o código
+              else begin
+                colProd := colProd + ',departamento';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
             end;
-          end
-          else begin
-            colProd := colProd + ',codi_departamento';
-            dadosProd := dadosProd + ',''' + '0' + '''';
           end;
           //MARCA
           i:=BuscaColuna(StringGrid1,'marca');
           if (i<>-1) then
           begin
-            if (StringGrid1.Cells[i,k]<>'') then
+            temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+            temp := (Copy(temp,1,60));
+            //Se for letras, buscar código.
+            if not (IsNumeric(temp)) then
             begin
-              //Se marca existir, usa codigo, senao usa generator
-              if temMarca(StringGrid1.Cells[i,k]) then
-              begin
+              temp2 := querySelect('select g.codi from marca g where g.descr = '''+temp+'''');
+              //Se não encontrar a string, cadastrar marca
+              if temp2='' then begin
+                queryInsert('insert into marca (CODI,DESCR) values (gen_id(gen_marca_id,1),'''+temp+''');');
                 colProd := colProd + ',marca';
-                dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
               end
               else begin
                 colProd := colProd + ',marca';
-                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
+
             end
             else begin
-              colProd := colProd + ',marca';
-              dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+              //Se for números, considera como código
+              //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+              temp2 := querySelect('select g.codi from marca g where g.codi = '''+temp+'''');
+              //Se não encontrar o codigo, colocamos o generator
+              if temp2='' then begin
+                colProd := colProd + ',marca';
+                dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
+              end
+              //Se encontrar usa o código
+              else begin
+                colProd := colProd + ',marca';
+                dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
             end;
-          end
-          else begin
-            colProd := colProd + ',marca';
-            dadosProd := dadosProd + ',''' + '0' + '''';
           end;
           //TIPO
           i:=BuscaColuna(StringGrid1,'tipo');
@@ -3048,7 +3135,7 @@ end;
 
 
 //Deletar Linha da StringGrid
-procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
+procedure TForm1.DeleteRow(Grid: TStringGrid; ARow: Integer);
 var
   i: Integer;
 begin
