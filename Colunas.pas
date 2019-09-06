@@ -84,6 +84,8 @@ begin
     ListColunas.Items.add('NCM');
     ListColunas.Items.add('CEST');
     ListColunas.Items.add('UNID');
+    ListColunas.Items.add('PESL');
+    ListColunas.Items.add('PESB');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
     ListColunas.Items.add('CUSTO_REAL');
