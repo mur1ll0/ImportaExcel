@@ -48,6 +48,7 @@ type
     procedure BtnAbrirClick(Sender: TObject);
     procedure AutoSizeCol(Grid: TStringGrid; Column: integer);
     procedure RemoveWhiteRows(Grid: TStringGrid);
+    procedure RemoveSpaces(Grid: TStringGrid);
     procedure BtnLoadClick(Sender: TObject);
     procedure BtnOpenDB(Sender: TObject);
     procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
@@ -86,6 +87,47 @@ var
   gridTemp: Array of Array of string;
 
 implementation
+
+
+//Função para tratar os numeros com ponto flutuante importados como texto
+function corrigeFloat(nume:string): string;
+var
+  c : Char;
+  flag : Integer;
+begin
+  {
+  Flag para encontrar pontos e virgulas
+  1- 1º Ponto
+  2- 1ª Virgula
+  3- Ponto é casa decimal
+  4- Virgula é casa decimal
+  }
+  flag := 0;
+
+  //Encontrar pontos e virgulas
+  for c in nume do begin
+    if flag = 0 then begin
+      if c = '.'  then flag := 1;
+      if c = ',' then flag := 2;
+    end
+    else begin
+      if flag > 2 then begin
+        if c = '.'  then flag := 3;
+        if c = ',' then flag := 4;
+      end;
+    end;
+  end;
+
+  {
+  Verificar a flag:
+  1-Decimal separado por ponto, troca por virgula
+  2-Decimal separado por virgula, deixa assim
+  3-Milhares separ. por virgulas, Decimal por ponto, tira virgulas e depois transforma ponto em virgula
+  4-Milhares separ. por pontos, Decimal por virgula, tira os pontos
+  }
+  ShowMessage(IntToStr(flag));
+
+end;
 
 
 //Função para carregar apenas o cabeçalho de uma planilha na StringGrid
@@ -369,8 +411,23 @@ begin
       DeleteRow(StringGrid1, i);
     end;
   end;
+end;
 
 
+//Função para Remover espaços no inicio e fim da string
+procedure TForm1.RemoveSpaces(Grid: TStringGrid);
+var
+  i, j: integer;
+begin
+  //Percorre linhas
+  for i := 0 to (Grid.RowCount - 1) do begin
+    //Percorre colunas
+    for j := 1 to (Grid.ColCount - 1) do begin
+      Grid.Cells[j,i] := TrimLeft(Grid.Cells[j,i]);
+      Grid.Cells[j,i] := TrimRight(Grid.Cells[j,i]);
+      Grid.Cells[j,i] := stringreplace(Grid.Cells[j,i], ';', '',[rfReplaceAll, rfIgnoreCase]);
+    end;
+  end;
 end;
 
 
@@ -396,12 +453,15 @@ begin
     CSV_To_StringGrid(StringGrid1, FilePath.Text);
   end;
 
+  //Remover linhas em branco
+  RemoveWhiteRows(StringGrid1);
+
+  //Remover espaços no inicio e fim das strings
+  RemoveSpaces(StringGrid1);
+
   //Redimensionar colunas
   for i := 0 to StringGrid1.ColCount - 1 do
     AutoSizeCol(StringGrid1, i);
-
-  //Remover linhas em branco
-  RemoveWhiteRows(StringGrid1);
 
 end;
 
@@ -702,7 +762,7 @@ begin
     except
       on e: exception do
       begin
-        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+        ShowMessage('Erro queryInsert SQL: '+e.message+sLineBreak+queryTemp.CommandText+'\nContinuando sem inserir.');
       end;
     end;
   finally
@@ -817,6 +877,12 @@ begin
   if checkCol(StringGrid1)=False then Exit;
   //Se não tiver colunas iguais, segue importação.
 
+  //Verificar se não selecionou um tipo de imporatação, finaliza
+  if SelectImport.Text = 'Tipo de Importação' then begin
+    ShowMessage('Selecione um tipo de Importação.');
+    Exit;
+  end;
+
 
   //Status se esta OK ou se tem erro, setado como OK
   status := 1;
@@ -837,6 +903,11 @@ begin
       if StrToInt(StartLine.Text) <= 0 then begin
         StartLine.Text := '1';
       end;
+      if StrToInt(StartLine.Text) > StringGrid1.RowCount then begin
+        ShowMessage('Inicio maior que o número máximo de linhas: '+IntToStr(StringGrid1.RowCount));
+        Exit;
+      end;
+
 
       for k := StrToInt(StartLine.Text) to StringGrid1.RowCount-1 do
       begin
@@ -1435,7 +1506,7 @@ begin
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
             temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
-            temp := (Copy(temp,1,60));
+            temp := (Copy(temp,1,30));
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
@@ -1474,7 +1545,7 @@ begin
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
             temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
-            temp := (Copy(temp,1,60));
+            temp := (Copy(temp,1,30));
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
@@ -1513,19 +1584,21 @@ begin
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
             temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
-            temp := (Copy(temp,1,60));
+            temp := (Copy(temp,1,30));
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
               temp2 := querySelect('select g.codi from departamento g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar departamento
               if temp2='' then begin
-                queryInsert('insert into departamento (CODI,DESCR) values (gen_id(gen_departamento_id,1),'''+temp+''');');
-                colProd := colProd + ',departamento';
-                dadosProd := dadosProd + ',' + 'gen_id(gen_departamento_id,0)';
+                temp2 := querySelect('select max(g.codi) from departamento g');
+                temp2 := IntToStr(StrToInt(temp2)+1);
+                queryInsert('insert into departamento (CODI,DESCR) values ('+temp2+','''+temp+''');');
+                colProd := colProd + ',codi_departamento';
+                dadosProd := dadosProd + ',' + temp2;
               end
               else begin
-                colProd := colProd + ',departamento';
+                colProd := colProd + ',codi_departamento';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
 
@@ -1536,12 +1609,13 @@ begin
               temp2 := querySelect('select g.codi from departamento g where g.codi = '''+temp+'''');
               //Se não encontrar o codigo, colocamos o generator
               if temp2='' then begin
-                colProd := colProd + ',departamento';
-                dadosProd := dadosProd + ',' + 'gen_id(gen_departamento_id,0)';
+                temp2 := querySelect('select max(g.codi) from departamento g');
+                colProd := colProd + ',codi_departamento';
+                dadosProd := dadosProd + ',' + temp2;
               end
               //Se encontrar usa o código
               else begin
-                colProd := colProd + ',departamento';
+                colProd := colProd + ',codi_departamento';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
             end;
@@ -1552,7 +1626,7 @@ begin
           begin
             temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
             temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
-            temp := (Copy(temp,1,60));
+            temp := (Copy(temp,1,50));
             //Se for letras, buscar código.
             if not (IsNumeric(temp)) then
             begin
@@ -1704,6 +1778,7 @@ begin
               temp := stringreplace(StringGrid1.Cells[i,k], '''', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, ',', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,10));
               dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(temp)) + '''';
             end
             //CEST
@@ -1715,8 +1790,42 @@ begin
             //UNID (Unidade de medida)
             else if (LowerCase(StringGrid1.Cells[i,0])='unid') then
             begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,12));
               colProd := colProd + ',unid';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              dadosProd := dadosProd + ',''' + temp + '''';
+            end
+            //PESL (Peso Líquido)
+            else if (LowerCase(StringGrid1.Cells[i,0])='pesl') then
+            begin
+              temp := corrigeFloat(StringGrid1.Cells[i,k]);
+              colProd := colProd + ',pesl';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+              dadosProd := dadosProd + ',' + temp;
+            end
+            //PESB (Peso Bruto)
+            else if (LowerCase(StringGrid1.Cells[i,0])='pesb') then
+            begin
+              colProd := colProd + ',pesb';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+              dadosProd := dadosProd + ',' + temp;
             end
             //CUSTO (Custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='custo') then
@@ -2829,17 +2938,24 @@ var
 
 begin
   Screen.Cursor := crHourGlass;
-  CSV.Delimiter := ' ';
+  CSV.Delimiter := ';';
 
   //Criar StringList
   CSV := TStringList.Create;
   Try
     for i := 0 to Grid.RowCount - 1 do
     begin
-      stream := '';
-      for j := 1 to Grid.ColCount -1 do
+      if Grid.ColCount >= 2 then
       begin
-        stream := stream + Grid.Cells[j,i] + ';';
+        stream := Grid.Cells[1,i];
+      end
+      else begin
+        Exit;
+      end;
+
+      for j := 2 to Grid.ColCount -1 do
+      begin
+        stream := stream + ';' + Grid.Cells[j,i];
       end;
       CSV.Add(stream);
     end;
