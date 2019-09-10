@@ -1737,6 +1737,7 @@ begin
               temp := stringreplace(StringGrid1.Cells[i,k], '''', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, ',', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,10));
               dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(temp)) + '''';
             end
             //CEST
@@ -2902,10 +2903,17 @@ begin
   Try
     for i := 0 to Grid.RowCount - 1 do
     begin
-      stream := '';
-      for j := 1 to Grid.ColCount -1 do
+      if Grid.ColCount >= 2 then
       begin
-        stream := stream + Grid.Cells[j,i] + ';';
+        stream := Grid.Cells[1,i];
+      end
+      else begin
+        Exit;
+      end;
+
+      for j := 2 to Grid.ColCount -1 do
+      begin
+        stream := stream + ';' + Grid.Cells[j,i];
       end;
       CSV.Add(stream);
     end;
