@@ -919,6 +919,9 @@ begin
       for k := StrToInt(StartLine.Text) to StringGrid1.RowCount-1 do
       begin
 
+        //Atualizar StartLine
+        StartLine.Text := IntToStr(k);
+
         //Se clicou em cancelar, quebra o laço das linhas e finaliza importação.
         //if Form2.Active=False then break; - Usando Active, se minimizar a tela cancela.
         if Form2.Visible=False then break;
@@ -990,8 +993,46 @@ begin
 
           for i := 0 to StringGrid1.ColCount-1 do
           begin
+            //GRUPO
+            if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,50));
+              //Se for letras, buscar código.
+              if not (IsNumeric(temp)) then
+              begin
+                temp2 := querySelect('select g.codi from grupo_cliente g where g.descr = '''+temp+'''');
+                //Se não encontrar a string, cadastrar sub grupo
+                if temp2='' then begin
+                  queryInsert('insert into grupo_cliente (CODI,DESCR,COMISSAO) values (gen_id(gen_grupo_cliente_id,1),'''+temp+''',1);');
+                  colClieForn := colClieForn + ',codi_grupo_clie';
+                  dadosClieForn := dadosClieForn + ',' + 'gen_id(gen_grupo_cliente_id,0)';
+                end
+                else begin
+                  colClieForn := colClieForn + ',codi_grupo_clie';
+                  dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+                end;
+
+              end
+              else begin
+                //Se for números, considera como código
+                //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
+                temp2 := querySelect('select g.codi from grupo_cliente g where g.codi = '''+temp+'''');
+                //Se não encontrar o codigo, colocamos o generator
+                if temp2='' then begin
+                  colClieForn := colClieForn + ',codi_grupo_clie';
+                  dadosClieForn := dadosClieForn + ',' + 'gen_id(gen_grupo_cliente_id,0)';
+                end
+                //Se encontrar usa o código
+                else begin
+                  colClieForn := colClieForn + ',codi_grupo_clie';
+                  dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+                end;
+              end;
+            end
             //NOME
-            if ((LowerCase(StringGrid1.Cells[i,0])='nome') and (StringGrid1.Cells[i,0]<>'')) then
+            else if ((LowerCase(StringGrid1.Cells[i,0])='nome') and (StringGrid1.Cells[i,0]<>'')) then
             begin
               colClieForn := colClieForn + ',nome';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
@@ -1921,26 +1962,50 @@ begin
             //CSOSN
             else if (LowerCase(StringGrid1.Cells[i,0])='csosn') then
             begin
-              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
             end
             //CST
             else if (LowerCase(StringGrid1.Cells[i,0])='cst') then
             begin
-              colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTADUAL';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-              colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-              colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTA_CF';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-              colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
-              dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
             end
             ;
 
@@ -2274,6 +2339,7 @@ begin
               end;
 
               count := count+1;
+              StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,13));
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
 
@@ -2433,13 +2499,13 @@ begin
                 dadosTituP := dadosTituP + ',''' + temp + '''';
               end;
             end
-            //VALOR (Valor do título)
+            //VALO (Valor do título)
             else if (LowerCase(StringGrid1.Cells[i,0])='valo') then
             begin
               colTituP := colTituP + ',valo';
               if StringGrid1.Cells[i,k]='' then
               begin
-                temp := '0';
+                temp := '0.0';
               end
               else begin
                 temp := StringGrid1.Cells[i,k];
@@ -2447,19 +2513,19 @@ begin
               temp := corrigeFloat(temp);
               dadosTituP := dadosTituP + ',' + temp;
 
-              //Testar se existe coluna saldo, se não existir joga o valor da VALO
+              //Testar se não existe coluna saldo, se não existir joga o valor da VALO
               count:=BuscaColuna(StringGrid1,'sald');
-              if (count<>-1) then
+              if (count=-1) then
               begin
                 colTituP := colTituP + ',sald';
-                if StringGrid1.Cells[count,k]='' then
+                if StringGrid1.Cells[i,k]='' then
                 begin
-                  temp2 := '0';
+                  temp2 := '0.0';
                 end
                 else begin
-                  temp2 := StringGrid1.Cells[count,k];
+                  temp2 := StringGrid1.Cells[i,k];
                 end;
-                temp := corrigeFloat(temp);
+                temp2 := corrigeFloat(temp2);
                 dadosTituP := dadosTituP + ',' + temp2;
               end;
             end
@@ -2469,7 +2535,7 @@ begin
               colTituP := colTituP + ',sald';
               if StringGrid1.Cells[i,k]='' then
               begin
-                temp := '0';
+                temp := '0.0';
               end
               else begin
                 temp := StringGrid1.Cells[i,k];
@@ -2477,17 +2543,17 @@ begin
               temp := corrigeFloat(temp);
               dadosTituP := dadosTituP + ',' + temp;
 
-              //Testar se existe coluna valo, se não existir joga o valor da SALD
+              //Testar se não existe coluna valo, se não existir joga o valor da SALD
               count:=BuscaColuna(StringGrid1,'valo');
-              if (count<>-1) then
+              if (count=-1) then
               begin
                 colTituP := colTituP + ',valo';
-                if StringGrid1.Cells[count,k]='' then
+                if StringGrid1.Cells[i,k]='' then
                 begin
-                  temp2 := '0';
+                  temp2 := '0.0';
                 end
                 else begin
-                  temp2 := StringGrid1.Cells[count,k];
+                  temp2 := StringGrid1.Cells[i,k];
                 end;
                 temp := corrigeFloat(temp);
                 dadosTituP := dadosTituP + ',' + temp2;
@@ -2565,6 +2631,7 @@ begin
               end;
 
               count := count+1;
+              StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,13));
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
 
@@ -2730,7 +2797,7 @@ begin
               colTituR := colTituR + ',valo';
               if StringGrid1.Cells[i,k]='' then
               begin
-                temp := '0';
+                temp := '0.0';
               end
               else begin
                 temp := StringGrid1.Cells[i,k];
@@ -2738,20 +2805,19 @@ begin
               temp := corrigeFloat(temp);
               dadosTituR := dadosTituR + ',' + temp;
 
-              //Testar se existe coluna saldo, se não existir joga o valor da VALO
+              //Testar se não existe coluna saldo, se não existir joga o valor da VALO
               count:=BuscaColuna(StringGrid1,'sald');
-              if (count<>-1) then
+              if (count=-1) then
               begin
                 colTituR := colTituR + ',sald';
-                if StringGrid1.Cells[count,k]='' then
+                if StringGrid1.Cells[i,k]='' then
                 begin
-                  temp2 := '0';
+                  temp2 := '0.0';
                 end
                 else begin
-                  temp2 := StringGrid1.Cells[count,k];
+                  temp2 := StringGrid1.Cells[i,k];
                 end;
-                temp2 := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-                temp2 := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+                temp2 := corrigeFloat(temp2);
                 dadosTituR := dadosTituR + ',' + temp2;
               end;
             end
@@ -2761,7 +2827,7 @@ begin
               colTituR := colTituR + ',sald';
               if StringGrid1.Cells[i,k]='' then
               begin
-                temp := '0';
+                temp := '0.0';
               end
               else begin
                 temp := StringGrid1.Cells[i,k];
@@ -2769,19 +2835,19 @@ begin
               temp := corrigeFloat(temp);
               dadosTituR := dadosTituR + ',' + temp;
 
-              //Testar se existe coluna valo, se não existir joga o valor da SALD
+              //Testar se não existe coluna valo, se não existir joga o valor da SALD
               count:=BuscaColuna(StringGrid1,'valo');
-              if (count<>-1) then
+              if (count=-1) then
               begin
                 colTituR := colTituR + ',valo';
-                if StringGrid1.Cells[count,k]='' then
+                if StringGrid1.Cells[i,k]='' then
                 begin
-                  temp2 := '0';
+                  temp2 := '0.0';
                 end
                 else begin
-                  temp2 := StringGrid1.Cells[count,k];
+                  temp2 := StringGrid1.Cells[i,k];
                 end;
-                temp := corrigeFloat(temp);
+                temp2 := corrigeFloat(temp2);
                 dadosTituR := dadosTituR + ',' + temp2;
               end;
             end
@@ -2834,8 +2900,6 @@ begin
 
         ;
 
-        //Atualizar StartLine
-        StartLine.Text := IntToStr(k);
 
       //Fim do For das Linhas
       end;
@@ -2984,11 +3048,12 @@ var
   stream : string;
 
 begin
+  //Criar StringList
+  CSV := TStringList.Create;
+
   Screen.Cursor := crHourGlass;
   CSV.Delimiter := ';';
 
-  //Criar StringList
-  CSV := TStringList.Create;
   Try
     for i := 0 to Grid.RowCount - 1 do
     begin

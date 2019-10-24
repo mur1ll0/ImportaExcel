@@ -28,10 +28,10 @@ implementation
 
 procedure TForm4.FormShow(Sender: TObject);
 begin
-  ListColunas.Items.Clear;
   //Se for Clientes/Fornecedores
   if LabelTipoImp.Caption = 'Clie/Forn' then
   begin
+    ListColunas.Items.Clear;
     ListColunas.Items.add('CODI');
     ListColunas.Items.add('UF');
     ListColunas.Items.add('CIDA');
@@ -123,7 +123,7 @@ begin
     ListColunas.Items.add('C_FUNC');
     ListColunas.Items.add('DATA');
     ListColunas.Items.add('VENC');
-    ListColunas.Items.add('VALO');
+    ListColunas.Items.add('VALOR');
     ListColunas.Items.add('SALD');
     ListColunas.Items.add('HIST');
   end
@@ -138,7 +138,7 @@ begin
     ListColunas.Items.add('C_FUNC');
     ListColunas.Items.add('DATA');
     ListColunas.Items.add('VENC');
-    ListColunas.Items.add('VALO');
+    ListColunas.Items.add('VALOR');
     ListColunas.Items.add('SALD');
     ListColunas.Items.add('HIST');
   end
