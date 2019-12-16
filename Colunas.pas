@@ -126,6 +126,7 @@ begin
     ListColunas.Items.add('VALO');
     ListColunas.Items.add('SALD');
     ListColunas.Items.add('HIST');
+    ListColunas.Items.add('DATA_BAIXA');
   end
   else if LabelTipoImp.Caption = 'Títulos a Receber' then
   begin
@@ -141,6 +142,7 @@ begin
     ListColunas.Items.add('VALO');
     ListColunas.Items.add('SALD');
     ListColunas.Items.add('HIST');
+    ListColunas.Items.add('DATA_BAIXA');
   end
   else if LabelTipoImp.Caption = 'Marcas' then
   begin

@@ -123,6 +123,7 @@ var
   SQL: TSQLDataSet;
   crt: Integer;
   cgc,razao,fant: string;
+  today : TDateTime;
 begin
 
   //Simples ou Normal
@@ -303,6 +304,11 @@ begin
         SQL.CommandText := 'INSERT INTO ASSOC_CST_CSOSN_XML (CODI, XML_CST_CSOSN, ENTRADA_CST, ENTRADA_CSOSN, SAIDA_CST_EST, SAIDA_CST_INTER, SAIDA_CST_EST_CF, SAIDA_CST_INTER_CF, SAIDA_CSOSN_EST, SAIDA_CSOSN_INTER, SAIDA_CSOSN_EST_CF, SAIDA_CSOSN_INTER_CF, EMPR) '+
                                  'VALUES (21, '+''''+'900'+''''+', '+''''+'90'+''''+', NULL, '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'90'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', '+''''+'102'+''''+', 1);';
       end;
+
+      //Liberação níveis de acesso
+      today := Now;
+      SQL.CommandText := 'UPDATE VDS set VDS.ulti_venc = ' + QuotedStr(stringreplace(DateToStr(today), '/', '.',[rfReplaceAll, rfIgnoreCase]));
+      SQL.ExecSQL;
 
     except
       on e: exception do
