@@ -959,6 +959,7 @@ begin
               ShowMessage('Código em branco na linha '+IntToStr(k));
             end
             else begin
+              StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
               if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
               colClieForn := colClieForn + 'codi';
               dadosClieForn := dadosClieForn + '''' + StringGrid1.Cells[i,k] + '''';
@@ -1522,6 +1523,7 @@ begin
           i:=BuscaColuna(StringGrid1,'Codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             colProd := colProd + ',codi';
             dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
@@ -2125,6 +2127,7 @@ begin
           if (i<>-1) then
           begin
             colGrupo := colGrupo + 'codi';
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosGrupo := dadosGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
@@ -2213,6 +2216,7 @@ begin
           if (i<>-1) then
           begin
             colSubGrupo := colSubGrupo + 'codi';
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosSubGrupo := dadosSubGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
@@ -2301,6 +2305,7 @@ begin
           if (i<>-1) then
           begin
             colMarca := colMarca + 'codi';
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosMarca := dadosMarca + '''' + StringGrid1.Cells[i,k] + '''';
           end
@@ -2376,6 +2381,7 @@ begin
           i:=BuscaColuna(StringGrid1,'codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
             l := Length(StringGrid1.Cells[i,k]);
             //Testar se ja existir o código do título e inserir uma barra.
@@ -2760,6 +2766,7 @@ begin
           i:=BuscaColuna(StringGrid1,'codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
             l := Length(StringGrid1.Cells[i,k]);
             //Testar se ja existir o código do título e inserir uma barra.

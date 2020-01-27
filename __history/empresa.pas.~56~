@@ -39,7 +39,6 @@ type
     procedure cancelClick(Sender: TObject);
     procedure saveClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-    procedure emprChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -87,12 +86,6 @@ end;
 
 
 //Ao criar formulario, carregar dados
-procedure TForm3.emprChange(Sender: TObject);
-begin
-  if empr.Text <> '' then
-    FormActivate(Self);
-end;
-
 procedure TForm3.FormActivate(Sender: TObject);
 var
   crt,cidade: string;

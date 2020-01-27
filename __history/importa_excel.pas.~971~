@@ -445,6 +445,10 @@ var
   fileExt :string;
 
 begin
+  //Limpar StringGrid
+  StringGrid1.ColCount := 1;
+  StringGrid1.RowCount := 1;
+
   //Carregar extensão do arquivo
   fileExt := LowerCase(ExtractFileExt(FilePath.Text));
 
@@ -877,7 +881,9 @@ var
   colMarca, dadosMarca: String;
   colTituP, dadosTituP: string;
   colTituR, dadosTituR: string;
-  i,j,k,status,max,count: integer;
+  colBTitu, dadosBTitu: string;
+  i,j,k,l,status,max,count: integer;
+  saldo: Double;
 
 begin
   //Incicialmente, testar se existem colunas com mesmo nome
@@ -1039,6 +1045,14 @@ begin
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
               temp2 := (Copy(temp,1,60));
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+
+              //Testar se não existe coluna NOME_FANT, se não existir joga o valor da NOME
+              count:=BuscaColuna(StringGrid1,'nome_fant');
+              if (count=-1) then
+              begin
+                colClieForn := colClieForn + ',nome_fant';
+                dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+              end;
             end
             //NOME_FANT (NOME FANTASIA)
             else if (LowerCase(StringGrid1.Cells[i,0])='nome_fant') then
@@ -1048,6 +1062,14 @@ begin
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
               temp2 := (Copy(temp,1,60));
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+
+              //Testar se não existe coluna NOME, se não existir joga o valor da NOME_FANT
+              count:=BuscaColuna(StringGrid1,'nome');
+              if (count=-1) then
+              begin
+                colClieForn := colClieForn + ',nome';
+                dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+              end;
             end
             //DATA_NASC
             else if (LowerCase(StringGrid1.Cells[i,0])='data_nasc') then
@@ -1335,14 +1357,25 @@ begin
                 temp := 'F';
                 colClieForn := colClieForn + ',sexo';
                 dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              end
+              else begin
+                colClieForn := colClieForn + ',sexo';
+                dadosClieForn := dadosClieForn + ',''' + 'F' + '''';
               end;
             end
             //TIPOCAD (A=AMBOS, C=CLIENTE, F=FORNECEDOR)
             else if (LowerCase(StringGrid1.Cells[i,0])='tipocad') then
             begin
               temp := StringGrid1.Cells[i,k];
-              if ((temp='S') or (temp='1')) then temp:='C';
-              if ((temp='N') or (temp='2')) then temp:='F';
+              if ((temp='S') or (temp='1') or (temp='C')) then begin
+                temp:='C';
+              end
+              else if ((temp='N') or (temp='2') or (temp='F')) then begin
+                temp:='F';
+              end
+              else begin
+                temp:='A';
+              end;
               colClieForn := colClieForn + ',tipocad';
               dadosClieForn := dadosClieForn + ',''' + temp + '''';
             end
@@ -1586,6 +1619,10 @@ begin
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
             end;
+          end
+          else begin
+            colProd := colProd + ',grup';
+            dadosProd := dadosProd + ',''' + '1' + '''';
           end;
           //SUB_GRUP
           i:=BuscaColuna(StringGrid1,'sub_grup');
@@ -1625,6 +1662,10 @@ begin
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
             end;
+          end
+          else begin
+            colProd := colProd + ',sub_grup';
+            dadosProd := dadosProd + ',''' + '1' + '''';
           end;
           //DEPARTAMENTO
           i:=BuscaColuna(StringGrid1,'departamento');
@@ -1667,6 +1708,10 @@ begin
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
             end;
+          end
+          else begin
+            colProd := colProd + ',codi_departamento';
+            dadosProd := dadosProd + ',''' + '0' + '''';
           end;
           //MARCA
           i:=BuscaColuna(StringGrid1,'marca');
@@ -2321,6 +2366,8 @@ begin
 
           colTituP := '';
           dadosTituP := '';
+          colBTitu := '';
+          dadosBTitu := '';
 
           //Carregar informações para importar
           //-------------------------------------------------------
@@ -2329,6 +2376,8 @@ begin
           i:=BuscaColuna(StringGrid1,'codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
+            l := Length(StringGrid1.Cells[i,k]);
             //Testar se ja existir o código do título e inserir uma barra.
             count := 0;
             while (temCodTituloP(StringGrid1.Cells[i,k]) = True) do
@@ -2336,19 +2385,23 @@ begin
               for j := 1 to count do
               begin
                 StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+                StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,l));
               end;
 
               count := count+1;
-              StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,13));
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
 
             colTituP := colTituP + 'codi';
             dadosTituP := dadosTituP + '''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + 'codi';
+            dadosBTitu := dadosBTitu + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituP := colTituP + 'codi';
             dadosTituP := dadosTituP + IntToStr(k);
+            colBTitu := colBTitu + 'codi';
+            dadosBTitu := dadosBTitu + IntToStr(k);
           end;
 
           //EMPR (EMPRESA)
@@ -2357,10 +2410,14 @@ begin
           begin
             colTituP := colTituP + ',empr';
             dadosTituP := dadosTituP + ',''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + ',empr';
+            dadosBTitu := dadosBTitu + ',''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituP := colTituP + ',empr';
             dadosTituP := dadosTituP + ',1';
+            colBTitu := colBTitu + ',empr';
+            dadosBTitu := dadosBTitu + ',1';
           end;
 
           //FORN (FORNECEDOR)
@@ -2380,6 +2437,8 @@ begin
               end;
               colTituP := colTituP + ',forn';
               dadosTituP := dadosTituP + ',''' + temp2 + '''';
+              colBTitu := colBTitu + ',forn';
+              dadosBTitu := dadosBTitu + ',''' + temp2 + '''';
             end
             else begin
               //Se for números, considera como código
@@ -2388,11 +2447,15 @@ begin
               if temp2='0' then begin
                 colTituP := colTituP + ',forn';
                 dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
+                colBTitu := colBTitu + ',forn';
+                dadosBTitu := dadosBTitu + ',' + 'gen_id(gen_clieforn_id,0)';
               end
               else begin
                 //Se achar o código, usamos o código
                 colTituP := colTituP + ',forn';
                 dadosTituP := dadosTituP + ',''' + temp + '''';
+                colBTitu := colBTitu + ',forn';
+                dadosBTitu := dadosBTitu + ',''' + temp + '''';
               end;
             end;
           end
@@ -2400,6 +2463,8 @@ begin
             //Se não tiver fornecedor, colocar o generator.
             colTituP := colTituP + ',forn';
             dadosTituP := dadosTituP + ',' + 'gen_id(gen_clieforn_id,0)';
+            colBTitu := colBTitu + ',forn';
+            dadosBTitu := dadosBTitu + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -2432,10 +2497,14 @@ begin
           begin
             colTituP := colTituP + ',oper';
             dadosTituP := dadosTituP + ',''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + ',oper';
+            dadosBTitu := dadosBTitu + ',''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituP := colTituP + ',oper';
             dadosTituP := dadosTituP + ',''' + '101' + '''';
+            colBTitu := colBTitu + ',oper';
+            dadosBTitu := dadosBTitu + ',''' + '101' + '''';
           end;
 
           //C_FUNC (FUNCIONÁRIO)
@@ -2444,10 +2513,14 @@ begin
           begin
             colTituP := colTituP + ',c_func';
             dadosTituP := dadosTituP + ',''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + ',c_func';
+            dadosBTitu := dadosBTitu + ',''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituP := colTituP + ',c_func';
             dadosTituP := dadosTituP + ',''' + '1' + '''';
+            colBTitu := colBTitu + ',c_func';
+            dadosBTitu := dadosBTitu + ',''' + '1' + '''';
           end;
 
 
@@ -2502,7 +2575,6 @@ begin
             //VALO (Valor do título)
             else if (LowerCase(StringGrid1.Cells[i,0])='valo') then
             begin
-              colTituP := colTituP + ',valo';
               if StringGrid1.Cells[i,k]='' then
               begin
                 temp := '0.0';
@@ -2511,7 +2583,12 @@ begin
                 temp := StringGrid1.Cells[i,k];
               end;
               temp := corrigeFloat(temp);
+              colTituP := colTituP + ',valo';
               dadosTituP := dadosTituP + ',' + temp;
+              colBTitu := colBTitu + ',valo';
+              dadosBTitu := dadosBTitu + ',' + temp;
+              colBTitu := colBTitu + ',tota';
+              dadosBTitu := dadosBTitu + ',' + temp;
 
               //Testar se não existe coluna saldo, se não existir joga o valor da VALO
               count:=BuscaColuna(StringGrid1,'sald');
@@ -2527,6 +2604,8 @@ begin
                 end;
                 temp2 := corrigeFloat(temp2);
                 dadosTituP := dadosTituP + ',' + temp2;
+                temp2 := stringreplace(temp2, '.', ',',[rfReplaceAll, rfIgnoreCase]);
+                saldo := StrToFloat(temp2);
               end;
             end
             //SALDO (Saldo do título)
@@ -2542,12 +2621,13 @@ begin
               end;
               temp := corrigeFloat(temp);
               dadosTituP := dadosTituP + ',' + temp;
+              temp := stringreplace(temp, '.', ',',[rfReplaceAll, rfIgnoreCase]);
+              saldo := StrToFloat(temp);
 
               //Testar se não existe coluna valo, se não existir joga o valor da SALD
               count:=BuscaColuna(StringGrid1,'valo');
               if (count=-1) then
               begin
-                colTituP := colTituP + ',valo';
                 if StringGrid1.Cells[i,k]='' then
                 begin
                   temp2 := '0.0';
@@ -2556,22 +2636,72 @@ begin
                   temp2 := StringGrid1.Cells[i,k];
                 end;
                 temp := corrigeFloat(temp);
+                colTituP := colTituP + ',valo';
                 dadosTituP := dadosTituP + ',' + temp2;
+                colBTitu := colBTitu + ',valo';
+                dadosBTitu := dadosBTitu + ',' + temp2;
+                colBTitu := colBTitu + ',tota';
+                dadosBTitu := dadosBTitu + ',' + temp2;
               end;
             end
             //HIST (HISTORICO)
             else if (LowerCase(StringGrid1.Cells[i,0])='hist') then
             begin
-              colTituP := colTituP + ',hist';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,150));
+              colTituP := colTituP + ',hist';
               dadosTituP := dadosTituP + ',''' + temp + '''';
+              colBTitu := colBTitu + ',hist';
+              dadosBTitu := dadosBTitu + ',''' + temp + '''';
+            end
+
+            //Colunas extras para BTITUP
+            //DATA_BAIXA (DATA DA BAIXA)
+            else if (LowerCase(StringGrid1.Cells[i,0])='data_baixa') then
+            begin
+              colBTitu := colBTitu + ',data';
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length = 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                dadosBTitu := dadosBTitu + ',''' + temp + '''';
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com data do titulo
+                //Se os caracteres da data do titulo forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                dadosBTitu := dadosBTitu + ',''' + temp + '''';
+              end;
             end
             ;
 
           //Fim do For das colunas
           end;
+
+          //ID (ID DA BTITUP)
+          colBTitu := colBTitu + ',id';
+          dadosBTitu := dadosBTitu + ',' + 'gen_id(gen_btitup_id,1)';
+          //JURO (JUROS)
+          colBTitu := colBTitu + ',juro';
+          dadosBTitu := dadosBTitu + ',''' + '0.0' + '''';
+          //MULT (MULTA)
+          colBTitu := colBTitu + ',mult';
+          dadosBTitu := dadosBTitu + ',''' + '0.0' + '''';
+          //DESCO (DESCONTO)
+          colBTitu := colBTitu + ',desco';
+          dadosBTitu := dadosBTitu + ',''' + '0.0' + '''';
+          //CONT (CONTA)
+          colBTitu := colBTitu + ',cont';
+          dadosBTitu := dadosBTitu + ',''' + '1' + '''';
+          //EMPR_BAIX (EMPRESA ONDE O TÍTULO FOI BAIXADO)
+          colBTitu := colBTitu + ',empr_baix';
+          dadosBTitu := dadosBTitu + ',''' + '1' + '''';
 
           //----------------------------------------
           //Gravar no banco de Títulos a Pagar
@@ -2586,6 +2716,13 @@ begin
               Form2.atualizaStatus('Inserindo dados na tabela TITUP.');
               SQL.CommandText := 'insert into titup ('+ colTituP +') values ' + '(' + dadosTituP + ');';
               SQL.ExecSQL;
+
+              if saldo <= 0.0 then begin
+                //Inserir na BTITUP
+                Form2.atualizaStatus('Inserindo dados na tabela BTITUP.');
+                SQL.CommandText := 'insert into btitup ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
+                SQL.ExecSQL;
+              end;
 
             except
               on e: exception do
@@ -2613,6 +2750,8 @@ begin
 
           colTituR := '';
           dadosTituR := '';
+          colBTitu := '';
+          dadosBTitu := '';
 
           //Carregar informações para importar
           //-------------------------------------------------------
@@ -2621,6 +2760,8 @@ begin
           i:=BuscaColuna(StringGrid1,'codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
+            l := Length(StringGrid1.Cells[i,k]);
             //Testar se ja existir o código do título e inserir uma barra.
             count := 0;
             while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
@@ -2628,19 +2769,23 @@ begin
               for j := 1 to count do
               begin
                 StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+                StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,l));
               end;
 
               count := count+1;
-              StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,13));
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
 
             colTituR := colTituR + 'codi';
             dadosTituR := dadosTituR + '''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + 'codi';
+            dadosBTitu := dadosBTitu + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituR := colTituR + 'codi';
             dadosTituR := dadosTituR + IntToStr(k);
+            colBTitu := colBTitu + 'codi';
+            dadosBTitu := dadosBTitu + IntToStr(k);
           end;
 
           //EMPR (EMPRESA)
@@ -2649,10 +2794,14 @@ begin
           begin
             colTituR := colTituR + ',empr';
             dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + ',empr';
+            dadosBTitu := dadosBTitu + ',''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituR := colTituR + ',empr';
             dadosTituR := dadosTituR + ',1';
+            colBTitu := colBTitu + ',empr';
+            dadosBTitu := dadosBTitu + ',1';
           end;
 
           //CLIE (CLIENTE)
@@ -2672,6 +2821,8 @@ begin
               end;
               colTituR := colTituR + ',clie';
               dadosTituR := dadosTituR + ',''' + temp2 + '''';
+              colBTitu := colBTitu + ',clie';
+              dadosBTitu := dadosBTitu + ',''' + temp2 + '''';
             end
             else begin
               //Se for números, considera como código
@@ -2680,11 +2831,15 @@ begin
               if temp2='0' then begin
                 colTituR := colTituR + ',clie';
                 dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+                colBTitu := colBTitu + ',clie';
+                dadosBTitu := dadosBTitu + ',' + 'gen_id(gen_clieforn_id,0)';
               end
               else begin
                 //Se achar o código, usamos o código
                 colTituR := colTituR + ',clie';
                 dadosTituR := dadosTituR + ',''' + temp + '''';
+                colBTitu := colBTitu + ',clie';
+                dadosBTitu := dadosBTitu + ',''' + temp + '''';
               end;
             end;
           end
@@ -2692,6 +2847,8 @@ begin
             //Se não tiver fornecedor, colocar o generator.
             colTituR := colTituR + ',clie';
             dadosTituR := dadosTituR + ',' + 'gen_id(gen_clieforn_id,0)';
+            colBTitu := colBTitu + ',clie';
+            dadosBTitu := dadosBTitu + ',' + 'gen_id(gen_clieforn_id,0)';
           end;
 
           //LOCA_COBR (LOCAL DE COBRANÇA)
@@ -2724,10 +2881,14 @@ begin
           begin
             colTituR := colTituR + ',oper';
             dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + ',oper';
+            dadosBTitu := dadosBTitu + ',''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituR := colTituR + ',oper';
             dadosTituR := dadosTituR + ',''' + '002' + '''';
+            colBTitu := colBTitu + ',oper';
+            dadosBTitu := dadosBTitu + ',''' + '002' + '''';
           end;
 
           //C_FUNC (FUNCIONÁRIO)
@@ -2736,10 +2897,14 @@ begin
           begin
             colTituR := colTituR + ',c_func';
             dadosTituR := dadosTituR + ',''' + StringGrid1.Cells[i,k] + '''';
+            colBTitu := colBTitu + ',c_func';
+            dadosBTitu := dadosBTitu + ',''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
             colTituR := colTituR + ',c_func';
             dadosTituR := dadosTituR + ',''' + '1' + '''';
+            colBTitu := colBTitu + ',c_func';
+            dadosBTitu := dadosBTitu + ',''' + '1' + '''';
           end;
 
 
@@ -2794,7 +2959,6 @@ begin
             //VALO (Valor do título)
             else if (LowerCase(StringGrid1.Cells[i,0])='valo') then
             begin
-              colTituR := colTituR + ',valo';
               if StringGrid1.Cells[i,k]='' then
               begin
                 temp := '0.0';
@@ -2803,7 +2967,12 @@ begin
                 temp := StringGrid1.Cells[i,k];
               end;
               temp := corrigeFloat(temp);
+              colTituR := colTituR + ',valo';
               dadosTituR := dadosTituR + ',' + temp;
+              colBTitu := colBTitu + ',valo';
+              dadosBTitu := dadosBTitu + ',' + temp;
+              colBTitu := colBTitu + ',tota';
+              dadosBTitu := dadosBTitu + ',' + temp;
 
               //Testar se não existe coluna saldo, se não existir joga o valor da VALO
               count:=BuscaColuna(StringGrid1,'sald');
@@ -2819,6 +2988,8 @@ begin
                 end;
                 temp2 := corrigeFloat(temp2);
                 dadosTituR := dadosTituR + ',' + temp2;
+                temp2 := stringreplace(temp2, '.', ',',[rfReplaceAll, rfIgnoreCase]);
+                saldo := StrToFloat(temp2);
               end;
             end
             //SALDO (Saldo do título)
@@ -2834,12 +3005,13 @@ begin
               end;
               temp := corrigeFloat(temp);
               dadosTituR := dadosTituR + ',' + temp;
+              temp := stringreplace(temp, '.', ',',[rfReplaceAll, rfIgnoreCase]);
+              saldo := StrToFloat(temp);
 
               //Testar se não existe coluna valo, se não existir joga o valor da SALD
               count:=BuscaColuna(StringGrid1,'valo');
               if (count=-1) then
               begin
-                colTituR := colTituR + ',valo';
                 if StringGrid1.Cells[i,k]='' then
                 begin
                   temp2 := '0.0';
@@ -2848,7 +3020,12 @@ begin
                   temp2 := StringGrid1.Cells[i,k];
                 end;
                 temp2 := corrigeFloat(temp2);
+                colTituR := colTituR + ',valo';
                 dadosTituR := dadosTituR + ',' + temp2;
+                colBTitu := colBTitu + ',valo';
+                dadosBTitu := dadosBTitu + ',' + temp2;
+                colBTitu := colBTitu + ',tota';
+                dadosBTitu := dadosBTitu + ',' + temp2;
               end;
             end
             //HIST (HISTORICO)
@@ -2860,10 +3037,53 @@ begin
               temp := (Copy(temp,1,150));
               dadosTituR := dadosTituR + ',''' + temp + '''';
             end
+
+            //Colunas extras para BTITUR
+            //DATA_BAIXA (DATA DA BAIXA)
+            else if (LowerCase(StringGrid1.Cells[i,0])='data_baixa') then
+            begin
+              colBTitu := colBTitu + ',data';
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length = 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                dadosBTitu := dadosBTitu + ',''' + temp + '''';
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com data do titulo
+                //Se os caracteres da data do titulo forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                dadosBTitu := dadosBTitu + ',''' + temp + '''';
+              end;
+            end
             ;
 
           //Fim do For das colunas
           end;
+
+          //ID (ID DA BTITUR)
+          colBTitu := colBTitu + ',id';
+          dadosBTitu := dadosBTitu + ',' + 'gen_id(gen_btitur_id,1)';
+          //JURO (JUROS)
+          colBTitu := colBTitu + ',juro';
+          dadosBTitu := dadosBTitu + ',''' + '0.0' + '''';
+          //MULT (MULTA)
+          colBTitu := colBTitu + ',mult';
+          dadosBTitu := dadosBTitu + ',''' + '0.0' + '''';
+          //DESCO (DESCONTO)
+          colBTitu := colBTitu + ',desco';
+          dadosBTitu := dadosBTitu + ',''' + '0.0' + '''';
+          //CONT (CONTA)
+          colBTitu := colBTitu + ',cont';
+          dadosBTitu := dadosBTitu + ',''' + '1' + '''';
+          //EMPR_BAIX (EMPRESA ONDE O TÍTULO FOI BAIXADO)
+          colBTitu := colBTitu + ',empr_baix';
+          dadosBTitu := dadosBTitu + ',''' + '1' + '''';
 
           //----------------------------------------
           //Gravar no banco de Títulos a Receber
@@ -2878,6 +3098,13 @@ begin
               Form2.atualizaStatus('Inserindo dados na tabela TITUR.');
               SQL.CommandText := 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');';
               SQL.ExecSQL;
+
+              if saldo <= 0.0 then begin
+                //Inserir na BTITUP
+                Form2.atualizaStatus('Inserindo dados na tabela BTITUR.');
+                SQL.CommandText := 'insert into btitur ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
+                SQL.ExecSQL;
+              end;
 
             except
               on e: exception do
@@ -2988,7 +3215,11 @@ begin
       Connect.Close;
 
     except
-      status := 0;
+      on e: exception do
+      begin
+        ShowMessage('Erro Interno: '+e.message+sLineBreak);
+        status := 0;
+      end;
     end;
   finally
     Form2.fim(status);
@@ -3346,6 +3577,9 @@ begin
   SQL.CommandText := 'delete from titup;';
   SQL.ExecSQL;
 
+  SQL.CommandText := 'delete from btitup;';
+  SQL.ExecSQL;
+
   ShowMessage('Limpado dados de Títulos a Pagar.');
 
   //Fechar conexoes
@@ -3365,6 +3599,9 @@ begin
   SQL.SQLConnection := Connect;
 
   SQL.CommandText := 'delete from titur;';
+  SQL.ExecSQL;
+
+  SQL.CommandText := 'delete from btitur;';
   SQL.ExecSQL;
 
   ShowMessage('Limpado dados de Títulos a Receber.');

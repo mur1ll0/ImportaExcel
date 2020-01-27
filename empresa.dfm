@@ -222,6 +222,7 @@ object Form3: TForm3
     ParentFont = False
     TabOrder = 3
     Text = '1'
+    OnChange = emprChange
   end
   object inscr: TEdit
     Left = 320
