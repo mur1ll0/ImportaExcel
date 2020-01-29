@@ -1879,7 +1879,11 @@ begin
             else if (LowerCase(StringGrid1.Cells[i,0])='cest') then
             begin
               colProd := colProd + ',cest';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              temp := stringreplace(StringGrid1.Cells[i,k], '''', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,8));
+              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(temp)) + '''';
             end
             //UNID (Unidade de medida)
             else if (LowerCase(StringGrid1.Cells[i,0])='unid') then
