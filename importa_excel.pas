@@ -1820,7 +1820,7 @@ begin
             begin
               colProd := colProd + ',descr';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,120));
               dadosProd := dadosProd + ',''' + temp + '''';
             end
@@ -1829,7 +1829,7 @@ begin
             begin
               colProd := colProd + ',descr2';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,255));
               dadosProd := dadosProd + ',''' + temp + '''';
             end
@@ -1933,6 +1933,9 @@ begin
               else begin
                 temp := StringGrid1.Cells[i,k];
               end;
+              temp := stringreplace(temp, 'R', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '$', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := Trim(temp);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
               //Testar se existe o custo_real, se não joga o custo mesmo
@@ -2056,6 +2059,41 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
                 colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ATIVO
+            else if (LowerCase(StringGrid1.Cells[i,0])='ativo') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProd := colProd + ',ATIVO';
+                dadosProd := dadosProd + ',''' + 'S' + '''';
+              end
+              else begin
+                colProd := colProd + ',ATIVO';
+                temp := UpperCase(StringGrid1.Cells[i,k]);
+                if (temp='ATIVO') or
+                   (temp='ATIVAR') or
+                   (temp='1') or
+                   (temp='SIM') or
+                   (temp='OK')
+                then begin
+                  temp := 'S';
+                end
+                else if (temp='INATIVO') or
+                        (temp='INATIVAR') or
+                        (temp='0') or
+                        (temp='NAO') or
+                        (temp='NÃO')
+                then begin
+                  temp := 'N';
+                end
+                else begin
+                  ShowMessage('Tratar valor da coluna ATIVO: '+temp);
+                  status := 0;
+                  Exit; //Quebra o for
+                end;
+
+                dadosProd := dadosProd + ',''' + UpperCase(temp) + '''';
               end;
             end
             ;
