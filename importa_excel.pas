@@ -936,6 +936,8 @@ begin
         //Atualizar Status
         Form2.atualizaItens(k,StringGrid1.RowCount-1);
 
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
         //Importar Clientes e Fornecedores
         if SelectImport.Text = 'Clie/Forn' then
         begin
@@ -988,6 +990,7 @@ begin
           if ((i<>-1) and (temp<>'')) then
           begin
             temp2 := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp2 := stringreplace(temp2, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
             temp := IntToStr(buscaCidade(temp2, temp));
             if StrToInt(temp) > 0 then
             begin
@@ -1043,7 +1046,7 @@ begin
             begin
               colClieForn := colClieForn + ',nome';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp2 := (Copy(temp,1,60));
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
 
@@ -1060,7 +1063,7 @@ begin
             begin
               colClieForn := colClieForn + ',nome_fant';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp2 := (Copy(temp,1,60));
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
 
