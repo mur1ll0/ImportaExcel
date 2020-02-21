@@ -1393,7 +1393,7 @@ begin
                 colClieForn := colClieForn + ',ativo';
                 dadosClieForn := dadosClieForn + ',''' + temp + '''';
               end
-              else if ((temp='N') or (temp='0') or (temp='I')) then
+              else if ((temp='N') or (temp='0') or (temp='I') or (temp='2')) then
               begin
                 temp := 'N';
                 colClieForn := colClieForn + ',ativo';
@@ -1762,7 +1762,11 @@ begin
           if (i<>-1) then
           begin
             colProd := colProd + ',codi_tipo';
-            dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            if StringGrid1.Cells[i,k] <> '' then begin
+              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end else begin
+              dadosProd := dadosProd + ',''' + '0' + '''';
+            end;
           end
           else begin
             colProd := colProd + ',codi_tipo';
@@ -2078,6 +2082,7 @@ begin
                    (temp='ATIVAR') or
                    (temp='1') or
                    (temp='SIM') or
+                   (temp='S') or
                    (temp='OK')
                 then begin
                   temp := 'S';
@@ -2085,7 +2090,9 @@ begin
                 else if (temp='INATIVO') or
                         (temp='INATIVAR') or
                         (temp='0') or
+                        (temp='2') or
                         (temp='NAO') or
+                        (temp='N') or
                         (temp='NÃO')
                 then begin
                   temp := 'N';
