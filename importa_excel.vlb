@@ -1,15 +1,8 @@
 ﻿[StringGrid1]
 Coordinates=10,10,80,58
 
-[OpenDialog1]
-Coordinates=82,77,89,36
-
 []
 Coordinates=589,166,91,36
-
-[BtnLoad]
-Coordinates=320,0,62,58
-Visible=True
 
 [SaveDialog1]
 Coordinates=322,1,87,36
@@ -21,23 +14,11 @@ Coordinates=30,87,70,58
 Coordinates=0,0,62,58
 Visible=True
 
-[OpenDialog2]
-Coordinates=322,56,89,36
-
 [ButOpenDB]
 Coordinates=81,1,83,58
 
 [SelectImport]
 Coordinates=183,1,101,124
-
-[ButSave]
-Coordinates=109,78,63,58
-
-[Connect]
-Coordinates=72,183,62,36
-
-[BtnAbrir]
-Coordinates=141,183,61,58
 
 [DBPath]
 Coordinates=210,144,59,58
@@ -102,4 +83,23 @@ Visible=True
 
 [StartLine]
 Coordinates=332,353,66,58
+
+[btnAbrirOrigem]
+Coordinates=141,183,61,58
+
+[opnDadosOrigem]
+Coordinates=82,77,89,36
+
+[btnLoadOrigem]
+Coordinates=320,0,62,58
+Visible=True
+
+[btnSalvar]
+Coordinates=109,78,63,58
+
+[opnDadosDestino]
+Coordinates=322,56,89,36
+
+[conDestino]
+Coordinates=72,183,62,36
 

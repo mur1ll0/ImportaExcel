@@ -71,9 +71,9 @@ var
   queryTemp: TSQLQuery;
 begin
   try
-    Form1.conDestino.Open;
+    Form1.Connect.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := Form1.Connect;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add(comando);
     queryTemp.Open;
@@ -81,7 +81,7 @@ begin
     Result := queryTemp.Fields[0].AsString;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    Form1.Connect.Close;
   end;
 end;
 
@@ -156,9 +156,9 @@ begin
   try
     try
       //Abrir conexoes
-      Form1.conDestino.Open;
+      Form1.Connect.Open;
       SQL := TSQLDataSet.Create(Nil);
-      SQL.SQLConnection := Form1.conDestino;
+      SQL.SQLConnection := Form1.Connect;
 
       //Executar COMANDO
       SQL.CommandText := 'UPDATE DADOS_EMPRE SET '+
@@ -326,7 +326,7 @@ begin
 
   finally
     SQL.Free;
-    Form1.conDestino.Close;
+    Form1.Connect.Close;
     ShowMessage('Dados da empresa salvos.');
     Form3.Close;
   end;

@@ -10,18 +10,18 @@ uses
 
 type
   TForm1 = class(TForm)
-    BtnLoad: TBitBtn;
-    OpenDialog1: TOpenDialog;
+    btnLoadOrigem: TBitBtn;
+    opnDadosOrigem: TOpenDialog;
     StringGrid1: TStringGrid;
     FilePath: TEdit;
-    BtnAbrir: TBitBtn;
+    btnAbrirOrigem: TBitBtn;
     SelectImport: TComboBox;
     ButImport: TBitBtn;
     DBPath: TEdit;
     ButOpenDB: TBitBtn;
-    OpenDialog2: TOpenDialog;
-    Connect: TSQLConnection;
-    ButSave: TBitBtn;
+    opnDadosDestino: TOpenDialog;
+    conDestino: TSQLConnection;
+    btnSalvar: TBitBtn;
     SaveDialog1: TSaveDialog;
     Menu: TMainMenu;
     t1: TMenuItem;
@@ -43,13 +43,16 @@ type
     Colunas: TMenuItem;
     Label1: TLabel;
     StartLine: TEdit;
+    Label2: TLabel;
+    Label3: TLabel;
+    conOrigem: TSQLConnection;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
-    procedure BtnAbrirClick(Sender: TObject);
+    procedure btnAbrirOrigemClick(Sender: TObject);
     procedure AutoSizeCol(Grid: TStringGrid; Column: integer);
     procedure RemoveWhiteRows(Grid: TStringGrid);
     procedure RemoveSpaces(Grid: TStringGrid);
-    procedure BtnLoadClick(Sender: TObject);
+    procedure btnLoadOrigemClick(Sender: TObject);
     procedure BtnOpenDB(Sender: TObject);
     procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -57,7 +60,7 @@ type
     procedure StringGrid1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure ButImportClick(Sender: TObject);
-    procedure ButSaveClick(Sender: TObject);
+    procedure btnSalvarClick(Sender: TObject);
     procedure Cabealho1Click(Sender: TObject);
     procedure LimpaClieFornClick(Sender: TObject);
     procedure LimpaGruposClick(Sender: TObject);
@@ -345,15 +348,15 @@ end;
 
 
 //Botão para selecionar arquivo
-procedure TForm1.BtnAbrirClick(Sender: TObject);
+procedure TForm1.btnAbrirOrigemClick(Sender: TObject);
 var
   arquivo : String;
 
 begin
-  if OpenDialog1.Execute then
+  if opnDadosOrigem.Execute then
   begin
     arquivo := ExtractFilePath(Application.ExeName);
-    FilePath.Text := OpenDialog1.FileName;
+    FilePath.Text := opnDadosOrigem.FileName;
   end;
 
 end;
@@ -365,11 +368,11 @@ var
   arquivo : String;
 
 begin
-  if OpenDialog2.Execute then
+  if opnDadosDestino.Execute then
   begin
     arquivo := ExtractFilePath(Application.ExeName);
-    DBPath.Text := OpenDialog2.FileName;
-    Connect.Params.Values['DataBase'] := DBPath.Text;
+    DBPath.Text := opnDadosDestino.FileName;
+    conDestino.Params.Values['DataBase'] := DBPath.Text;
   end;
 
 end;
@@ -439,7 +442,7 @@ end;
 
 
 //Botão para Carregar arquivo Excel na StringGrid
-procedure TForm1.BtnLoadClick(Sender: TObject);
+procedure TForm1.btnLoadOrigemClick(Sender: TObject);
 var
   i: integer;
   fileExt :string;
@@ -462,7 +465,19 @@ begin
   begin
     //Carregar CSV na StringGrid
     CSV_To_StringGrid(StringGrid1, FilePath.Text);
-  end;
+  end
+  else if (fileExt='.fdb') then
+  begin
+    //Carregar FDB no conOrigem
+    ShowMessage('Funcionalidade de carregar base ADMERP ainda não implementada');
+    conOrigem.Params.Values['DataBase'] := FilePath.Text;
+  end
+  else
+  begin
+    //Mensagem de extenção não suportada
+    ShowMessage('Extenção não suportada. ( '+fileExt+' )');
+  end
+  ;
 
   //Remover linhas em branco
   RemoveWhiteRows(StringGrid1);
@@ -523,9 +538,9 @@ var
 begin
   try
     try
-      Form1.Connect.Open;
+      Form1.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQLConnection := Form1.conDestino;
       queryTemp.SQL.Clear;
 
       //Desativar Trigger das cidades
@@ -557,7 +572,7 @@ begin
       Result := queryTemp.FieldByName('CODI').AsInteger;
     end;
     queryTemp.Close;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -569,9 +584,9 @@ var
 
 begin
   try
-    Form1.Connect.Open;
+    Form1.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQLConnection := Form1.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('SELECT * FROM CIDADE WHERE CID_DESC = :PDESC AND CID_UF = :PUF');
     queryTemp.ParamByName('PDESC').AsString := Cidade;
@@ -586,7 +601,7 @@ begin
       Result := queryTemp.FieldByName('CID_CODI').AsInteger;
     end;
     queryTemp.Close;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -598,9 +613,9 @@ var
 
 begin
   try
-    Form1.Connect.Open;
+    Form1.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQLConnection := Form1.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select tp.codi from titup tp where tp.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -612,7 +627,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -624,9 +639,9 @@ var
 
 begin
   try
-    Form1.Connect.Open;
+    Form1.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQLConnection := Form1.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select tr.codi from titur tr where tr.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -638,7 +653,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -650,9 +665,9 @@ var
 
 begin
   try
-    Form1.Connect.Open;
+    Form1.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQLConnection := Form1.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select g.codi from grup_prod g where g.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -664,7 +679,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -676,9 +691,9 @@ var
 
 begin
   try
-    Form1.Connect.Open;
+    Form1.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQLConnection := Form1.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select sg.codi from sub_grup_prod sg where sg.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -690,7 +705,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -702,9 +717,9 @@ var
 
 begin
   try
-    Form1.Connect.Open;
+    Form1.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.Connect;
+    queryTemp.SQLConnection := Form1.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select m.codi from marca m where m.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -716,7 +731,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -729,9 +744,9 @@ var
 begin
   try
     try
-      Form1.Connect.Open;
+      Form1.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQLConnection := Form1.conDestino;
       queryTemp.SQL.Clear;
       //queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
       //queryTemp.ParamByName('PNOME').AsString := clieforn;
@@ -749,7 +764,7 @@ begin
     end;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -763,9 +778,9 @@ var
 begin
   try
     try
-      Form1.Connect.Open;
+      Form1.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQLConnection := Form1.conDestino;
       queryTemp.SQL.Clear;
       queryTemp.CommandText := sql;
       queryTemp.ExecSQL;
@@ -785,7 +800,7 @@ begin
       Result := queryTemp.FieldByName('CODI').AsInteger;
     end;
     queryTemp.Close;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -798,9 +813,9 @@ var
 begin
   try
     try
-      Form1.Connect.Open;
+      Form1.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.Connect;
+      queryTemp.SQLConnection := Form1.conDestino;
       queryTemp.SQL.Clear;
       queryTemp.CommandText := sql;
       queryTemp.ExecSQL;
@@ -816,7 +831,7 @@ begin
     end;
   finally
     queryTemp.Free;
-    Form1.Connect.Close;
+    Form1.conDestino.Close;
   end;
 end;
 
@@ -867,7 +882,7 @@ end;
 procedure TForm1.ButImportClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
-  temp, temp2: String;
+  temp, temp2, max: String;
   colClieForn, dadosClieForn: String;
   colProd, dadosProd: String;
   colProdTrib, dadosProdTrib: String;
@@ -882,7 +897,7 @@ var
   colTituP, dadosTituP: string;
   colTituR, dadosTituR: string;
   colBTitu, dadosBTitu: string;
-  i,j,k,l,status,max,count: integer;
+  i,j,k,l,status,count: integer;
   saldo: Double;
 
 begin
@@ -899,9 +914,6 @@ begin
 
   //Status se esta OK ou se tem erro, setado como OK
   status := 1;
-
-  //Valor do codigo maximo para atualizar o generator
-  max := 0;
 
   try
     try
@@ -962,7 +974,6 @@ begin
             end
             else begin
               StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
               colClieForn := colClieForn + 'codi';
               dadosClieForn := dadosClieForn + '''' + StringGrid1.Cells[i,k] + '''';
             end;
@@ -1410,9 +1421,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               Form2.atualizaStatus('Inserindo dados na tabela CLIEFORN.');
 
@@ -1432,14 +1443,14 @@ begin
                 ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                 status := 0;
                 SQL.Free;
-                Connect.Close;
+                conDestino.Close;
                 break; //Quebra o for
               end;
             end;
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -1527,7 +1538,6 @@ begin
           if (i<>-1) then
           begin
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             colProd := colProd + ',codi';
             dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
             colProdTrib := colProdTrib + ',trib_id';
@@ -2116,9 +2126,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               //Executar INSERTs
               Form2.atualizaStatus('Inserindo dados na tabela PROD.');
@@ -2154,7 +2164,7 @@ begin
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -2180,7 +2190,6 @@ begin
           begin
             colGrupo := colGrupo + 'codi';
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosGrupo := dadosGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
@@ -2223,9 +2232,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               //Executar INSERT
               Form2.atualizaStatus('Inserindo dados na tabela GRUP_PROD.');
@@ -2243,7 +2252,7 @@ begin
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -2269,7 +2278,6 @@ begin
           begin
             colSubGrupo := colSubGrupo + 'codi';
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosSubGrupo := dadosSubGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
@@ -2312,9 +2320,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               //Executar INSERT
               Form2.atualizaStatus('Inserindo dados na tabela SUB_GRUP_PROD.');
@@ -2332,7 +2340,7 @@ begin
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -2358,7 +2366,6 @@ begin
           begin
             colMarca := colMarca + 'codi';
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosMarca := dadosMarca + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
@@ -2388,9 +2395,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               //Executar INSERT
               Form2.atualizaStatus('Inserindo dados na tabela MARCA.');
@@ -2408,7 +2415,7 @@ begin
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -2766,9 +2773,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               //Executar INSERT
               Form2.atualizaStatus('Inserindo dados na tabela TITUP.');
@@ -2793,7 +2800,7 @@ begin
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -3149,9 +3156,9 @@ begin
           try
             try
               //Abrir conexoes
-              Connect.Open;
+              conDestino.Open;
               SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := Connect;
+              SQL.SQLConnection := conDestino;
 
               //Executar INSERT
               Form2.atualizaStatus('Inserindo dados na tabela TITUR.');
@@ -3176,7 +3183,7 @@ begin
 
           finally
             SQL.Free;
-            Connect.Close;
+            conDestino.Close;
           end;
 
         end
@@ -3194,17 +3201,18 @@ begin
       //COMANDOS PÓS IMPORTAÇÃO
 
       //Abrir conexoes
-      Connect.Open;
+      conDestino.Open;
       SQL := TSQLDataSet.Create(Nil);
-      SQL.SQLConnection := Connect;
+      SQL.SQLConnection := conDestino;
 
       if SelectImport.Text='Clie/Forn' then
       begin
         //Arrumar Generator dos Clientes e Fornecedores
-        if max > 0 then
+        max := querySelect('select max(codi) from clieforn');
+        if StrToInt(max) > 0 then
         begin
           Form2.atualizaStatus('Alterando generator do Clie/Forn.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH ' + IntToStr(max) + ';';
+          SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH ' + max + ';';
           SQL.ExecSQL;
         end;
       end
@@ -3212,10 +3220,11 @@ begin
       else if SelectImport.Text='Produtos' then
       begin
         //Arrumar Generator dos Produtos
-        if max > 0 then
+        max := querySelect('select max(codi) from prod');
+        if StrToInt(max) > 0 then
         begin
           Form2.atualizaStatus('Alterar Generator do Produto.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH ' + IntToStr(max) + ';';
+          SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH ' + max + ';';
           SQL.ExecSQL;
         end;
 
@@ -3237,10 +3246,11 @@ begin
       else if SelectImport.Text='Grupos' then
       begin
         //Arrumar Generator dos Grupos
-        if max > 0 then
+        max := querySelect('select max(codi) from grup_prod');
+        if StrToInt(max) > 0 then
         begin
           Form2.atualizaStatus('Alterar Generator dos Grupos.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_GRUP_PROD_ID RESTART WITH ' + IntToStr(max) + ';';
+          SQL.CommandText := 'ALTER SEQUENCE GEN_GRUP_PROD_ID RESTART WITH ' + max + ';';
           SQL.ExecSQL;
         end;
       end
@@ -3248,10 +3258,11 @@ begin
       else if SelectImport.Text='SubGrupos' then
       begin
         //Arrumar Generator dos SubGrupos
-        if max > 0 then
+        max := querySelect('select max(codi) from sub_grup_prod');
+        if StrToInt(max) > 0 then
         begin
           Form2.atualizaStatus('Alterar Generator dos SubGrupos.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_SUB_GRUP_PROD_ID RESTART WITH ' + IntToStr(max) + ';';
+          SQL.CommandText := 'ALTER SEQUENCE GEN_SUB_GRUP_PROD_ID RESTART WITH ' + max + ';';
           SQL.ExecSQL;
         end;
       end
@@ -3259,10 +3270,11 @@ begin
       else if SelectImport.Text='Marcas' then
       begin
         //Arrumar Generator das MARCAS
-        if max > 0 then
+        max := querySelect('select max(codi) from marca');
+        if StrToInt(max) > 0 then
         begin
           Form2.atualizaStatus('Alterar Generator das Marcas.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH ' + IntToStr(max) + ';';
+          SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH ' + max + ';';
           SQL.ExecSQL;
         end;
       end
@@ -3271,7 +3283,7 @@ begin
 
       //Fechar conexoes
       SQL.Free;
-      Connect.Close;
+      conDestino.Close;
 
     except
       on e: exception do
@@ -3377,7 +3389,7 @@ end;
 
 
 //Botão Salvar StringGrid em planilha
-procedure TForm1.ButSaveClick(Sender: TObject);
+procedure TForm1.btnSalvarClick(Sender: TObject);
 var
   fileExt: string;
 
@@ -3471,10 +3483,10 @@ var
   arquivo: string;
 
 begin
-  if OpenDialog1.Execute then
+  if opnDadosOrigem.Execute then
   begin
     ExtractFilePath(Application.ExeName);
-    arquivo :=  OpenDialog1.FileName;
+    arquivo :=  opnDadosOrigem.FileName;
 
     StringGridToArray(StringGrid1);
     XlsHeaderLoad(StringGrid1,arquivo);
@@ -3489,9 +3501,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from clieforn;';
   SQL.ExecSQL;
@@ -3503,7 +3515,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 
@@ -3513,9 +3525,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from grup_prod;';
   SQL.ExecSQL;
@@ -3527,7 +3539,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 
@@ -3537,9 +3549,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from marca;';
   SQL.ExecSQL;
@@ -3551,7 +3563,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 
@@ -3561,9 +3573,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from prod;';
   SQL.ExecSQL;
@@ -3595,7 +3607,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 
@@ -3605,9 +3617,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from sub_grup_prod;';
   SQL.ExecSQL;
@@ -3619,7 +3631,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 
@@ -3629,9 +3641,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from titup;';
   SQL.ExecSQL;
@@ -3643,7 +3655,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 
@@ -3653,9 +3665,9 @@ var
   SQL: TSQLDataSet;
 begin
   //Abrir conexoes
-  Connect.Open;
+  conDestino.Open;
   SQL := TSQLDataSet.Create(Nil);
-  SQL.SQLConnection := Connect;
+  SQL.SQLConnection := conDestino;
 
   SQL.CommandText := 'delete from titur;';
   SQL.ExecSQL;
@@ -3667,7 +3679,7 @@ begin
 
   //Fechar conexoes
   SQL.Free;
-  Connect.Close;
+  conDestino.Close;
 end;
 
 

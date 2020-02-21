@@ -445,6 +445,10 @@ var
   fileExt :string;
 
 begin
+  //Limpar StringGrid
+  StringGrid1.ColCount := 1;
+  StringGrid1.RowCount := 1;
+
   //Carregar extensão do arquivo
   fileExt := LowerCase(ExtractFileExt(FilePath.Text));
 
@@ -932,6 +936,8 @@ begin
         //Atualizar Status
         Form2.atualizaItens(k,StringGrid1.RowCount-1);
 
+        //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
         //Importar Clientes e Fornecedores
         if SelectImport.Text = 'Clie/Forn' then
         begin
@@ -955,6 +961,7 @@ begin
               ShowMessage('Código em branco na linha '+IntToStr(k));
             end
             else begin
+              StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
               if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
               colClieForn := colClieForn + 'codi';
               dadosClieForn := dadosClieForn + '''' + StringGrid1.Cells[i,k] + '''';
@@ -983,6 +990,7 @@ begin
           if ((i<>-1) and (temp<>'')) then
           begin
             temp2 := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+            temp2 := stringreplace(temp2, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
             temp := IntToStr(buscaCidade(temp2, temp));
             if StrToInt(temp) > 0 then
             begin
@@ -1038,7 +1046,7 @@ begin
             begin
               colClieForn := colClieForn + ',nome';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp2 := (Copy(temp,1,60));
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
 
@@ -1055,7 +1063,7 @@ begin
             begin
               colClieForn := colClieForn + ',nome_fant';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp2 := (Copy(temp,1,60));
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
 
@@ -1385,7 +1393,7 @@ begin
                 colClieForn := colClieForn + ',ativo';
                 dadosClieForn := dadosClieForn + ',''' + temp + '''';
               end
-              else if ((temp='N') or (temp='0') or (temp='I')) then
+              else if ((temp='N') or (temp='0') or (temp='I') or (temp='2')) then
               begin
                 temp := 'N';
                 colClieForn := colClieForn + ',ativo';
@@ -1518,6 +1526,7 @@ begin
           i:=BuscaColuna(StringGrid1,'Codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             colProd := colProd + ',codi';
             dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
@@ -1753,7 +1762,11 @@ begin
           if (i<>-1) then
           begin
             colProd := colProd + ',codi_tipo';
-            dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            if StringGrid1.Cells[i,k] <> '' then begin
+              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end else begin
+              dadosProd := dadosProd + ',''' + '0' + '''';
+            end;
           end
           else begin
             colProd := colProd + ',codi_tipo';
@@ -1814,7 +1827,7 @@ begin
             begin
               colProd := colProd + ',descr';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,120));
               dadosProd := dadosProd + ',''' + temp + '''';
             end
@@ -1823,7 +1836,7 @@ begin
             begin
               colProd := colProd + ',descr2';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,255));
               dadosProd := dadosProd + ',''' + temp + '''';
             end
@@ -1873,7 +1886,11 @@ begin
             else if (LowerCase(StringGrid1.Cells[i,0])='cest') then
             begin
               colProd := colProd + ',cest';
-              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              temp := stringreplace(StringGrid1.Cells[i,k], '''', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, ',', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,8));
+              dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(temp)) + '''';
             end
             //UNID (Unidade de medida)
             else if (LowerCase(StringGrid1.Cells[i,0])='unid') then
@@ -1923,6 +1940,9 @@ begin
               else begin
                 temp := StringGrid1.Cells[i,k];
               end;
+              temp := stringreplace(temp, 'R', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '$', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := Trim(temp);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
               //Testar se existe o custo_real, se não joga o custo mesmo
@@ -2048,6 +2068,44 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
+            //ATIVO
+            else if (LowerCase(StringGrid1.Cells[i,0])='ativo') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProd := colProd + ',ATIVO';
+                dadosProd := dadosProd + ',''' + 'S' + '''';
+              end
+              else begin
+                colProd := colProd + ',ATIVO';
+                temp := UpperCase(StringGrid1.Cells[i,k]);
+                if (temp='ATIVO') or
+                   (temp='ATIVAR') or
+                   (temp='1') or
+                   (temp='SIM') or
+                   (temp='S') or
+                   (temp='OK')
+                then begin
+                  temp := 'S';
+                end
+                else if (temp='INATIVO') or
+                        (temp='INATIVAR') or
+                        (temp='0') or
+                        (temp='2') or
+                        (temp='NAO') or
+                        (temp='N') or
+                        (temp='NÃO')
+                then begin
+                  temp := 'N';
+                end
+                else begin
+                  ShowMessage('Tratar valor da coluna ATIVO: '+temp);
+                  status := 0;
+                  Exit; //Quebra o for
+                end;
+
+                dadosProd := dadosProd + ',''' + UpperCase(temp) + '''';
+              end;
+            end
             ;
 
           //Fim do for
@@ -2121,6 +2179,7 @@ begin
           if (i<>-1) then
           begin
             colGrupo := colGrupo + 'codi';
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosGrupo := dadosGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
@@ -2209,6 +2268,7 @@ begin
           if (i<>-1) then
           begin
             colSubGrupo := colSubGrupo + 'codi';
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosSubGrupo := dadosSubGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
@@ -2297,6 +2357,7 @@ begin
           if (i<>-1) then
           begin
             colMarca := colMarca + 'codi';
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosMarca := dadosMarca + '''' + StringGrid1.Cells[i,k] + '''';
           end
@@ -2372,6 +2433,7 @@ begin
           i:=BuscaColuna(StringGrid1,'codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
             StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
             l := Length(StringGrid1.Cells[i,k]);
             //Testar se ja existir o código do título e inserir uma barra.
@@ -2756,6 +2818,9 @@ begin
           i:=BuscaColuna(StringGrid1,'codi');
           if (i<>-1) then
           begin
+            StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
+            StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
+            l := Length(StringGrid1.Cells[i,k]);
             //Testar se ja existir o código do título e inserir uma barra.
             count := 0;
             while (temCodTituloR(StringGrid1.Cells[i,k]) = True) do
@@ -2763,10 +2828,10 @@ begin
               for j := 1 to count do
               begin
                 StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '/'+IntToStr(j), '',[rfReplaceAll, rfIgnoreCase]);
+                StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,l));
               end;
 
               count := count+1;
-              StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,13));
               StringGrid1.Cells[i,k] := StringGrid1.Cells[i,k] + '/' + IntToStr(count);
             end;
 

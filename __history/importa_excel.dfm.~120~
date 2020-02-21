@@ -21,6 +21,21 @@ object Form1: TForm1
     600)
   PixelsPerInch = 96
   TextHeight = 13
+  object Label1: TLabel
+    Left = 755
+    Top = 29
+    Width = 89
+    Height = 16
+    Anchors = [akTop, akRight]
+    Caption = 'Iniciar da linha:'
+    DragMode = dmAutomatic
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
   object BtnLoad: TBitBtn
     AlignWithMargins = True
     Left = 8
@@ -129,6 +144,16 @@ object Form1: TForm1
     Caption = 'Salvar'
     TabOrder = 8
     OnClick = ButSaveClick
+  end
+  object StartLine: TEdit
+    Left = 850
+    Top = 29
+    Width = 65
+    Height = 21
+    Anchors = [akTop, akRight]
+    NumbersOnly = True
+    TabOrder = 9
+    Text = '1'
   end
   object OpenDialog1: TOpenDialog
     Options = [ofEnableSizing]
