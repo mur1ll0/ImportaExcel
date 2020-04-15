@@ -6,7 +6,7 @@ object Form1: TForm1
   BiDiMode = bdLeftToRight
   Caption = 'Importa Excel'
   ClientHeight = 768
-  ClientWidth = 1100
+  ClientWidth = 1366
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,12 +18,12 @@ object Form1: TForm1
   ParentBiDiMode = False
   Position = poDesigned
   DesignSize = (
-    1100
+    1366
     768)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 811
+    Left = 1078
     Top = 41
     Width = 100
     Height = 16
@@ -125,7 +125,7 @@ object Form1: TForm1
   object StringGrid1: TStringGrid
     Left = 0
     Top = 80
-    Width = 1101
+    Width = 1367
     Height = 689
     Anchors = [akLeft, akTop, akRight, akBottom]
     BiDiMode = bdLeftToRight
@@ -138,7 +138,8 @@ object Form1: TForm1
     OnDblClick = StringGrid1DblClick
     OnKeyDown = StringGrid1KeyDown
     OnMouseDown = StringGrid1MouseDown
-    ExplicitWidth = 1367
+    ExplicitWidth = 801
+    ExplicitHeight = 521
   end
   object FilePath: TEdit
     AlignWithMargins = True
@@ -265,7 +266,7 @@ object Form1: TForm1
     OnClick = btnAbrirOrigemClick
   end
   object SelectImport: TComboBox
-    Left = 920
+    Left = 1187
     Top = 5
     Width = 171
     Height = 21
@@ -283,7 +284,7 @@ object Form1: TForm1
   end
   object ButImport: TBitBtn
     AlignWithMargins = True
-    Left = 1016
+    Left = 1283
     Top = 37
     Width = 75
     Height = 25
@@ -300,7 +301,7 @@ object Form1: TForm1
     BiDiMode = bdLeftToRight
     ParentBiDiMode = False
     TabOrder = 6
-    Text = 'Caminho do destino (.TXT) ou DADOS (.FDB)'
+    Text = 'Caminho da base de dados - FDB'
   end
   object ButOpenDB: TBitBtn
     Left = 108
@@ -470,7 +471,7 @@ object Form1: TForm1
     OnClick = btnSalvarClick
   end
   object StartLine: TEdit
-    Left = 920
+    Left = 1187
     Top = 39
     Width = 65
     Height = 21

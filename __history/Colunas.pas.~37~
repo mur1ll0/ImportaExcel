@@ -28,13 +28,14 @@ implementation
 
 procedure TForm4.FormShow(Sender: TObject);
 begin
+  ListColunas.Items.Clear;
   //Se for Clientes/Fornecedores
   if LabelTipoImp.Caption = 'Clie/Forn' then
   begin
-    ListColunas.Items.Clear;
     ListColunas.Items.add('CODI');
     ListColunas.Items.add('UF');
     ListColunas.Items.add('CIDA');
+    ListColunas.Items.add('GRUPO');
     ListColunas.Items.add('NOME');
     ListColunas.Items.add('NOME_FANT');
     ListColunas.Items.add('DATA_NASC');
@@ -84,6 +85,8 @@ begin
     ListColunas.Items.add('NCM');
     ListColunas.Items.add('CEST');
     ListColunas.Items.add('UNID');
+    ListColunas.Items.add('PESL');
+    ListColunas.Items.add('PESB');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
     ListColunas.Items.add('CUSTO_REAL');
@@ -94,9 +97,68 @@ begin
   end
   else if LabelTipoImp.Caption = 'Grupos' then
   begin
-
+    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('EMPR');
+    ListColunas.Items.add('DESCR');
   end
-
+  else if LabelTipoImp.Caption = 'SubGrupos' then
+  begin
+    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('EMPR');
+    ListColunas.Items.add('DESCR');
+  end
+  else if LabelTipoImp.Caption = 'Marcas' then
+  begin
+    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('DESCR');
+  end
+  else if LabelTipoImp.Caption = 'Títulos a Pagar' then
+  begin
+    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('EMPR');
+    ListColunas.Items.add('FORN');
+    ListColunas.Items.add('LOCA_COBR');
+    ListColunas.Items.add('CART');
+    ListColunas.Items.add('OPER');
+    ListColunas.Items.add('C_FUNC');
+    ListColunas.Items.add('DATA');
+    ListColunas.Items.add('VENC');
+    ListColunas.Items.add('VALO');
+    ListColunas.Items.add('SALD');
+    ListColunas.Items.add('HIST');
+    ListColunas.Items.add('DATA_BAIXA');
+  end
+  else if LabelTipoImp.Caption = 'Títulos a Receber' then
+  begin
+    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('EMPR');
+    ListColunas.Items.add('CLIE');
+    ListColunas.Items.add('LOCA_COBR');
+    ListColunas.Items.add('CART');
+    ListColunas.Items.add('OPER');
+    ListColunas.Items.add('C_FUNC');
+    ListColunas.Items.add('DATA');
+    ListColunas.Items.add('VENC');
+    ListColunas.Items.add('VALO');
+    ListColunas.Items.add('SALD');
+    ListColunas.Items.add('HIST');
+    ListColunas.Items.add('DATA_BAIXA');
+  end
+  else if LabelTipoImp.Caption = 'Marcas' then
+  begin
+    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('EMPR');
+    ListColunas.Items.add('CLIE');
+    ListColunas.Items.add('LOCA_COBR');
+    ListColunas.Items.add('CART');
+    ListColunas.Items.add('OPER');
+    ListColunas.Items.add('C_FUNC');
+    ListColunas.Items.add('DATA');
+    ListColunas.Items.add('VENC');
+    ListColunas.Items.add('VALOR');
+    ListColunas.Items.add('SALD');
+    ListColunas.Items.add('HIST');
+  end
   ;
 
 

@@ -80,6 +80,7 @@ begin
     ListColunas.Items.add('DESCR2');
     ListColunas.Items.add('REFE');
     ListColunas.Items.add('REFE_ORIGINAL');
+    ListColunas.Items.add('LOCALIZACAO');
     ListColunas.Items.add('CODI_BARRA');
     ListColunas.Items.add('CODI_BARRA_COM');
     ListColunas.Items.add('NCM');
