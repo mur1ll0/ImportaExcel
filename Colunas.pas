@@ -83,6 +83,7 @@ begin
     ListColunas.Items.add('LOCALIZACAO');
     ListColunas.Items.add('CODI_BARRA');
     ListColunas.Items.add('CODI_BARRA_COM');
+    ListColunas.Items.add('OBS');
     ListColunas.Items.add('NCM');
     ListColunas.Items.add('CEST');
     ListColunas.Items.add('UNID');
@@ -90,11 +91,22 @@ begin
     ListColunas.Items.add('PESB');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
+    ListColunas.Items.add('IPI');
+    ListColunas.Items.add('ICMS');
+    ListColunas.Items.add('FRETE');
     ListColunas.Items.add('CUSTO_REAL');
     ListColunas.Items.add('PRECO_PRAZO');
     ListColunas.Items.add('PRECO_VISTA');
     ListColunas.Items.add('CSOSN');
     ListColunas.Items.add('CST');
+    ListColunas.Items.add('ALIQ_ICMS');
+    ListColunas.Items.add('CST_IPI');
+    ListColunas.Items.add('ALIQ_IPI');
+    ListColunas.Items.add('CST_PIS');
+    ListColunas.Items.add('ALIQ_PIS');
+    ListColunas.Items.add('CST_COFINS');
+    ListColunas.Items.add('ALIQ_COFINS');
+    ListColunas.Items.add('ATIVO');
   end
   else if LabelTipoImp.Caption = 'Grupos' then
   begin

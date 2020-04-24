@@ -138,7 +138,6 @@ object Form1: TForm1
     OnDblClick = StringGrid1DblClick
     OnKeyDown = StringGrid1KeyDown
     OnMouseDown = StringGrid1MouseDown
-    ExplicitWidth = 1367
   end
   object FilePath: TEdit
     AlignWithMargins = True

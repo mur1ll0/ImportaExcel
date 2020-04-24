@@ -80,6 +80,7 @@ begin
     ListColunas.Items.add('DESCR2');
     ListColunas.Items.add('REFE');
     ListColunas.Items.add('REFE_ORIGINAL');
+    ListColunas.Items.add('LOCALIZACAO');
     ListColunas.Items.add('CODI_BARRA');
     ListColunas.Items.add('CODI_BARRA_COM');
     ListColunas.Items.add('NCM');
@@ -94,6 +95,9 @@ begin
     ListColunas.Items.add('PRECO_VISTA');
     ListColunas.Items.add('CSOSN');
     ListColunas.Items.add('CST');
+    ListColunas.Items.add('ALIQ_ICMS');
+    ListColunas.Items.add('ALIQ_IPI');
+    ListColunas.Items.add('ATIVO');
   end
   else if LabelTipoImp.Caption = 'Grupos' then
   begin
@@ -123,9 +127,10 @@ begin
     ListColunas.Items.add('C_FUNC');
     ListColunas.Items.add('DATA');
     ListColunas.Items.add('VENC');
-    ListColunas.Items.add('VALOR');
+    ListColunas.Items.add('VALO');
     ListColunas.Items.add('SALD');
     ListColunas.Items.add('HIST');
+    ListColunas.Items.add('DATA_BAIXA');
   end
   else if LabelTipoImp.Caption = 'Títulos a Receber' then
   begin
@@ -138,9 +143,10 @@ begin
     ListColunas.Items.add('C_FUNC');
     ListColunas.Items.add('DATA');
     ListColunas.Items.add('VENC');
-    ListColunas.Items.add('VALOR');
+    ListColunas.Items.add('VALO');
     ListColunas.Items.add('SALD');
     ListColunas.Items.add('HIST');
+    ListColunas.Items.add('DATA_BAIXA');
   end
   else if LabelTipoImp.Caption = 'Marcas' then
   begin

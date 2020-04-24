@@ -1994,6 +1994,12 @@ begin
               colProd := colProd + ',codi_barra_com';
               dadosProd := dadosProd + ',''' + temp + '''';
             end
+            //OBS (Observação)
+            else if (LowerCase(StringGrid1.Cells[i,0])='obs') then
+            begin
+              colProd := colProd + ',obs';
+              dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+            end
             //NCM
             else if (LowerCase(StringGrid1.Cells[i,0])='ncm') then
             begin
@@ -2085,6 +2091,51 @@ begin
               else begin
                 temp := StringGrid1.Cells[i,k];
               end;
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //IPI (IPI agregado ao custo)
+            else if (LowerCase(StringGrid1.Cells[i,0])='ipi') then
+            begin
+              colProdCust := colProdCust + ',cust_ipi';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //ICMS (ICMS agregado ao custo)
+            else if (LowerCase(StringGrid1.Cells[i,0])='icms') then
+            begin
+              colProdCust := colProdCust + ',cust_icms';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //FRETE
+            else if (LowerCase(StringGrid1.Cells[i,0])='frete') then
+            begin
+              colProdCust := colProdCust + ',cust_frete';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
             end
@@ -2188,6 +2239,98 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
                 colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_ICMS (Alíquota de ICMS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_icms') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //CST_IPI (Código de CST IPI)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_ipi') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_IPI (Alíquota de IPI)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_ipi') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //CST_PIS (Código de CST PIS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_pis') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_PIS (Alíquota de PIS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_pis') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //CST_COFINS (Código de CST COFINS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_cofins') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_COFINS (Alíquota de COFINS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_cofins') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
               end;
             end
             //ATIVO

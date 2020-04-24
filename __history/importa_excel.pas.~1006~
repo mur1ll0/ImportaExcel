@@ -46,6 +46,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     conOrigem: TSQLConnection;
+    btnTXT: TBitBtn;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -76,6 +77,7 @@ type
     procedure DeletarLinhaClick(Sender: TObject);
     procedure DadosEmprClick(Sender: TObject);
     procedure ColunasClick(Sender: TObject);
+    procedure btnTXTClick(Sender: TObject);
 
 
   private
@@ -465,7 +467,19 @@ begin
   begin
     //Carregar CSV na StringGrid
     CSV_To_StringGrid(StringGrid1, FilePath.Text);
-  end;
+  end
+  else if (fileExt='.fdb') then
+  begin
+    //Carregar FDB no conOrigem
+    ShowMessage('Funcionalidade de carregar base ADMERP ainda não implementada');
+    conOrigem.Params.Values['DataBase'] := FilePath.Text;
+  end
+  else
+  begin
+    //Mensagem de extenção não suportada
+    ShowMessage('Extenção não suportada. ( '+fileExt+' )');
+  end
+  ;
 
   //Remover linhas em branco
   RemoveWhiteRows(StringGrid1);
@@ -762,6 +776,7 @@ function queryInsert(sql: string): Integer;
 var
   gen_id: Integer;
   queryTemp: TSQLQuery;
+  fileTXT: TextFile;
 
 begin
   try
@@ -799,28 +814,30 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
+  if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then Result := ''
+  else
     try
-      Form1.conDestino.Open;
-      queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.conDestino;
-      queryTemp.SQL.Clear;
-      queryTemp.CommandText := sql;
-      queryTemp.ExecSQL;
-      queryTemp.Open;
+      try
+        Form1.conDestino.Open;
+        queryTemp := TSQLQuery.Create(nil);
+        queryTemp.SQLConnection := Form1.conDestino;
+        queryTemp.SQL.Clear;
+        queryTemp.CommandText := sql;
+        queryTemp.ExecSQL;
+        queryTemp.Open;
 
-      Result := queryTemp.Fields[0].AsString;
+        Result := queryTemp.Fields[0].AsString;
 
-    except
-      on e: exception do
-      begin
-        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      except
+        on e: exception do
+        begin
+          ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+        end;
       end;
+    finally
+      queryTemp.Free;
+      Form1.conDestino.Close;
     end;
-  finally
-    queryTemp.Free;
-    Form1.conDestino.Close;
-  end;
 end;
 
 
@@ -870,7 +887,7 @@ end;
 procedure TForm1.ButImportClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
-  temp, temp2: String;
+  temp, temp2, max: String;
   colClieForn, dadosClieForn: String;
   colProd, dadosProd: String;
   colProdTrib, dadosProdTrib: String;
@@ -885,8 +902,9 @@ var
   colTituP, dadosTituP: string;
   colTituR, dadosTituR: string;
   colBTitu, dadosBTitu: string;
-  i,j,k,l,status,max,count: integer;
+  i,j,k,l,status,count: integer;
   saldo: Double;
+  fileTXT: TextFile;
 
 begin
   //Incicialmente, testar se existem colunas com mesmo nome
@@ -899,12 +917,15 @@ begin
     Exit;
   end;
 
+  //Verificar se selecionou um destino para importar
+  if DBPath.Text = 'Caminho do destino (.TXT) ou DADOS (.FDB)' then begin
+    ShowMessage('Selecione um destino para a Importação.');
+    Exit;
+  end;
+
 
   //Status se esta OK ou se tem erro, setado como OK
   status := 1;
-
-  //Valor do codigo maximo para atualizar o generator
-  max := 0;
 
   try
     try
@@ -965,7 +986,6 @@ begin
             end
             else begin
               StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
               colClieForn := colClieForn + 'codi';
               dadosClieForn := dadosClieForn + '''' + StringGrid1.Cells[i,k] + '''';
             end;
@@ -1018,7 +1038,18 @@ begin
                 temp2 := querySelect('select g.codi from grupo_cliente g where g.descr = '''+temp+'''');
                 //Se não encontrar a string, cadastrar sub grupo
                 if temp2='' then begin
-                  queryInsert('insert into grupo_cliente (CODI,DESCR,COMISSAO) values (gen_id(gen_grupo_cliente_id,1),'''+temp+''',1);');
+                  if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                    //Carregar arquivo TXT
+                    AssignFile(fileTXT, DBPath.Text);
+                    if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                    else append(fileTXT);
+                    WriteLn(fileTXT, 'insert into grupo_cliente (CODI,DESCR,COMISSAO) values (case when (select gc.codi from grupo_cliente gc where gc.descr='''+temp+''') is null then gen_id(gen_grupo_cliente_id,1 ) else (select gc.codi from grupo_cliente gc where gc.descr='''+temp+''') end,'''+temp+''',1);');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    CloseFile(fileTXT);
+                  end
+                  else begin
+                    queryInsert('insert into grupo_cliente (CODI,DESCR,COMISSAO) values (gen_id(gen_grupo_cliente_id,1),'''+temp+''',1);');
+                  end;
                   colClieForn := colClieForn + ',codi_grupo_clie';
                   dadosClieForn := dadosClieForn + ',' + 'gen_id(gen_grupo_cliente_id,0)';
                 end
@@ -1410,40 +1441,77 @@ begin
 
           //----------------------------------------
           //Gravar no banco de dados ClieForn
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              Form2.atualizaStatus('Inserindo dados na tabela CLIEFORN.');
+                Form2.atualizaStatus('Inserindo dados na tabela CLIEFORN.');
 
-              //Desativar Trigger das cidades
-              SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 INACTIVE;';
-              SQL.ExecSQL;
-              //Executar INSERT
-              SQL.CommandText := 'insert into clieforn ('+ colClieForn +') values ' + '(' + dadosClieForn + ');';
-              SQL.ExecSQL;
-              //Reativar Trigger das cidades
-              SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 ACTIVE;';
-              SQL.ExecSQL;
+                //Desativar Trigger das cidades
+                SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 INACTIVE;';
+                SQL.ExecSQL;
+                //Executar INSERT
+                SQL.CommandText := 'insert into clieforn ('+ colClieForn +') values ' + '(' + dadosClieForn + ');';
+                SQL.ExecSQL;
+                //Reativar Trigger das cidades
+                SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 ACTIVE;';
+                SQL.ExecSQL;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                SQL.Free;
-                conDestino.Close;
-                break; //Quebra o for
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  SQL.Free;
+                  conDestino.Close;
+                  break; //Quebra o for
+                end;
               end;
-            end;
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+            finally
+              SQL.Free;
+              conDestino.Close;
+            end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
+
+                Form2.atualizaStatus('Comandos da CLIEFORN.');
+                WriteLn(fileTXT, '----------Comandos da CLIEFORN----------');
+
+                //Desativar Trigger das cidades
+                WriteLn(fileTXT, 'ALTER TRIGGER clieforn_biu0 INACTIVE;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                //Executar INSERT
+                WriteLn(fileTXT, 'insert into clieforn ('+ colClieForn +') values ' + '(' + dadosClieForn + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                //Reativar Trigger das cidades
+                WriteLn(fileTXT, 'ALTER TRIGGER clieforn_biu0 ACTIVE;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
+
 
         end
         //----------------------------------------------------------------------------
@@ -1530,7 +1598,6 @@ begin
           if (i<>-1) then
           begin
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             colProd := colProd + ',codi';
             dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
             colProdTrib := colProdTrib + ',trib_id';
@@ -1602,7 +1669,18 @@ begin
               temp2 := querySelect('select g.codi from grup_prod g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar grupo
               if temp2='' then begin
-                queryInsert('insert into grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_grup_prod_id,1),'''+temp+''',1);');
+                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                    //Carregar arquivo TXT
+                    AssignFile(fileTXT, DBPath.Text);
+                    if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                    else append(fileTXT);
+                    WriteLn(fileTXT, 'insert into grup_prod (CODI,DESCR,EMPR) values (case when (select g.codi from grup_prod g where g.descr = '''+temp+''') is null then gen_id(gen_grup_prod_id,1 ) else (select g.codi from grup_prod g where g.descr = '''+temp+''') end,'''+temp+''',1);');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    CloseFile(fileTXT);
+                  end
+                else begin
+                  queryInsert('insert into grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_grup_prod_id,1),'''+temp+''',1);');
+                end;
                 colProd := colProd + ',grup';
                 dadosProd := dadosProd + ',' + 'gen_id(gen_grup_prod_id,0)';
               end
@@ -1645,7 +1723,18 @@ begin
               temp2 := querySelect('select g.codi from sub_grup_prod g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar sub grupo
               if temp2='' then begin
-                queryInsert('insert into sub_grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_sub_grup_prod_id,1),'''+temp+''',1);');
+                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                    //Carregar arquivo TXT
+                    AssignFile(fileTXT, DBPath.Text);
+                    if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                    else append(fileTXT);
+                    WriteLn(fileTXT, 'insert into sub_grup_prod (CODI,DESCR,EMPR) values (case when (select g.codi from sub_grup_prod g where g.descr = '''+temp+''') is null then gen_id(gen_sub_grup_prod_id,1 ) else (select g.codi from sub_grup_prod g where g.descr = '''+temp+''') end,'''+temp+''',1);');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    CloseFile(fileTXT);
+                  end
+                else begin
+                  queryInsert('insert into sub_grup_prod (CODI,DESCR,EMPR) values (gen_id(gen_sub_grup_prod_id,1),'''+temp+''',1);');
+                end;
                 colProd := colProd + ',sub_grup';
                 dadosProd := dadosProd + ',' + 'gen_id(gen_sub_grup_prod_id,0)';
               end
@@ -1688,9 +1777,20 @@ begin
               temp2 := querySelect('select g.codi from departamento g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar departamento
               if temp2='' then begin
-                temp2 := querySelect('select max(g.codi) from departamento g');
-                temp2 := IntToStr(StrToInt(temp2)+1);
-                queryInsert('insert into departamento (CODI,DESCR) values ('+temp2+','''+temp+''');');
+                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                    //Carregar arquivo TXT
+                    AssignFile(fileTXT, DBPath.Text);
+                    if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                    else append(fileTXT);
+                    WriteLn(fileTXT, 'insert into departamento (CODI,DESCR) values (case when (select g.codi from departamento g where g.descr = '''+temp+''') is null then (select max(g.codi) from departamento g) else (select g.codi from departamento g where g.descr = '''+temp+''') end,'''+temp+''');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    CloseFile(fileTXT);
+                  end
+                else begin
+                  temp2 := querySelect('select max(g.codi) from departamento g');
+                  temp2 := IntToStr(StrToInt(temp2)+1);
+                  queryInsert('insert into departamento (CODI,DESCR) values ('+temp2+','''+temp+''');');
+                end;
                 colProd := colProd + ',codi_departamento';
                 dadosProd := dadosProd + ',' + temp2;
               end
@@ -1734,7 +1834,18 @@ begin
               temp2 := querySelect('select g.codi from marca g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar marca
               if temp2='' then begin
-                queryInsert('insert into marca (CODI,DESCR) values (gen_id(gen_marca_id,1),'''+temp+''');');
+                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                    //Carregar arquivo TXT
+                    AssignFile(fileTXT, DBPath.Text);
+                    if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                    else append(fileTXT);
+                    WriteLn(fileTXT, 'insert into marca (CODI,DESCR) values (case when (select g.codi from marca g where g.descr = '''+temp+''') is null then gen_id(gen_marca_id,1) else (select g.codi from marca g where g.descr = '''+temp+''') end,'''+temp+''');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    CloseFile(fileTXT);
+                  end
+                else begin
+                  queryInsert('insert into marca (CODI,DESCR) values (gen_id(gen_marca_id,1),'''+temp+''');');
+                end;
                 colProd := colProd + ',marca';
                 dadosProd := dadosProd + ',' + 'gen_id(gen_marca_id,0)';
               end
@@ -1858,6 +1969,14 @@ begin
               temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
               colProd := colProd + ',refe_original';
               dadosProd := dadosProd + ',''' + temp + '''';
+            end
+            //LOCALIZACAO (Localização)
+            else if (LowerCase(StringGrid1.Cells[i,0])='localizacao') then
+            begin
+              temp := UpperCase(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, ',', '.',[rfReplaceAll, rfIgnoreCase]);
+              colProdAdic := colProdAdic + ',adic_localizacao';
+              dadosProdAdic := dadosProdAdic + ',''' + temp + '''';
             end
             //CODI_BARRA (Codigo de barras unitario)
             else if (LowerCase(StringGrid1.Cells[i,0])='codi_barra') then
@@ -2071,6 +2190,20 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
+            //ALIQ_ICMS (Alíquota de ICMS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='ALIQ_ICMS') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                if StrToFloat(temp) < 1 then temp := FloatToStr( StrToFloat(temp) * 100 );
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
             //ATIVO
             else if (LowerCase(StringGrid1.Cells[i,0])='ativo') then
             begin
@@ -2116,48 +2249,96 @@ begin
 
           //----------------------------------------
           //Gravar no banco de dados
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              //Executar INSERTs
-              Form2.atualizaStatus('Inserindo dados na tabela PROD.');
-              SQL.CommandText := 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
-              SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
-              SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
-              SQL.CommandText := 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela MVA.');
-              SQL.CommandText := 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
-              SQL.CommandText := 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');';
-              SQL.ExecSQL;
-              Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
-              SQL.CommandText := 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');';
-              SQL.ExecSQL;
+                //Executar INSERTs
+                Form2.atualizaStatus('Inserindo dados na tabela PROD.');
+                SQL.CommandText := 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');';
+                SQL.ExecSQL;
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');';
+                SQL.ExecSQL;
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');';
+                SQL.ExecSQL;
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                SQL.CommandText := 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');';
+                SQL.ExecSQL;
+                Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                SQL.CommandText := 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');';
+                SQL.ExecSQL;
+                Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                SQL.CommandText := 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');';
+                SQL.ExecSQL;
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                SQL.CommandText := 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');';
+                SQL.ExecSQL;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                break; //Quebra o for
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  break; //Quebra o for
+                end;
               end;
-            end;
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+            finally
+              SQL.Free;
+              conDestino.Close;
+            end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
+
+                Form2.atualizaStatus('Comandos da PROD.');
+                WriteLn(fileTXT, '----------Comandos da PROD----------');
+
+                Form2.atualizaStatus('Inserindo dados na tabela PROD.');
+                WriteLn(fileTXT, 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                WriteLn(fileTXT, 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                WriteLn(fileTXT, 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                WriteLn(fileTXT, 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                WriteLn(fileTXT, 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                WriteLn(fileTXT, 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                WriteLn(fileTXT, 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
 
         end
@@ -2183,7 +2364,6 @@ begin
           begin
             colGrupo := colGrupo + 'codi';
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosGrupo := dadosGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
@@ -2223,30 +2403,59 @@ begin
 
           //----------------------------------------
           //Gravar no banco de GRUP_PROD
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              //Executar INSERT
-              Form2.atualizaStatus('Inserindo dados na tabela GRUP_PROD.');
-              SQL.CommandText := 'insert into grup_prod ('+ colGrupo +') values ' + '(' + dadosGrupo + ');';
-              SQL.ExecSQL;
+                //Executar INSERT
+                Form2.atualizaStatus('Inserindo dados na tabela GRUP_PROD.');
+                SQL.CommandText := 'insert into grup_prod ('+ colGrupo +') values ' + '(' + dadosGrupo + ');';
+                SQL.ExecSQL;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                break; //Quebra o for
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  break; //Quebra o for
+                end;
               end;
-            end;
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+            finally
+              SQL.Free;
+              conDestino.Close;
+            end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
+
+                Form2.atualizaStatus('Comandos da GRUP_PROD.');
+                WriteLn(fileTXT, '----------Comandos da GRUP_PROD----------');
+
+                WriteLn(fileTXT, 'insert into grup_prod ('+ colGrupo +') values ' + '(' + dadosGrupo + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
 
         end
@@ -2272,7 +2481,6 @@ begin
           begin
             colSubGrupo := colSubGrupo + 'codi';
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosSubGrupo := dadosSubGrupo + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
@@ -2312,30 +2520,59 @@ begin
 
           //----------------------------------------
           //Gravar no banco de SUB_GRUP_PROD
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              //Executar INSERT
-              Form2.atualizaStatus('Inserindo dados na tabela SUB_GRUP_PROD.');
-              SQL.CommandText := 'insert into sub_grup_prod ('+ colSubGrupo +') values ' + '(' + dadosSubGrupo + ');';
-              SQL.ExecSQL;
+                //Executar INSERT
+                Form2.atualizaStatus('Inserindo dados na tabela SUB_GRUP_PROD.');
+                SQL.CommandText := 'insert into sub_grup_prod ('+ colSubGrupo +') values ' + '(' + dadosSubGrupo + ');';
+                SQL.ExecSQL;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                break; //Quebra o for
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  break; //Quebra o for
+                end;
               end;
-            end;
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+            finally
+              SQL.Free;
+              conDestino.Close;
+            end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
+
+                Form2.atualizaStatus('Comandos da SUB_GRUP_PROD.');
+                WriteLn(fileTXT, '----------Comandos da SUB_GRUP_PROD----------');
+
+                WriteLn(fileTXT, 'insert into sub_grup_prod ('+ colSubGrupo +') values ' + '(' + dadosSubGrupo + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
 
         end
@@ -2361,7 +2598,6 @@ begin
           begin
             colMarca := colMarca + 'codi';
             StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-            if StrToInt(StringGrid1.Cells[i,k])>max then max:=StrToInt(StringGrid1.Cells[i,k]);
             dadosMarca := dadosMarca + '''' + StringGrid1.Cells[i,k] + '''';
           end
           else begin
@@ -2388,30 +2624,59 @@ begin
 
           //----------------------------------------
           //Gravar no banco de MARCA
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              //Executar INSERT
-              Form2.atualizaStatus('Inserindo dados na tabela MARCA.');
-              SQL.CommandText := 'insert into marca ('+ colMarca +') values ' + '(' + dadosMarca + ');';
-              SQL.ExecSQL;
+                //Executar INSERT
+                Form2.atualizaStatus('Inserindo dados na tabela MARCA.');
+                SQL.CommandText := 'insert into marca ('+ colMarca +') values ' + '(' + dadosMarca + ');';
+                SQL.ExecSQL;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                break; //Quebra o for
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  break; //Quebra o for
+                end;
               end;
-            end;
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+            finally
+              SQL.Free;
+              conDestino.Close;
+            end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
+
+                Form2.atualizaStatus('Comandos da MARCA.');
+                WriteLn(fileTXT, '----------Comandos da MARCA----------');
+
+                WriteLn(fileTXT, 'insert into marca ('+ colMarca +') values ' + '(' + dadosMarca + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
 
         end
@@ -2766,37 +3031,74 @@ begin
 
           //----------------------------------------
           //Gravar no banco de Títulos a Pagar
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              //Executar INSERT
-              Form2.atualizaStatus('Inserindo dados na tabela TITUP.');
-              SQL.CommandText := 'insert into titup ('+ colTituP +') values ' + '(' + dadosTituP + ');';
-              SQL.ExecSQL;
-
-              if saldo <= 0.0 then begin
-                //Inserir na BTITUP
-                Form2.atualizaStatus('Inserindo dados na tabela BTITUP.');
-                SQL.CommandText := 'insert into btitup ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
+                //Executar INSERT
+                Form2.atualizaStatus('Inserindo dados na tabela TITUP.');
+                SQL.CommandText := 'insert into titup ('+ colTituP +') values ' + '(' + dadosTituP + ');';
                 SQL.ExecSQL;
+
+                if saldo <= 0.0 then begin
+                  //Inserir na BTITUP
+                  Form2.atualizaStatus('Inserindo dados na tabela BTITUP.');
+                  SQL.CommandText := 'insert into btitup ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
+                  SQL.ExecSQL;
+                end;
+
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  break; //Quebra o for
+                end;
               end;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                break; //Quebra o for
-              end;
+            finally
+              SQL.Free;
+              conDestino.Close;
             end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+                Form2.atualizaStatus('Comandos da TITUP.');
+                WriteLn(fileTXT, '----------Comandos da TITUP----------');
+
+                WriteLn(fileTXT, 'insert into TITUP ('+ colMarca +') values ' + '(' + dadosMarca + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+
+                if saldo <= 0.0 then begin
+                  //Inserir na BTITUP
+                  Form2.atualizaStatus('Comandos BTITUP.');
+                  WriteLn(fileTXT, '----------Comandos da BTITUP----------');
+                  WriteLn(fileTXT, 'insert into btitup ('+ colBTitu +') values ' + '(' + dadosBTitu +');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                end;
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
 
         end
@@ -3149,37 +3451,74 @@ begin
 
           //----------------------------------------
           //Gravar no banco de Títulos a Receber
-          try
+          if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
             try
-              //Abrir conexoes
-              conDestino.Open;
-              SQL := TSQLDataSet.Create(Nil);
-              SQL.SQLConnection := conDestino;
+              try
+                //Abrir conexoes
+                conDestino.Open;
+                SQL := TSQLDataSet.Create(Nil);
+                SQL.SQLConnection := conDestino;
 
-              //Executar INSERT
-              Form2.atualizaStatus('Inserindo dados na tabela TITUR.');
-              SQL.CommandText := 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');';
-              SQL.ExecSQL;
-
-              if saldo <= 0.0 then begin
-                //Inserir na BTITUP
-                Form2.atualizaStatus('Inserindo dados na tabela BTITUR.');
-                SQL.CommandText := 'insert into btitur ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
+                //Executar INSERT
+                Form2.atualizaStatus('Inserindo dados na tabela TITUR.');
+                SQL.CommandText := 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');';
                 SQL.ExecSQL;
+
+                if saldo <= 0.0 then begin
+                  //Inserir na BTITUP
+                  Form2.atualizaStatus('Inserindo dados na tabela BTITUR.');
+                  SQL.CommandText := 'insert into btitur ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
+                  SQL.ExecSQL;
+                end;
+
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  status := 0;
+                  break; //Quebra o for
+                end;
               end;
 
-            except
-              on e: exception do
-              begin
-                ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
-                status := 0;
-                break; //Quebra o for
-              end;
+            finally
+              SQL.Free;
+              conDestino.Close;
             end;
+          end
+          //Gravar comandos em TXT
+          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+            try
+              try
+                //Carregar arquivo TXT
+                AssignFile(fileTXT, DBPath.Text);
+                if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                else append(fileTXT);
 
-          finally
-            SQL.Free;
-            conDestino.Close;
+                Form2.atualizaStatus('Comandos da TITUR.');
+                WriteLn(fileTXT, '----------Comandos da TITUR----------');
+
+                WriteLn(fileTXT, 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+
+                if saldo <= 0.0 then begin
+                  //Inserir na BTITUP
+                  Form2.atualizaStatus('Comandos BTITUR.');
+                  WriteLn(fileTXT, '----------Comandos da BTITUR----------');
+                  WriteLn(fileTXT, 'insert into btitur ('+ colBTitu +') values ' + '(' + dadosBTitu +');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                end;
+              except
+                on e: exception do
+                begin
+                  ShowMessage('Erro TXT: '+e.message);
+                  status := 0;
+                  CloseFile(fileTXT);
+                  break; //Quebra o for
+                end;
+              end;
+            finally
+              CloseFile(fileTXT);
+            end;
           end;
 
         end
@@ -3196,85 +3535,156 @@ begin
       //------------------------------------------------------------------------------
       //COMANDOS PÓS IMPORTAÇÃO
 
-      //Abrir conexoes
-      conDestino.Open;
-      SQL := TSQLDataSet.Create(Nil);
-      SQL.SQLConnection := conDestino;
+      //Usando banco de dados FDB
+      if UpperCase( ExtractFileExt(DBPath.Text) ) = '.FDB' then begin
+        //Abrir conexoes
+        conDestino.Open;
+        SQL := TSQLDataSet.Create(Nil);
+        SQL.SQLConnection := conDestino;
 
-      if SelectImport.Text='Clie/Forn' then
-      begin
-        //Arrumar Generator dos Clientes e Fornecedores
-        if max > 0 then
+        if SelectImport.Text='Clie/Forn' then
+        begin
+          //Arrumar Generator dos Clientes e Fornecedores
+          max := querySelect('select max(codi) from clieforn');
+          if StrToInt(max) > 0 then
+          begin
+            Form2.atualizaStatus('Alterando generator do Clie/Forn.');
+            SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH ' + max + ';';
+            SQL.ExecSQL;
+          end;
+        end
+
+        else if SelectImport.Text='Produtos' then
+        begin
+          //Arrumar Generator dos Produtos
+          max := querySelect('select max(codi) from prod');
+          if StrToInt(max) > 0 then
+          begin
+            Form2.atualizaStatus('Alterar Generator do Produto.');
+            SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH ' + max + ';';
+            SQL.ExecSQL;
+          end;
+
+          //Atualizar MARGEM1
+          Form2.atualizaStatus('Ajustando MARGENS.');
+          SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
+          SQL.ExecSQL;
+          SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
+          SQL.ExecSQL;
+          //Atualizar MARGEM2
+          SQL.CommandText := 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;';
+          SQL.ExecSQL;
+          //Criar registro na PROD_AJUS
+          Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
+          SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
+          SQL.ExecSQL;
+        end
+
+        else if SelectImport.Text='Grupos' then
+        begin
+          //Arrumar Generator dos Grupos
+          max := querySelect('select max(codi) from grup_prod');
+          if StrToInt(max) > 0 then
+          begin
+            Form2.atualizaStatus('Alterar Generator dos Grupos.');
+            SQL.CommandText := 'ALTER SEQUENCE GEN_GRUP_PROD_ID RESTART WITH ' + max + ';';
+            SQL.ExecSQL;
+          end;
+        end
+
+        else if SelectImport.Text='SubGrupos' then
+        begin
+          //Arrumar Generator dos SubGrupos
+          max := querySelect('select max(codi) from sub_grup_prod');
+          if StrToInt(max) > 0 then
+          begin
+            Form2.atualizaStatus('Alterar Generator dos SubGrupos.');
+            SQL.CommandText := 'ALTER SEQUENCE GEN_SUB_GRUP_PROD_ID RESTART WITH ' + max + ';';
+            SQL.ExecSQL;
+          end;
+        end
+
+        else if SelectImport.Text='Marcas' then
+        begin
+          //Arrumar Generator das MARCAS
+          max := querySelect('select max(codi) from marca');
+          if StrToInt(max) > 0 then
+          begin
+            Form2.atualizaStatus('Alterar Generator das Marcas.');
+            SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH ' + max + ';';
+            SQL.ExecSQL;
+          end;
+        end
+
+        ;
+        //Fechar conexoes
+        SQL.Free;
+        conDestino.Close;
+      end
+      //Usando arquivo TXT
+      else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+        //Carregar arquivo TXT
+        AssignFile(fileTXT, DBPath.Text);
+        if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+        else append(fileTXT);
+
+        if SelectImport.Text='Clie/Forn' then
         begin
           Form2.atualizaStatus('Alterando generator do Clie/Forn.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH ' + IntToStr(max) + ';';
-          SQL.ExecSQL;
-        end;
-      end
+          WriteLn(fileTXT, 'select gen_id(gen_clieforn_id, abs((select max(CODI) from clieforn) - (select gen_id(gen_clieforn_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+        end
 
-      else if SelectImport.Text='Produtos' then
-      begin
-        //Arrumar Generator dos Produtos
-        if max > 0 then
+        else if SelectImport.Text='Produtos' then
         begin
+          //Arrumar Generator dos Produtos
           Form2.atualizaStatus('Alterar Generator do Produto.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH ' + IntToStr(max) + ';';
-          SQL.ExecSQL;
-        end;
+          WriteLn(fileTXT, 'select gen_id(gen_prod_id, abs((select max(CODI) from prod) - (select gen_id(gen_prod_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
 
-        //Atualizar MARGEM1
-        Form2.atualizaStatus('Ajustando MARGENS.');
-        SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
-        SQL.ExecSQL;
-        SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
-        SQL.ExecSQL;
-        //Atualizar MARGEM2
-        SQL.CommandText := 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;';
-        SQL.ExecSQL;
-        //Criar registro na PROD_AJUS
-        Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
-        SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
-        SQL.ExecSQL;
-      end
+          //Atualizar MARGEM1
+          Form2.atualizaStatus('Ajustando MARGENS.');
+          WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+          WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+          //Atualizar MARGEM2
+          WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+          //Criar registro na PROD_AJUS
+          Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
+          WriteLn(fileTXT, 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+        end
 
-      else if SelectImport.Text='Grupos' then
-      begin
-        //Arrumar Generator dos Grupos
-        if max > 0 then
+        else if SelectImport.Text='Grupos' then
         begin
+          //Arrumar Generator dos Grupos
           Form2.atualizaStatus('Alterar Generator dos Grupos.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_GRUP_PROD_ID RESTART WITH ' + IntToStr(max) + ';';
-          SQL.ExecSQL;
-        end;
-      end
+          WriteLn(fileTXT, 'select gen_id(gen_grup_prod_id, abs((select max(CODI) from grup_prod) - (select gen_id(gen_grup_prod_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+        end
 
-      else if SelectImport.Text='SubGrupos' then
-      begin
-        //Arrumar Generator dos SubGrupos
-        if max > 0 then
+        else if SelectImport.Text='SubGrupos' then
         begin
+          //Arrumar Generator dos SubGrupos
           Form2.atualizaStatus('Alterar Generator dos SubGrupos.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_SUB_GRUP_PROD_ID RESTART WITH ' + IntToStr(max) + ';';
-          SQL.ExecSQL;
-        end;
-      end
+          WriteLn(fileTXT, 'select gen_id(GEN_SUB_GRUP_PROD_ID, abs((select max(CODI) from sub_grup_prod) - (select gen_id(GEN_SUB_GRUP_PROD_ID,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+        end
 
-      else if SelectImport.Text='Marcas' then
-      begin
-        //Arrumar Generator das MARCAS
-        if max > 0 then
+        else if SelectImport.Text='Marcas' then
         begin
+          //Arrumar Generator das MARCAS
           Form2.atualizaStatus('Alterar Generator das Marcas.');
-          SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH ' + IntToStr(max) + ';';
-          SQL.ExecSQL;
-        end;
-      end
+          WriteLn(fileTXT, 'select gen_id(GEN_MARCA_ID, abs((select max(CODI) from marca) - (select gen_id(GEN_MARCA_ID,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
+          WriteLn(fileTXT, 'COMMIT WORK;');
+        end
 
-      ;
-
-      //Fechar conexoes
-      SQL.Free;
-      conDestino.Close;
+        ;
+        //Fechar arquivo
+        CloseFile(fileTXT);
+      end;
 
     except
       on e: exception do
@@ -3427,6 +3837,20 @@ begin
   end;
 end;
 
+
+procedure TForm1.btnTXTClick(Sender: TObject);
+begin
+  //Sugerir extensão inicial
+  SaveDialog1.Filter := 'Text File(*.txt)|*.TXT';
+  SaveDialog1.DefaultExt := 'txt';
+
+  if SaveDialog1.Execute then
+  begin
+    DBPath.Text := SaveDialog1.FileName;
+    conDestino.Params.Values['DataBase'] := '';
+  end;
+
+end;
 
 //Função para salvar StringGrid em um array de string
 function StringGridToArray(Grid: TStringGrid): Integer;
