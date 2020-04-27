@@ -918,7 +918,7 @@ begin
   end;
 
   //Verificar se selecionou um destino para importar
-  if DBPath.Text = 'Caminho do destino (.TXT) ou DADOS (.FDB)' then begin
+  if DBPath.Text = 'Caminho do destino (TXT, SQL) ou DADOS (.FDB)' then begin
     ShowMessage('Selecione um destino para a Importação.');
     Exit;
   end;
@@ -3970,7 +3970,7 @@ end;
 procedure TForm1.btnTXTClick(Sender: TObject);
 begin
   //Sugerir extensão inicial
-  SaveDialog1.Filter := 'Text File(*.txt)|*.TXT';
+  SaveDialog1.Filter := 'Text File(*.txt)|*.TXT|SQL File (*.sql)|*.SQL|';
   SaveDialog1.DefaultExt := 'txt';
 
   if SaveDialog1.Execute then
@@ -4484,7 +4484,8 @@ begin
     //Se for uma fixa pergunta se deseja mesclar ou copiar coluna
     else if Row=0 then     
     begin
-      but := Mensagem('Mesclar ou copiar coluna', mtCustom, [mbYes, mbNo],['Mesclar','Copiar'], 'Mesclar ou copiar coluna');
+      but := Mensagem('Mesclar ou Copiar coluna ou marcar coluna como Update', mtCustom, [mbYes, mbNo, mbCancel],['Mesclar','Copiar','Update'], 'Mesclar - Copiar - Marcar Update');
+      ShowMessage(IntToStr(but));
       if (but = 6) then
       begin
         //ShowMessage('Mesclar Coluna');
