@@ -1553,48 +1553,24 @@ begin
             dadosProd := dadosProd + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colProdTrib := colProdTrib + 'trib_prod_empr';
             dadosProdTrib := dadosProdTrib + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
-            colProdTrib := colProdTrib + ',trib_empr';
-            dadosProdTrib := dadosProdTrib + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colProdAdic := colProdAdic + 'adic_prod_empr';
             dadosProdAdic := dadosProdAdic + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
-            colProdAdic := colProdAdic + ',adic_empr';
-            dadosProdAdic := dadosProdAdic + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colProdCust := colProdCust + 'cust_prod_empr';
             dadosProdCust := dadosProdCust + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
-            colProdCust := colProdCust + ',cust_empr';
-            dadosProdCust := dadosProdCust + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
-            colMVA := colMVA + ',mva_empr';
-            dadosMVA := dadosMVA + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
-            colItens := colItens + 'empr';
-            dadosItens := dadosItens + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
-            colProdForn := colProdForn + 'empr';
-            dadosProdForn := dadosProdForn + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
           end
           else begin
             colProd := colProd + 'empr';
             dadosProd := dadosProd + '''' + '1' + '''';
             colProdTrib := colProdTrib + 'trib_prod_empr';
             dadosProdTrib := dadosProdTrib + '''' + '1' + '''';
-            colProdTrib := colProdTrib + ',trib_empr';
-            dadosProdTrib := dadosProdTrib + ',''' + '1' + '''';
             colProdAdic := colProdAdic + 'adic_prod_empr';
             dadosProdAdic := dadosProdAdic + '''' + '1' + '''';
-            colProdAdic := colProdAdic + ',adic_empr';
-            dadosProdAdic := dadosProdAdic + ',''' + '1' + '''';
             colProdCust := colProdCust + 'cust_prod_empr';
             dadosProdCust := dadosProdCust + '''' + '1' + '''';
-            colProdCust := colProdCust + ',cust_empr';
-            dadosProdCust := dadosProdCust + ',''' + '1' + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + '1' + '''';
-            colMVA := colMVA + ',mva_empr';
-            dadosMVA := dadosMVA + ',''' + '1' + '''';
-            colItens := colItens + 'empr';
-            dadosItens := dadosItens + '''' + '1' + '''';
-            colProdForn := colProdForn + 'empr';
-            dadosProdForn := dadosProdForn + '''' + '1' + '''';
           end;
 
           //Codigo é obrigatório, se não tiver preenche com o generator
@@ -2395,24 +2371,37 @@ begin
                 Form2.atualizaStatus('Inserindo dados na tabela PROD.');
                 SQL.CommandText := 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');';
                 SQL.ExecSQL;
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
-                SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');';
-                SQL.ExecSQL;
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
-                SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');';
-                SQL.ExecSQL;
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
-                SQL.CommandText := 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');';
-                SQL.ExecSQL;
-                Form2.atualizaStatus('Inserindo dados na tabela MVA.');
-                SQL.CommandText := 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');';
-                SQL.ExecSQL;
-                Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
-                SQL.CommandText := 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');';
-                SQL.ExecSQL;
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
-                SQL.CommandText := 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');';
-                SQL.ExecSQL;
+
+                //Criar registros em todas as empresas
+                {
+                  CUST_PROD_EMPR: Empresa onde foi criado
+                  CUST_EMPR: Empresa que irá aparecer, por isso tem esse FOR
+                }
+                j := BuscaColuna(StringGrid1,'empr');
+                //Se nao achar seta padrão
+                if j = -1 then temp := '1'
+                //Se achar recebe valor no temp
+                else temp := StringGrid1.Cells[j,k];
+                for i := 1 to StrToInt(temp) do begin
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                  SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +',trib_empr) values ' + '(' + dadosProdTrib + ','+temp+');';
+                  SQL.ExecSQL;
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                  SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +',adic_empr) values ' + '(' + dadosProdAdic + ','+temp+ ');';
+                  SQL.ExecSQL;
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                  SQL.CommandText := 'insert into prod_custos ('+ colProdCust +',cust_empr) values ' + '(' + dadosProdCust + ','+temp+ ');';
+                  SQL.ExecSQL;
+                  Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                  SQL.CommandText := 'insert into mva ('+ colMVA +',mva_empr) values ' + '(' + dadosMVA + ','+temp+ ');';
+                  SQL.ExecSQL;
+                  Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                  SQL.CommandText := 'insert into itens ('+ colItens +',empr) values ' + '(' + dadosItens + ','+temp+ ');';
+                  SQL.ExecSQL;
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                  SQL.CommandText := 'insert into prod_forn ('+ colProdForn +',empr) values ' + '(' + dadosProdForn + ','+temp+ ');';
+                  SQL.ExecSQL;
+                end;
 
               except
                 on e: exception do
@@ -2443,24 +2432,37 @@ begin
                 Form2.atualizaStatus('Inserindo dados na tabela PROD.');
                 WriteLn(fileTXT, 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');');
                 WriteLn(fileTXT, 'COMMIT WORK;');
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
-                WriteLn(fileTXT, 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');');
-                WriteLn(fileTXT, 'COMMIT WORK;');
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
-                WriteLn(fileTXT, 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');');
-                WriteLn(fileTXT, 'COMMIT WORK;');
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
-                WriteLn(fileTXT, 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');');
-                WriteLn(fileTXT, 'COMMIT WORK;');
-                Form2.atualizaStatus('Inserindo dados na tabela MVA.');
-                WriteLn(fileTXT, 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');');
-                WriteLn(fileTXT, 'COMMIT WORK;');
-                Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
-                WriteLn(fileTXT, 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');');
-                WriteLn(fileTXT, 'COMMIT WORK;');
-                Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
-                WriteLn(fileTXT, 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');');
-                WriteLn(fileTXT, 'COMMIT WORK;');
+
+                //Criar registros em todas as empresas
+                {
+                  CUST_PROD_EMPR: Empresa onde foi criado
+                  CUST_EMPR: Empresa que irá aparecer, por isso tem esse FOR
+                }
+                j := BuscaColuna(StringGrid1,'empr');
+                //Se nao achar seta padrão
+                if j = -1 then temp := '1'
+                //Se achar recebe valor no temp
+                else temp := StringGrid1.Cells[j,k];
+                for i := 1 to StrToInt(temp) do begin
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                  WriteLn(fileTXT, 'insert into prod_tributos ('+ colProdTrib +',trib_empr) values ' + '(' + dadosProdTrib + ','+temp+ ');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                  WriteLn(fileTXT, 'insert into prod_adicionais ('+ colProdAdic +',adic_empr) values ' + '(' + dadosProdAdic + ','+temp+ ');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                  WriteLn(fileTXT, 'insert into prod_custos ('+ colProdCust +',cust_empr) values ' + '(' + dadosProdCust + ','+temp+ ');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                  Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                  WriteLn(fileTXT, 'insert into mva ('+ colMVA +',mva_empr) values ' + '(' + dadosMVA + ','+temp+ ');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                  Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                  WriteLn(fileTXT, 'insert into itens ('+ colItens +',empr) values ' + '(' + dadosItens + ','+temp+ ');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                  Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                  WriteLn(fileTXT, 'insert into prod_forn ('+ colProdForn +',empr) values ' + '(' + dadosProdForn + ','+temp+ ');');
+                  WriteLn(fileTXT, 'COMMIT WORK;');
+                end;
               except
                 on e: exception do
                 begin
