@@ -47,6 +47,7 @@ type
     Label3: TLabel;
     conOrigem: TSQLConnection;
     btnTXT: TBitBtn;
+    lblColUpdate: TLabel;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -78,6 +79,8 @@ type
     procedure DadosEmprClick(Sender: TObject);
     procedure ColunasClick(Sender: TObject);
     procedure btnTXTClick(Sender: TObject);
+    procedure StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
 
 
   private
@@ -89,6 +92,8 @@ type
 
 var
   Form1: TForm1;
+  colUpdate: Array of string;
+  colUpdateCount: Integer;
   gridTemp: Array of Array of string;
 
 implementation
@@ -918,7 +923,7 @@ begin
   end;
 
   //Verificar se selecionou um destino para importar
-  if DBPath.Text = 'Caminho do destino (.TXT) ou DADOS (.FDB)' then begin
+  if DBPath.Text = 'Caminho do destino (TXT, SQL) ou DADOS (.FDB)' then begin
     ShowMessage('Selecione um destino para a Importação.');
     Exit;
   end;
@@ -1994,6 +1999,12 @@ begin
               colProd := colProd + ',codi_barra_com';
               dadosProd := dadosProd + ',''' + temp + '''';
             end
+            //OBS (Observação)
+            else if (LowerCase(StringGrid1.Cells[i,0])='obs') then
+            begin
+              colProd := colProd + ',obs';
+              dadosProd := dadosProd + ',''' + StringGrid1.Cells[i,k] + '''';
+            end
             //NCM
             else if (LowerCase(StringGrid1.Cells[i,0])='ncm') then
             begin
@@ -2085,6 +2096,51 @@ begin
               else begin
                 temp := StringGrid1.Cells[i,k];
               end;
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //IPI (IPI agregado ao custo)
+            else if (LowerCase(StringGrid1.Cells[i,0])='ipi') then
+            begin
+              colProdCust := colProdCust + ',cust_ipi';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //ICMS (ICMS agregado ao custo)
+            else if (LowerCase(StringGrid1.Cells[i,0])='icms') then
+            begin
+              colProdCust := colProdCust + ',cust_icms';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //FRETE
+            else if (LowerCase(StringGrid1.Cells[i,0])='frete') then
+            begin
+              colProdCust := colProdCust + ',cust_frete';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
             end
@@ -2188,6 +2244,98 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
                 colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_ICMS (Alíquota de ICMS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_icms') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //CST_IPI (Código de CST IPI)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_ipi') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_IPI (Alíquota de IPI)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_ipi') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_IPI';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //CST_PIS (Código de CST PIS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_pis') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_PIS (Alíquota de PIS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_pis') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_PIS';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //CST_COFINS (Código de CST COFINS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_cofins') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //ALIQ_COFINS (Alíquota de COFINS)
+            else if (LowerCase(StringGrid1.Cells[i,0])='aliq_cofins') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_ALIQ_COFINS';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
               end;
             end
             //ATIVO
@@ -3827,7 +3975,7 @@ end;
 procedure TForm1.btnTXTClick(Sender: TObject);
 begin
   //Sugerir extensão inicial
-  SaveDialog1.Filter := 'Text File(*.txt)|*.TXT';
+  SaveDialog1.Filter := 'Text File(*.txt)|*.TXT|SQL File (*.sql)|*.SQL|';
   SaveDialog1.DefaultExt := 'txt';
 
   if SaveDialog1.Execute then
@@ -4341,7 +4489,7 @@ begin
     //Se for uma fixa pergunta se deseja mesclar ou copiar coluna
     else if Row=0 then     
     begin
-      but := Mensagem('Mesclar ou copiar coluna', mtCustom, [mbYes, mbNo],['Mesclar','Copiar'], 'Mesclar ou copiar coluna');
+      but := Mensagem('Mesclar ou Copiar coluna ou marcar coluna como Update', mtCustom, [mbYes, mbNo, mbCancel],['Mesclar','Copiar','Update'], 'Mesclar - Copiar - Marcar Update');
       if (but = 6) then
       begin
         //ShowMessage('Mesclar Coluna');
@@ -4398,7 +4546,46 @@ begin
           end;
           i:= i-1;
         end;
+      end
+      else if (but = 2) then
+      begin
+        //ShowMessage('Marcar coluna como Update');
+        //Verificar se ja existe nos marcados como Update
+        j := -1; //j recebera a posicao encontrada
+        for i := 0 to colUpdateCount-1 do begin
+          temp := StringGrid1.Cells[Col,0];
+          temp := colUpdate[i];
+          if colUpdate[i] = StringGrid1.Cells[Col,0] then begin
+            j := i; //Achou
+            Break;
+          end;
+        end;
+        //Se achou deve remover dos Updates
+        if j <> -1 then begin
+          for i := j+1 to colUpdateCount-1 do begin
+            colUpdate[i-1] := colUpdate[i];
+          end;
+          colUpdateCount := colUpdateCount - 1;
+          SetLength(colUpdate,colUpdateCount);
+        end
+        //Se não achou adiciona aos Updates
+        else begin
+          colUpdateCount := colUpdateCount + 1;
+          SetLength(colUpdate,colUpdateCount);
+          colUpdate[colUpdateCount-1] := StringGrid1.Cells[Col,0];
+        end;
+        //Preencher a label
+        lblColUpdate.Caption := 'Colunas Update:';
+        for i := 0 to colUpdateCount-1 do begin
+          lblColUpdate.Caption := lblColUpdate.Caption + ' '+colUpdate[i];
+        end;
+        //Aciona visibilidade da label se tem pelo menos 1 valor nos updates
+        if colUpdateCount > 0 then lblColUpdate.Visible := True
+        else lblColUpdate.Visible := False;
+        //Atualizar coluna
+        StringGrid1DrawCell(Self, Col, Row, StringGrid1.CellRect(Col,Row), [gdFixed,gdSelected,gdFocused]);
       end;
+
       //Redimensionar colunas
       for i := 0 to StringGrid1.ColCount - 1 do
         AutoSizeCol(StringGrid1, i);
@@ -4459,6 +4646,36 @@ begin
 end;
 
 
+procedure TForm1.StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
+  Rect: TRect; State: TGridDrawState);
+var
+  i, CellLeftMargin, CellTopMargin: Integer;
+begin
+   for i := 0 to colUpdateCount-1 do begin
+      if StringGrid1.Cells[Acol,Arow] = colUpdate[i] then begin
+        {set font to bold}
+        StringGrid1.Canvas.Font.Style := [fsBold];  // must come before theTextWidth & TextHeight
+//        {calculate left and top margins}
+//        CellLeftMargin := (StringGrid1.ColWidths[ACol] - StringGrid1.Canvas.TextWidth(StringGrid1.Cells[ACol,ARow])) div 2;
+//        CellTopMargin := (StringGrid1.RowHeights[ARow] - StringGrid1.Canvas.TextHeight(StringGrid1.Cells[ACol,ARow])) div 2;
+//        //StringGrid1.Canvas.FillRect(Rect);
+//        {draw the text}
+//        StringGrid1.Canvas.TextOut(Rect.Left + CellLeftMargin,
+//                                   Rect.Top + CellTopMargin,
+//                                   StringGrid1.Cells[ACol, ARow]);
+      end;
+  end;
+  {calculate left and top margins}
+  CellLeftMargin := (StringGrid1.ColWidths[ACol] - StringGrid1.Canvas.TextWidth(StringGrid1.Cells[ACol,ARow])) div 2;
+  CellTopMargin := (StringGrid1.RowHeights[ARow] - StringGrid1.Canvas.TextHeight(StringGrid1.Cells[ACol,ARow])) div 2;
+  //StringGrid1.Canvas.FillRect(Rect);
+  {draw the text}
+  StringGrid1.Canvas.TextOut(Rect.Left + CellLeftMargin,
+                             Rect.Top + CellTopMargin,
+                             StringGrid1.Cells[ACol, ARow]);
+
+end;
+
 //Botão abrir cadastro da empresa
 procedure TForm1.DadosEmprClick(Sender: TObject);
 begin
@@ -4478,5 +4695,6 @@ end;
 initialization
 SetLength(gridTemp,1);
 SetLength(gridTemp[0],1);
-
+SetLength(colUpdate,1);
+colUpdateCount := 0;
 end.

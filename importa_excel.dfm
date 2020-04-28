@@ -65,6 +65,20 @@ object Form1: TForm1
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object lblColUpdate: TLabel
+    Left = 8
+    Top = 66
+    Width = 93
+    Height = 15
+    Caption = 'Colunas Update:'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+    Visible = False
+  end
   object btnLoadOrigem: TBitBtn
     AlignWithMargins = True
     Left = 479
@@ -124,9 +138,9 @@ object Form1: TForm1
   end
   object StringGrid1: TStringGrid
     Left = 0
-    Top = 80
+    Top = 88
     Width = 1101
-    Height = 689
+    Height = 681
     Anchors = [akLeft, akTop, akRight, akBottom]
     BiDiMode = bdLeftToRight
     ColCount = 3
@@ -136,6 +150,7 @@ object Form1: TForm1
     ParentBiDiMode = False
     TabOrder = 1
     OnDblClick = StringGrid1DblClick
+    OnDrawCell = StringGrid1DrawCell
     OnKeyDown = StringGrid1KeyDown
     OnMouseDown = StringGrid1MouseDown
   end

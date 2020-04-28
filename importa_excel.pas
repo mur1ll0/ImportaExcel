@@ -47,6 +47,7 @@ type
     Label3: TLabel;
     conOrigem: TSQLConnection;
     btnTXT: TBitBtn;
+    lblColUpdate: TLabel;
 
     //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -78,6 +79,8 @@ type
     procedure DadosEmprClick(Sender: TObject);
     procedure ColunasClick(Sender: TObject);
     procedure btnTXTClick(Sender: TObject);
+    procedure StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
 
 
   private
@@ -89,6 +92,8 @@ type
 
 var
   Form1: TForm1;
+  colUpdate: Array of string;
+  colUpdateCount: Integer;
   gridTemp: Array of Array of string;
 
 implementation
@@ -391,10 +396,10 @@ begin
     if W > WMax then
       WMax := W;
   end;
-  Grid.ColWidths[Column] := WMax + 5;
+  Grid.ColWidths[Column] := WMax + 10;
 
   //Se for uma coluna nova
-  if Grid.ColWidths[Column] = 5 then
+  if Grid.ColWidths[Column] = 10 then
   begin
     Grid.ColWidths[Column] := 40;
   end;
@@ -4482,10 +4487,9 @@ begin
       end;
     end
     //Se for uma fixa pergunta se deseja mesclar ou copiar coluna
-    else if Row=0 then     
+    else if Row=0 then
     begin
-      but := Mensagem('Mesclar ou Copiar coluna ou marcar coluna como Update', mtCustom, [mbYes, mbNo, mbCancel],['Mesclar','Copiar','Update'], 'Mesclar - Copiar - Marcar Update');
-      ShowMessage(IntToStr(but));
+      but := Mensagem('Mesclar ou Copiar coluna ou marcar coluna como Update', mtCustom, [mbYes, mbNo, mbIgnore],['Mesclar','Copiar','Update'], 'Mesclar - Copiar - Marcar Update');
       if (but = 6) then
       begin
         //ShowMessage('Mesclar Coluna');
@@ -4542,7 +4546,46 @@ begin
           end;
           i:= i-1;
         end;
+      end
+      else if (but = 5) then
+      begin
+        //ShowMessage('Marcar coluna como Update');
+        //Verificar se ja existe nos marcados como Update
+        j := -1; //j recebera a posicao encontrada
+        for i := 0 to colUpdateCount-1 do begin
+          temp := StringGrid1.Cells[Col,0];
+          temp := colUpdate[i];
+          if colUpdate[i] = StringGrid1.Cells[Col,0] then begin
+            j := i; //Achou
+            Break;
+          end;
+        end;
+        //Se achou deve remover dos Updates
+        if j <> -1 then begin
+          for i := j+1 to colUpdateCount-1 do begin
+            colUpdate[i-1] := colUpdate[i];
+          end;
+          colUpdateCount := colUpdateCount - 1;
+          SetLength(colUpdate,colUpdateCount);
+        end
+        //Se não achou adiciona aos Updates
+        else begin
+          colUpdateCount := colUpdateCount + 1;
+          SetLength(colUpdate,colUpdateCount);
+          colUpdate[colUpdateCount-1] := StringGrid1.Cells[Col,0];
+        end;
+        //Preencher a label
+        lblColUpdate.Caption := 'Colunas Update:';
+        for i := 0 to colUpdateCount-1 do begin
+          lblColUpdate.Caption := lblColUpdate.Caption + ' '+colUpdate[i];
+        end;
+        //Aciona visibilidade da label se tem pelo menos 1 valor nos updates
+        if colUpdateCount > 0 then lblColUpdate.Visible := True
+        else lblColUpdate.Visible := False;
+        //Atualizar coluna
+        StringGrid1DrawCell(StringGrid1, Col, Row, StringGrid1.CellRect(Col,Row), [gdFixed,gdSelected,gdFocused,gdRowSelected,gdHotTrack,gdPressed]);
       end;
+
       //Redimensionar colunas
       for i := 0 to StringGrid1.ColCount - 1 do
         AutoSizeCol(StringGrid1, i);
@@ -4603,6 +4646,32 @@ begin
 end;
 
 
+procedure TForm1.StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
+  Rect: TRect; State: TGridDrawState);
+var
+  i, CellLeftMargin, CellTopMargin: Integer;
+begin
+  with (Sender as TStringGrid) do
+  begin
+    Canvas.Font.Color := clBlack;
+    Canvas.Brush.Color := clWhite;
+    // Don't change color for first Column, first row
+    if (ARow <> 0) and (ACol <> 0) then begin
+      // Draw the Band
+      if ARow mod 2 = 0 then
+        Canvas.Brush.Color := $00E1FFF9
+      else
+        Canvas.Brush.Color := $00FFEBDF;
+    end;
+    for i := 0 to colUpdateCount-1 do begin
+      if StringGrid1.Cells[Acol,Arow] = colUpdate[i] then
+        Canvas.Font.Color := clBlue;
+    end;
+    Canvas.TextRect(Rect, Rect.Left + 2, Rect.Top + 2, cells[acol, arow]);
+    Canvas.FrameRect(Rect);
+  end;
+end;
+
 //Botão abrir cadastro da empresa
 procedure TForm1.DadosEmprClick(Sender: TObject);
 begin
@@ -4622,5 +4691,6 @@ end;
 initialization
 SetLength(gridTemp,1);
 SetLength(gridTemp[0],1);
-
+SetLength(colUpdate,1);
+colUpdateCount := 0;
 end.
