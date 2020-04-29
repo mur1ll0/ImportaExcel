@@ -15,10 +15,12 @@ object Form4: TForm4
   PixelsPerInch = 96
   TextHeight = 13
   object LabelTipoImp: TLabel
-    Left = 64
-    Top = 8
-    Width = 165
+    Left = 0
+    Top = 0
+    Width = 296
     Height = 23
+    Align = alTop
+    Alignment = taCenter
     Caption = 'Tipo de Importa'#231#227'o'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clHotLight
@@ -26,14 +28,23 @@ object Form4: TForm4
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
+    ExplicitLeft = 64
+    ExplicitTop = 8
+    ExplicitWidth = 165
   end
   object ListColunas: TListBox
-    Left = 16
-    Top = 37
-    Width = 257
-    Height = 535
+    Left = 0
+    Top = 23
+    Width = 296
+    Height = 557
+    Align = alClient
     ItemHeight = 13
+    ScrollWidth = 5
     TabOrder = 0
     OnKeyDown = ListColunasKeyDown
+    ExplicitLeft = 16
+    ExplicitTop = 37
+    ExplicitWidth = 257
+    ExplicitHeight = 535
   end
 end

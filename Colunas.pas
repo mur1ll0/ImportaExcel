@@ -10,6 +10,7 @@ type
   TForm4 = class(TForm)
     LabelTipoImp: TLabel;
     ListColunas: TListBox;
+    procedure MostrarColunas();
     procedure FormShow(Sender: TObject);
     procedure ListColunasKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -26,7 +27,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TForm4.FormShow(Sender: TObject);
+procedure TForm4.MostrarColunas();
 begin
   ListColunas.Items.Clear;
   //Se for Clientes/Fornecedores
@@ -173,17 +174,11 @@ begin
     ListColunas.Items.add('HIST');
   end
   ;
+end;
 
-
-  {
-
-SubGrupos
-Marcas
-Produtos
-Títulos a Pagar
-Títulos a Receber
-}
-
+procedure TForm4.FormShow(Sender: TObject);
+begin
+  MostrarColunas;
 end;
 
 
