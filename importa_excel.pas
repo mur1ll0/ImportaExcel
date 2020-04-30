@@ -899,8 +899,8 @@ var
   colProdAdic, dadosProdAdic, condUpdateProdAdic, dadosUpdateProdAdic: String;
   colProdCust, dadosProdCust, condUpdateProdCust, dadosUpdateProdCust: String;
   colItens, dadosItens, condUpdateItens, dadosUpdateItens: String;
-  colMVA, dadosMVA, condUpdateMVA, dadosUpdateMVA: String;
-  colProdForn, dadosProdForn, condUpdateProdForn, dadosUpdateProdForn: String;
+  colMVA, dadosMVA: String;
+  colProdForn, dadosProdForn: String;
   colGrupo, dadosGrupo, condUpdateGrupo, dadosUpdateGrupo: String;
   colSubGrupo, dadosSubGrupo, condUpdateSubGrupo, dadosUpdateSubGrupo: String;
   colMarca, dadosMarca, condUpdateMarca, dadosUpdateMarca: String;
@@ -1824,6 +1824,8 @@ begin
                 else begin
                   Form2.atualizaStatus('Atualizando dados na tabela CLIEFORN.');
 
+                  if dadosUpdateClieForn = '' then Exit;
+
                   //Executar UPDATE
                   SQL.CommandText := 'update clieforn set '+ dadosUpdateClieForn +' where ' + condUpdateClieForn + ';';
                   SQL.ExecSQL;
@@ -1915,6 +1917,17 @@ begin
           colProdForn := '';
           dadosProdForn := '';
 
+          dadosUpdateProd := '';
+          dadosUpdateProdTrib := '';
+          dadosUpdateProdAdic := '';
+          dadosUpdateProdCust := '';
+          dadosUpdateItens := '';
+          condUpdateProd := '';
+          condUpdateProdTrib := '';
+          condUpdateProdAdic := '';
+          condUpdateProdCust := '';
+          condUpdateItens := '';
+
           //Carregar informações para importar
           //-------------------------------------------------------
 
@@ -1933,6 +1946,32 @@ begin
             dadosProdCust := dadosProdCust + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+
+            //Testa se é Update
+            if VerificaUpdate('empr') = 1 then begin
+              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+              condUpdateProd := condUpdateProd + 'empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+              condUpdateProdTrib := condUpdateProdTrib + 'trib_empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+              condUpdateProdAdic := condUpdateProdAdic + 'adic_empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+              condUpdateProdCust := condUpdateProdCust + 'cust_empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+              condUpdateItens := condUpdateItens + 'empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end
+            else begin
+              if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+              dadosUpdateProd := dadosUpdateProd + 'empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+              dadosUpdateProdTrib := dadosUpdateProdTrib + 'trib_empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateProdAdic <> '' then dadosUpdateProdAdic := dadosUpdateProdAdic + ', ';
+              dadosUpdateProdAdic := dadosUpdateProdAdic + 'adic_empr' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+              dadosUpdateProdCust := dadosUpdateProdCust + 'cust_empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateItens <> '' then dadosUpdateItens := dadosUpdateItens + ', ';
+              dadosUpdateItens := dadosUpdateItens + 'empr=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end;
           end
           else begin
             colProd := colProd + 'empr';
@@ -1971,14 +2010,40 @@ begin
             dadosMVA := dadosMVA + ',' + 'gen_id(gen_mva_id,1)';
             colMVA := colMVA + ',codi_prod';
             dadosMVA := dadosMVA + ',''' + StringGrid1.Cells[i,k] + '''';
-            colItens := colItens + ',codi';
-            dadosItens := dadosItens + ',' + 'gen_id(gen_itens_id,1)';
+            colItens := colItens + 'codi';
+            dadosItens := dadosItens + 'gen_id(gen_itens_id,1)';
             colItens := colItens + ',prodcod';
             dadosItens := dadosItens + ',''' + StringGrid1.Cells[i,k] + '''';
-            colProdForn := colProdForn + ',prod';
-            dadosProdForn := dadosProdForn + ',''' + StringGrid1.Cells[i,k] + '''';
+            colProdForn := colProdForn + 'prod';
+            dadosProdForn := dadosProdForn + '''' + StringGrid1.Cells[i,k] + '''';
             colProdForn := colProdForn + ',id';
             dadosProdForn := dadosProdForn + ',' + 'gen_id(gen_prod_forn_id,1)';
+
+            //Testa se é Update
+            if VerificaUpdate('codi') = 1 then begin
+              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+              condUpdateProd := condUpdateProd + 'codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+              condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+              condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+              condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+              condUpdateItens := condUpdateItens + 'prodcod=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end
+            else begin
+              if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+              dadosUpdateProd := dadosUpdateProd + 'codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+              dadosUpdateProdTrib := dadosUpdateProdTrib + 'trib_prod_codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateProdAdic <> '' then dadosUpdateProdAdic := dadosUpdateProdAdic + ', ';
+              dadosUpdateProdAdic := dadosUpdateProdAdic + 'adic_prod_codi' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+              dadosUpdateProdCust := dadosUpdateProdCust + 'cust_prod_codi=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              if dadosUpdateItens <> '' then dadosUpdateItens := dadosUpdateItens + ', ';
+              dadosUpdateItens := dadosUpdateItens + 'prodcod=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            end;
           end
           else begin
             colProd := colProd + ',codi';
@@ -1999,12 +2064,12 @@ begin
             dadosMVA := dadosMVA + ',' + 'gen_id(gen_prod_id,0)';
             colMVA := colMVA + ',id';
             dadosMVA := dadosMVA + ',' + 'gen_id(gen_mva_id,1)';
-            colItens := colItens + ',codi';
-            dadosItens := dadosItens + ',' + 'gen_id(gen_itens_id,1)';
+            colItens := colItens + 'codi';
+            dadosItens := dadosItens + 'gen_id(gen_itens_id,1)';
             colItens := colItens + ',prodcod';
             dadosItens := dadosItens + ',' + 'gen_id(gen_prod_id,0)';
-            colProdForn := colProdForn + ',prod';
-            dadosProdForn := dadosProdForn + ',' + 'gen_id(gen_prod_id,0)';
+            colProdForn := colProdForn + 'prod';
+            dadosProdForn := dadosProdForn + 'gen_id(gen_prod_id,0)';
             colProdForn := colProdForn + ',id';
             dadosProdForn := dadosProdForn + ',' + 'gen_id(gen_prod_forn_id,1)';
           end;
@@ -2043,7 +2108,23 @@ begin
                 colProd := colProd + ',grup';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
-
+              //Testa se é Update
+              if VerificaUpdate('grup') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'grup=(select codi from grup_prod where descr='+''''+temp+''')';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where grup = (select codi from grup_prod where descr='+''''+temp+'''))';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where grup = (select codi from grup_prod where descr='+''''+temp+'''))';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where grup = (select codi from grup_prod where descr='+''''+temp+'''))';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where grup = (select codi from grup_prod where descr='+''''+temp+'''))';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'grup=' + '''' + temp + '''';
+              end;
             end
             else begin
               //Se for números, considera como código
@@ -2058,6 +2139,23 @@ begin
               else begin
                 colProd := colProd + ',grup';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
+              //Testa se é Update
+              if VerificaUpdate('grup') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'grup='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where grup = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where grup = '+''''+temp+''')';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where grup = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where grup = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'grup=' + '''' + temp + '''';
               end;
             end;
           end
@@ -2097,7 +2195,23 @@ begin
                 colProd := colProd + ',sub_grup';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
-
+              //Testa se é Update
+              if VerificaUpdate('sub_grup') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'sub_grup=(select codi from sub_grup_prod where descr='+''''+temp+''')';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where sub_grup = (select codi from sub_grup_prod where descr='+''''+temp+'''))';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where sub_grup = (select codi from sub_grup_prod where descr='+''''+temp+'''))';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where sub_grup = (select codi from sub_grup_prod where descr='+''''+temp+'''))';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where sub_grup = (select codi from sub_grup_prod where descr='+''''+temp+'''))';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'sub_grup=' + '''' + temp + '''';
+              end;
             end
             else begin
               //Se for números, considera como código
@@ -2112,6 +2226,23 @@ begin
               else begin
                 colProd := colProd + ',sub_grup';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
+              //Testa se é Update
+              if VerificaUpdate('sub_grup') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'sub_grup='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where sub_grup = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where sub_grup = '+''''+temp+''')';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where sub_grup = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where sub_grup = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'sub_grup=' + '''' + temp + '''';
               end;
             end;
           end
@@ -2153,7 +2284,23 @@ begin
                 colProd := colProd + ',codi_departamento';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
-
+              //Testa se é Update
+              if VerificaUpdate('departamento') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi_departamento=(select codi from departamento where descr='+''''+temp+''')';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_departamento = (select codi from departamento where descr='+''''+temp+'''))';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_departamento = (select codi from departamento where descr='+''''+temp+'''))';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_departamento = (select codi from departamento where descr='+''''+temp+'''))';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where codi_departamento = (select codi from departamento where descr='+''''+temp+'''))';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'codi_departamento=' + '''' + temp + '''';
+              end;
             end
             else begin
               //Se for números, considera como código
@@ -2169,6 +2316,23 @@ begin
               else begin
                 colProd := colProd + ',codi_departamento';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
+              end;
+              //Testa se é Update
+              if VerificaUpdate('departamento') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi_departamento='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where departamento = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where departamento = '+''''+temp+''')';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where departamento = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where departamento = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'codi_departamento=' + '''' + temp + '''';
               end;
             end;
           end
@@ -2208,7 +2372,23 @@ begin
                 colProd := colProd + ',marca';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
-
+              //Testa se é Update
+              if VerificaUpdate('marca') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'marca=(select codi from marca where descr='+''''+temp+''')';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where marca = (select codi from marca where descr='+''''+temp+'''))';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where marca = (select codi from marca where descr='+''''+temp+'''))';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where marca = (select codi from marca where descr='+''''+temp+'''))';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where marca = (select codi from marca where descr='+''''+temp+'''))';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'marca=' + '''' + temp + '''';
+              end;
             end
             else begin
               //Se for números, considera como código
@@ -2224,6 +2404,23 @@ begin
                 colProd := colProd + ',marca';
                 dadosProd := dadosProd + ',''' + temp2 + '''';
               end;
+              //Testa se é Update
+              if VerificaUpdate('marca') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'marca='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where marca = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where marca = '+''''+temp+''')';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where marca = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where marca = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'marca=' + '''' + temp + '''';
+              end;
             end;
           end;
           //TIPO
@@ -2233,6 +2430,23 @@ begin
             colProd := colProd + ',codi_tipo';
             if StringGrid1.Cells[i,k] <> '' then begin
               dadosProd := dadosProd + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              //Testa se é Update
+              if VerificaUpdate('tipo') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi_tipo='+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'codi_tipo=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+              end;
             end else begin
               dadosProd := dadosProd + ',''' + '0' + '''';
             end;
@@ -2261,6 +2475,23 @@ begin
             temp := corrigeFloat(temp);
             dadosItens := dadosItens + ',' + temp;
             colItens := colItens + ',qtd';
+            //Testa se é Update
+//            if VerificaUpdate('qtd') = 1 then begin
+//              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+//              condUpdateProd := condUpdateProd + 'codi in (select prodcodi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+//              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+//              condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+//              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+//              condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+//              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+//              condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+//              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+//              condUpdateItens := condUpdateItens + 'prodcod in (select codi from prod where codi_tipo = '+''''+UpperCase(RemoveAcento(StringGrid1.Cells[i,k]))+''')';
+//            end
+//            else begin
+//              if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+//              dadosUpdateProd := dadosUpdateProd + 'codi_tipo=' + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+//            end;
           end
           else begin
             colItens := colItens + ',qtd';
@@ -2758,29 +2989,30 @@ begin
                 else temp := StringGrid1.Cells[j,k];
                 for i := 1 to StrToInt(temp) do begin
                   Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
-                  SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +',trib_empr) values ' + '(' + dadosProdTrib + ','+temp+');';
+                  SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +',trib_empr) values ' + '(' + dadosProdTrib + ','+IntToStr(i)+');';
                   SQL.ExecSQL;
                   Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
-                  SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +',adic_empr) values ' + '(' + dadosProdAdic + ','+temp+ ');';
+                  SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +',adic_empr) values ' + '(' + dadosProdAdic + ','+IntToStr(i)+ ');';
                   SQL.ExecSQL;
                   Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
-                  SQL.CommandText := 'insert into prod_custos ('+ colProdCust +',cust_empr) values ' + '(' + dadosProdCust + ','+temp+ ');';
+                  SQL.CommandText := 'insert into prod_custos ('+ colProdCust +',cust_empr) values ' + '(' + dadosProdCust + ','+IntToStr(i)+ ');';
                   SQL.ExecSQL;
                   Form2.atualizaStatus('Inserindo dados na tabela MVA.');
-                  SQL.CommandText := 'insert into mva ('+ colMVA +',mva_empr) values ' + '(' + dadosMVA + ','+temp+ ');';
+                  SQL.CommandText := 'insert into mva ('+ colMVA +',mva_empr) values ' + '(' + dadosMVA + ','+IntToStr(i)+ ');';
                   SQL.ExecSQL;
                   Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
-                  SQL.CommandText := 'insert into itens ('+ colItens +',empr) values ' + '(' + dadosItens + ','+temp+ ');';
+                  SQL.CommandText := 'insert into itens ('+ colItens +',empr) values ' + '(' + dadosItens + ','+IntToStr(i)+ ');';
                   SQL.ExecSQL;
                   Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
-                  SQL.CommandText := 'insert into prod_forn ('+ colProdForn +',empr) values ' + '(' + dadosProdForn + ','+temp+ ');';
+                  SQL.CommandText := 'insert into prod_forn ('+ colProdForn +',empr) values ' + '(' + dadosProdForn + ','+IntToStr(i)+ ');';
                   SQL.ExecSQL;
                 end;
 
               except
                 on e: exception do
                 begin
-                  ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+                  Mensagem('Erro SQL: '+e.message+sLineBreak+SQL.CommandText,mtCustom,[],[],'Erro SQL Produtos');
+                  //ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
                   status := 0;
                   break; //Quebra o for
                 end;
