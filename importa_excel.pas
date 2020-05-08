@@ -2643,6 +2643,20 @@ begin
               temp := corrigeFloat(temp);
               dadosProd := dadosProd + ',' + temp;
             end
+            //FATOR_CONV (Fator de Conversão)
+            else if (LowerCase(StringGrid1.Cells[i,0])='fator_conv') then
+            begin
+              colProd := colProd + ',fator_conv';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := corrigeFloat(temp);
+              dadosProd := dadosProd + ',' + temp;
+            end
             //CUSTO (Custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='custo') then
             begin
@@ -2684,6 +2698,36 @@ begin
             else if (LowerCase(StringGrid1.Cells[i,0])='ipi') then
             begin
               colProdCust := colProdCust + ',cust_ipi';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //PIS (PIS agregado ao custo)
+            else if (LowerCase(StringGrid1.Cells[i,0])='pis') then
+            begin
+              colProdCust := colProdCust + ',cust_pis';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+            end
+            //COFINS (COFINS agregado ao custo)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cofins') then
+            begin
+              colProdCust := colProdCust + ',cust_cofins';
               if StringGrid1.Cells[i,k]='' then
               begin
                 temp := '0';

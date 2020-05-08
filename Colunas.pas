@@ -90,9 +90,12 @@ begin
     ListColunas.Items.add('UNID');
     ListColunas.Items.add('PESL');
     ListColunas.Items.add('PESB');
+    ListColunas.Items.add('FATOR_CONV');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
     ListColunas.Items.add('IPI');
+    ListColunas.Items.add('PIS');
+    ListColunas.Items.add('COFINS');
     ListColunas.Items.add('ICMS');
     ListColunas.Items.add('FRETE');
     ListColunas.Items.add('CUSTO_REAL');

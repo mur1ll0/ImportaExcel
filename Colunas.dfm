@@ -28,8 +28,6 @@ object Form4: TForm4
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 64
-    ExplicitTop = 8
     ExplicitWidth = 165
   end
   object ListColunas: TListBox
@@ -42,9 +40,5 @@ object Form4: TForm4
     ScrollWidth = 5
     TabOrder = 0
     OnKeyDown = ListColunasKeyDown
-    ExplicitLeft = 16
-    ExplicitTop = 37
-    ExplicitWidth = 257
-    ExplicitHeight = 535
   end
 end
