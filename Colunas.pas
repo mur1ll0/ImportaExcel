@@ -102,8 +102,14 @@ begin
     ListColunas.Items.add('PRECO_PRAZO');
     ListColunas.Items.add('PRECO_VISTA');
     ListColunas.Items.add('CSOSN');
+    ListColunas.Items.add('CSOSN_ESTA');
+    ListColunas.Items.add('CSOSN_INTER');
     ListColunas.Items.add('CST');
+    ListColunas.Items.add('CST_ESTA');
+    ListColunas.Items.add('CST_INTER');
     ListColunas.Items.add('ALIQ_ICMS');
+    ListColunas.Items.add('REDU_ESTA');
+    ListColunas.Items.add('REDU_INTER');
     ListColunas.Items.add('CST_IPI');
     ListColunas.Items.add('ALIQ_IPI');
     ListColunas.Items.add('CST_PIS');

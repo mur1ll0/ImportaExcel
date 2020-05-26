@@ -10,6 +10,7 @@ type
   TForm4 = class(TForm)
     LabelTipoImp: TLabel;
     ListColunas: TListBox;
+    procedure MostrarColunas();
     procedure FormShow(Sender: TObject);
     procedure ListColunasKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -26,7 +27,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TForm4.FormShow(Sender: TObject);
+procedure TForm4.MostrarColunas();
 begin
   ListColunas.Items.Clear;
   //Se for Clientes/Fornecedores
@@ -83,19 +84,32 @@ begin
     ListColunas.Items.add('LOCALIZACAO');
     ListColunas.Items.add('CODI_BARRA');
     ListColunas.Items.add('CODI_BARRA_COM');
+    ListColunas.Items.add('OBS');
     ListColunas.Items.add('NCM');
     ListColunas.Items.add('CEST');
     ListColunas.Items.add('UNID');
     ListColunas.Items.add('PESL');
     ListColunas.Items.add('PESB');
+    ListColunas.Items.add('FATOR_CONV');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
+    ListColunas.Items.add('IPI');
+    ListColunas.Items.add('PIS');
+    ListColunas.Items.add('COFINS');
+    ListColunas.Items.add('ICMS');
+    ListColunas.Items.add('FRETE');
     ListColunas.Items.add('CUSTO_REAL');
     ListColunas.Items.add('PRECO_PRAZO');
     ListColunas.Items.add('PRECO_VISTA');
     ListColunas.Items.add('CSOSN');
     ListColunas.Items.add('CST');
     ListColunas.Items.add('ALIQ_ICMS');
+    ListColunas.Items.add('CST_IPI');
+    ListColunas.Items.add('ALIQ_IPI');
+    ListColunas.Items.add('CST_PIS');
+    ListColunas.Items.add('ALIQ_PIS');
+    ListColunas.Items.add('CST_COFINS');
+    ListColunas.Items.add('ALIQ_COFINS');
     ListColunas.Items.add('ATIVO');
   end
   else if LabelTipoImp.Caption = 'Grupos' then
@@ -163,17 +177,11 @@ begin
     ListColunas.Items.add('HIST');
   end
   ;
+end;
 
-
-  {
-
-SubGrupos
-Marcas
-Produtos
-Títulos a Pagar
-Títulos a Receber
-}
-
+procedure TForm4.FormShow(Sender: TObject);
+begin
+  MostrarColunas;
 end;
 
 
