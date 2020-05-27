@@ -49,7 +49,7 @@ type
     btnTXT: TBitBtn;
     lblColUpdate: TLabel;
 
-    //function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
+    function quantidadeEmpresas(colEmpr: Integer): Integer;
     procedure btnAbrirOrigemClick(Sender: TObject);
     procedure AutoSizeCol(Grid: TStringGrid; Column: integer);
     procedure RemoveWhiteRows(Grid: TStringGrid);
@@ -95,8 +95,23 @@ var
   colUpdate: Array of string;
   colUpdateCount: Integer;
   gridTemp: Array of Array of string;
+  qtdEmpr: Integer;
 
 implementation
+
+//Função para definir a quantidade de empresas
+function TForm1.quantidadeEmpresas(colEmpr: Integer): Integer;
+var
+  i, max: Integer;
+begin
+  max := 1;
+  for i := StrToInt(StartLine.Text) to StringGrid1.RowCount-1 do begin
+    if StrToInt(StringGrid1.Cells[colEmpr,i]) > max  then begin
+      max := StrToInt(StringGrid1.Cells[colEmpr,i]);
+    end;
+  end;
+  Result := max;
+end;
 
 
 //Função para tratar os numeros com ponto flutuante importados como texto
@@ -895,11 +910,11 @@ var
   temp, temp2, max: String;
   colClieForn, dadosClieForn, condUpdateClieForn, dadosUpdateClieForn: String;
   colProd, dadosProd, condUpdateProd, dadosUpdateProd: String;
-  colProdTrib, dadosProdTrib, condUpdateProdTrib, dadosUpdateProdTrib: String;
-  colProdAdic, dadosProdAdic, condUpdateProdAdic, dadosUpdateProdAdic: String;
-  colProdCust, dadosProdCust, condUpdateProdCust, dadosUpdateProdCust: String;
+  colProdTrib, dadosProdTrib, condUpdateProdTrib, dadosUpdateProdTrib, colRegistroProdTrib, dadosRegistroProdTrib: String;
+  colProdAdic, dadosProdAdic, condUpdateProdAdic, dadosUpdateProdAdic, colRegistroProdAdic, dadosRegistroProdAdic: String;
+  colProdCust, dadosProdCust, condUpdateProdCust, dadosUpdateProdCust, colRegistroProdCust, dadosRegistroProdCust: String;
   colItens, dadosItens, condUpdateItens, dadosUpdateItens: String;
-  colMVA, dadosMVA: String;
+  colMVA, dadosMVA, colRegistroMVA, dadosRegistroMVA: String;
   colProdForn, dadosProdForn: String;
   colGrupo, dadosGrupo, condUpdateGrupo, dadosUpdateGrupo: String;
   colSubGrupo, dadosSubGrupo, condUpdateSubGrupo, dadosUpdateSubGrupo: String;
@@ -948,6 +963,13 @@ begin
       if StrToInt(StartLine.Text) > StringGrid1.RowCount then begin
         ShowMessage('Inicio maior que o número máximo de linhas: '+IntToStr(StringGrid1.RowCount));
         Exit;
+      end;
+
+      //Buscar quantidade de empresas
+      i:=BuscaColuna(StringGrid1,'empr');
+      if (i<>-1) then
+      begin
+        qtdEmpr := quantidadeEmpresas(i);
       end;
 
 
@@ -1917,6 +1939,15 @@ begin
           colProdForn := '';
           dadosProdForn := '';
 
+          colRegistroProdTrib := '';
+          colRegistroProdAdic := '';
+          colRegistroProdCust := '';
+          colRegistroMVA := '';
+          dadosRegistroProdTrib := '';
+          dadosRegistroProdAdic := '';
+          dadosRegistroProdCust := '';
+          dadosRegistroMVA := '';
+
           dadosUpdateProd := '';
           dadosUpdateProdTrib := '';
           dadosUpdateProdAdic := '';
@@ -1944,8 +1975,24 @@ begin
             dadosProdAdic := dadosProdAdic + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colProdCust := colProdCust + 'cust_prod_empr';
             dadosProdCust := dadosProdCust + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            colProdTrib := colProdTrib + ',trib_empr';
+            dadosProdTrib := dadosProdTrib + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            colProdAdic := colProdAdic + ',adic_empr';
+            dadosProdAdic := dadosProdAdic + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            colProdCust := colProdCust + ',cust_empr';
+            dadosProdCust := dadosProdCust + ',''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+
+            //Registros para outras empresas
+            colRegistroProdTrib := colRegistroProdTrib + 'trib_prod_empr';
+            dadosRegistroProdTrib := dadosRegistroProdTrib + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            colRegistroProdAdic := colRegistroProdAdic + 'adic_prod_empr';
+            dadosRegistroProdAdic := dadosRegistroProdAdic + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            colRegistroProdCust := colRegistroProdCust + 'cust_prod_empr';
+            dadosRegistroProdCust := dadosRegistroProdCust + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
+            colRegistroMVA := colRegistroMVA + 'empr';
+            dadosRegistroMVA := dadosRegistroMVA + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
 
             //Testa se é Update
             if VerificaUpdate('empr') = 1 then begin
@@ -1982,8 +2029,24 @@ begin
             dadosProdAdic := dadosProdAdic + '''' + '1' + '''';
             colProdCust := colProdCust + 'cust_prod_empr';
             dadosProdCust := dadosProdCust + '''' + '1' + '''';
+            colProdTrib := colProdTrib + ',trib_empr';
+            dadosProdTrib := dadosProdTrib + ',''' + '1' + '''';
+            colProdAdic := colProdAdic + ',adic_empr';
+            dadosProdAdic := dadosProdAdic + ',''' + '1' + '''';
+            colProdCust := colProdCust + ',cust_empr';
+            dadosProdCust := dadosProdCust + ',''' + '1' + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + '1' + '''';
+
+            //Registros para outras empresas
+            colRegistroProdTrib := colRegistroProdTrib + 'trib_prod_empr';
+            dadosRegistroProdTrib := dadosRegistroProdTrib + '''' + '1' + '''';
+            colRegistroProdAdic := colRegistroProdAdic + 'adic_prod_empr';
+            dadosRegistroProdAdic := dadosRegistroProdAdic + '''' + '1' + '''';
+            colRegistroProdCust := colRegistroProdCust + 'cust_prod_empr';
+            dadosRegistroProdCust := dadosRegistroProdCust + '''' + '1' + '''';
+            colRegistroMVA := colRegistroMVA + 'empr';
+            dadosRegistroMVA := dadosRegistroMVA + '''' + '1' + '''';
           end;
 
           //Codigo é obrigatório, se não tiver preenche com o generator
@@ -2018,6 +2081,24 @@ begin
             dadosProdForn := dadosProdForn + '''' + StringGrid1.Cells[i,k] + '''';
             colProdForn := colProdForn + ',id';
             dadosProdForn := dadosProdForn + ',' + 'gen_id(gen_prod_forn_id,1)';
+
+            //Registros para outras empresas
+            colRegistroProdTrib := colRegistroProdTrib + ',trib_id';
+            dadosRegistroProdTrib := dadosRegistroProdTrib + ',' + 'gen_id(gen_prod_tributos_id,1)';
+            colRegistroProdTrib := colRegistroProdTrib + ',trib_prod_codi';
+            dadosRegistroProdTrib := dadosRegistroProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+            colRegistroProdAdic := colRegistroProdAdic + ',adic_id';
+            dadosRegistroProdAdic := dadosRegistroProdAdic + ',' + 'gen_id(gen_prod_adicionais_id,1)';
+            colRegistroProdAdic := colRegistroProdAdic + ',adic_prod_codi';
+            dadosRegistroProdAdic := dadosRegistroProdAdic + ',''' + StringGrid1.Cells[i,k] + '''';
+            colRegistroProdCust := colRegistroProdCust + ',cust_id';
+            dadosRegistroProdCust := dadosRegistroProdCust + ',' + 'gen_id(gen_prod_custos_id,1)';
+            colRegistroProdCust := colRegistroProdCust + ',cust_prod_codi';
+            dadosRegistroProdCust := dadosRegistroProdCust + ',''' + StringGrid1.Cells[i,k] + '''';
+            colRegistroMVA := colRegistroMVA + ',id';
+            dadosRegistroMVA := dadosRegistroMVA + ',' + 'gen_id(gen_mva_id,1)';
+            colRegistroMVA := colRegistroMVA + ',codi_prod';
+            dadosRegistroMVA := dadosRegistroMVA + ',''' + StringGrid1.Cells[i,k] + '''';
 
             //Testa se é Update
             if VerificaUpdate('codi') = 1 then begin
@@ -2072,6 +2153,24 @@ begin
             dadosProdForn := dadosProdForn + 'gen_id(gen_prod_id,0)';
             colProdForn := colProdForn + ',id';
             dadosProdForn := dadosProdForn + ',' + 'gen_id(gen_prod_forn_id,1)';
+
+            //Registros para outras empresas
+            colRegistroProdTrib := colRegistroProdTrib + ',trib_id';
+            dadosRegistroProdTrib := dadosRegistroProdTrib + ',' + 'gen_id(gen_prod_tributos_id,1)';
+            colRegistroProdTrib := colRegistroProdTrib + ',trib_prod_codi';
+            dadosRegistroProdTrib := dadosRegistroProdTrib + ',' + 'gen_id(gen_prod_id,0)';
+            colRegistroProdAdic := colRegistroProdAdic + ',adic_id';
+            dadosRegistroProdAdic := dadosRegistroProdAdic + ',' + 'gen_id(gen_prod_adicionais_id,1)';
+            colRegistroProdAdic := colRegistroProdAdic + ',adic_prod_codi';
+            dadosRegistroProdAdic := dadosRegistroProdAdic + ',' + 'gen_id(gen_prod_id,0)';
+            colRegistroProdCust := colRegistroProdCust + ',cust_id';
+            dadosRegistroProdCust := dadosRegistroProdCust + ',' + 'gen_id(gen_prod_custos_id,1)';
+            colRegistroProdCust := colRegistroProdCust + ',cust_prod_codi';
+            dadosRegistroProdCust := dadosRegistroProdCust + ',' + 'gen_id(gen_prod_id,0)';
+            colRegistroMVA := colRegistroMVA + ',id';
+            dadosRegistroMVA := dadosRegistroMVA + ',' + 'gen_id(gen_mva_id,1)';
+            colRegistroMVA := colRegistroMVA + ',codi_prod';
+            dadosRegistroMVA := dadosRegistroMVA + ',' + 'gen_id(gen_prod_id,0)';
           end;
 
           //Grupo, subgrupo, departamento, marca e tipo são obrigatórios, se não tiver colocar padroes
@@ -2847,6 +2946,38 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
+            //CSOSN ESTADUAL
+            else if (LowerCase(StringGrid1.Cells[i,0])='csosn_esta') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //CSOSN INTERESTADUAL
+            else if (LowerCase(StringGrid1.Cells[i,0])='csosn_inter') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
             //CST
             else if (LowerCase(StringGrid1.Cells[i,0])='cst') then
             begin
@@ -2871,6 +3002,38 @@ begin
                 dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
+            //CST ESTADUAL
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_esta') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_ESTA_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
+            //CST INTERESTADUAL
+            else if (LowerCase(StringGrid1.Cells[i,0])='cst_inter') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + '90' + '''';
+              end
+              else begin
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                colProdTrib := colProdTrib + ',TRIB_CST_ICMS_INTER_CF';
+                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+              end;
+            end
             //ALIQ_ICMS (Alíquota de ICMS)
             else if (LowerCase(StringGrid1.Cells[i,0])='aliq_icms') then
             begin
@@ -2882,6 +3045,34 @@ begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
                 temp := corrigeFloat(temp);
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //REDU_ESTA (Redução da Alíquota de ICMS Estadual)
+            else if (LowerCase(StringGrid1.Cells[i,0])='redu_esta') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_ESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              end;
+            end
+            //REDU_INTER (Redução da Alíquota de ICMS Interestadual)
+            else if (LowerCase(StringGrid1.Cells[i,0])='redu_inter') then
+            begin
+              if StringGrid1.Cells[i,k]='' then begin
+                colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_INTERESTADUAL';
+                dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+              end
+              else begin
+                temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
+                temp := corrigeFloat(temp);
+                colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_INTERESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
               end;
             end
@@ -3031,25 +3222,50 @@ begin
                 if j = -1 then temp := '1'
                 //Se achar recebe valor no temp
                 else temp := StringGrid1.Cells[j,k];
-                for i := 1 to StrToInt(temp) do begin
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
-                  SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +',trib_empr) values ' + '(' + dadosProdTrib + ','+IntToStr(i)+');';
-                  SQL.ExecSQL;
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
-                  SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +',adic_empr) values ' + '(' + dadosProdAdic + ','+IntToStr(i)+ ');';
-                  SQL.ExecSQL;
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
-                  SQL.CommandText := 'insert into prod_custos ('+ colProdCust +',cust_empr) values ' + '(' + dadosProdCust + ','+IntToStr(i)+ ');';
-                  SQL.ExecSQL;
-                  Form2.atualizaStatus('Inserindo dados na tabela MVA.');
-                  SQL.CommandText := 'insert into mva ('+ colMVA +',mva_empr) values ' + '(' + dadosMVA + ','+IntToStr(i)+ ');';
-                  SQL.ExecSQL;
-                  Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
-                  SQL.CommandText := 'insert into itens ('+ colItens +',empr) values ' + '(' + dadosItens + ','+IntToStr(i)+ ');';
-                  SQL.ExecSQL;
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
-                  SQL.CommandText := 'insert into prod_forn ('+ colProdForn +',empr) values ' + '(' + dadosProdForn + ','+IntToStr(i)+ ');';
-                  SQL.ExecSQL;
+
+                //Criar registros em todas as empresas
+                {
+                  CUST_PROD_EMPR: Empresa onde foi criado
+                  CUST_EMPR: Empresa que irá aparecer, por isso tem esse FOR
+                }
+
+                for i := 1 to qtdEmpr do begin
+                  //Testa se é a empresa onde o produto foi cadastrado
+                  if i = StrToInt(temp) then begin
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                    SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                    SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                    SQL.CommandText := 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                    SQL.CommandText := 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                    SQL.CommandText := 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                    SQL.CommandText := 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');';
+                    SQL.ExecSQL;
+                  end
+                  //Se não, cria registro em branco na outra empresa
+                  else begin
+                    Form2.atualizaStatus('Inserindo registro na tabela PROD_TRIBUTOS para Empresa '+IntToStr(i));
+                    SQL.CommandText := 'insert into prod_tributos ('+ colRegistroProdTrib + ',trib_empr) values ' + '(' + dadosRegistroProdTrib + ','+IntToStr(i)+');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo registro na tabela PROD_ADICIONAIS para Empresa '+IntToStr(i));
+                    SQL.CommandText := 'insert into prod_adicionais ('+ colRegistroProdAdic +',adic_empr) values ' + '(' + dadosRegistroProdAdic + ','+IntToStr(i)+ ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo registro na tabela PROD_CUSTOS para Empresa '+IntToStr(i));
+                    SQL.CommandText := 'insert into prod_custos ('+ colRegistroProdCust +',cust_empr) values ' + '(' + dadosRegistroProdCust + ','+IntToStr(i)+ ');';
+                    SQL.ExecSQL;
+                    Form2.atualizaStatus('Inserindo registro na tabela MVA para Empresa '+IntToStr(i));
+                    SQL.CommandText := 'insert into mva ('+ colRegistroMVA +',mva_empr) values ' + '(' + dadosRegistroMVA + ','+IntToStr(i)+ ');';
+                    SQL.ExecSQL;
+                  end;
                 end;
 
               except
@@ -3093,25 +3309,50 @@ begin
                 if j = -1 then temp := '1'
                 //Se achar recebe valor no temp
                 else temp := StringGrid1.Cells[j,k];
-                for i := 1 to StrToInt(temp) do begin
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
-                  WriteLn(fileTXT, 'insert into prod_tributos ('+ colProdTrib +',trib_empr) values ' + '(' + dadosProdTrib + ','+temp+ ');');
-                  WriteLn(fileTXT, 'COMMIT WORK;');
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
-                  WriteLn(fileTXT, 'insert into prod_adicionais ('+ colProdAdic +',adic_empr) values ' + '(' + dadosProdAdic + ','+temp+ ');');
-                  WriteLn(fileTXT, 'COMMIT WORK;');
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
-                  WriteLn(fileTXT, 'insert into prod_custos ('+ colProdCust +',cust_empr) values ' + '(' + dadosProdCust + ','+temp+ ');');
-                  WriteLn(fileTXT, 'COMMIT WORK;');
-                  Form2.atualizaStatus('Inserindo dados na tabela MVA.');
-                  WriteLn(fileTXT, 'insert into mva ('+ colMVA +',mva_empr) values ' + '(' + dadosMVA + ','+temp+ ');');
-                  WriteLn(fileTXT, 'COMMIT WORK;');
-                  Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
-                  WriteLn(fileTXT, 'insert into itens ('+ colItens +',empr) values ' + '(' + dadosItens + ','+temp+ ');');
-                  WriteLn(fileTXT, 'COMMIT WORK;');
-                  Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
-                  WriteLn(fileTXT, 'insert into prod_forn ('+ colProdForn +',empr) values ' + '(' + dadosProdForn + ','+temp+ ');');
-                  WriteLn(fileTXT, 'COMMIT WORK;');
+
+                //Criar registros em todas as empresas
+                {
+                  CUST_PROD_EMPR: Empresa onde foi criado
+                  CUST_EMPR: Empresa que irá aparecer, por isso tem esse FOR
+                }
+
+                for i := 1 to qtdEmpr do begin
+                  //Testa se é a empresa onde o produto foi cadastrado
+                  if i = StrToInt(temp) then begin
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                    WriteLn(fileTXT, 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                    WriteLn(fileTXT, 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                    WriteLn(fileTXT, 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                    WriteLn(fileTXT, 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                    WriteLn(fileTXT, 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                    WriteLn(fileTXT, 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                  end
+                  //Se não, cria registro em branco na outra empresa
+                  else begin
+                    Form2.atualizaStatus('Inserindo registro na tabela PROD_TRIBUTOS para Empresa '+IntToStr(i));
+                    WriteLn(fileTXT, 'insert into prod_tributos ('+ colRegistroProdTrib + ',trib_empr) values ' + '(' + dadosRegistroProdTrib + ','+IntToStr(i)+');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo registro na tabela PROD_ADICIONAIS para Empresa '+IntToStr(i));
+                    WriteLn(fileTXT, 'insert into prod_adicionais ('+ colRegistroProdAdic +',adic_empr) values ' + '(' + dadosRegistroProdAdic + ','+IntToStr(i)+ ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo registro na tabela PROD_CUSTOS para Empresa '+IntToStr(i));
+                    WriteLn(fileTXT, 'insert into prod_custos ('+ colRegistroProdCust +',cust_empr) values ' + '(' + dadosRegistroProdCust + ','+IntToStr(i)+ ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                    Form2.atualizaStatus('Inserindo registro na tabela MVA para Empresa '+IntToStr(i));
+                    WriteLn(fileTXT, 'insert into mva ('+ colRegistroMVA +',mva_empr) values ' + '(' + dadosRegistroMVA + ','+IntToStr(i)+ ');');
+                    WriteLn(fileTXT, 'COMMIT WORK;');
+                  end;
                 end;
               except
                 on e: exception do
