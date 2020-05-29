@@ -970,7 +970,8 @@ begin
       if (i<>-1) then
       begin
         qtdEmpr := quantidadeEmpresas(i);
-      end;
+      end
+      else qtdEmpr := 1;
 
 
       for k := StrToInt(StartLine.Text) to StringGrid1.RowCount-1 do
