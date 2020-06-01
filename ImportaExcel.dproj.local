@@ -16,5 +16,8 @@
     <Transaction>2019/08/08 15:27:52.000.527,=C:\Users\murileo\Desktop\Importa Excel\Unit4.pas</Transaction>
     <Transaction>2019/08/08 15:31:19.000.070,C:\Users\murileo\Desktop\Importa Excel\Unit4.pas=C:\Users\murileo\Desktop\Importa Excel\Colunas.pas</Transaction>
     <Transaction>2019/08/08 15:31:19.000.070,C:\Users\murileo\Desktop\Importa Excel\Unit4.dfm=C:\Users\murileo\Desktop\Importa Excel\Colunas.dfm</Transaction>
+    <Transaction>2020/06/01 10:57:05.220,=D:\ImportaExcel\Unit5.pas</Transaction>
+    <Transaction>2020/06/01 10:58:51.619,D:\ImportaExcel\uSubstituir.dfm=D:\ImportaExcel\Unit5.dfm</Transaction>
+    <Transaction>2020/06/01 10:58:51.619,D:\ImportaExcel\uSubstituir.pas=D:\ImportaExcel\Unit5.pas</Transaction>
   </Transactions>
 </BorlandProject>

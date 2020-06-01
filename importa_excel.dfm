@@ -1,4 +1,4 @@
-object Form1: TForm1
+object frmPrinc: TfrmPrinc
   Left = 0
   Top = 0
   VertScrollBar.ParentColor = False
@@ -642,6 +642,13 @@ object Form1: TForm1
       object DeletarLinha: TMenuItem
         Caption = 'Deletar Linha (Del)'
         OnClick = DeletarLinhaClick
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object mnuSubstituir: TMenuItem
+        Caption = 'Substituir (CTRL + H)'
+        OnClick = mnuSubstituirClick
       end
     end
     object Limpar: TMenuItem

@@ -74,7 +74,6 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=2.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
@@ -89,19 +88,23 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="importa_excel.pas">
-            <Form>Form1</Form>
+            <Form>frmPrinc</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="importando.pas">
-            <Form>Form2</Form>
+            <Form>frmImportando</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="empresa.pas">
-            <Form>Form3</Form>
+            <Form>frmEmpr</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="Colunas.pas">
-            <Form>Form4</Form>
+            <Form>frmColunas</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="uSubstituir.pas">
+            <Form>frmSubstituir</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Release">

@@ -1,4 +1,4 @@
-object Form4: TForm4
+object frmColunas: TfrmColunas
   Left = 0
   Top = 0
   Caption = 'Colunas'

@@ -8,7 +8,7 @@ uses
 
 
 type
-  TForm2 = class(TForm)
+  TfrmImportando = class(TForm)
     BitBtn1: TBitBtn;
     Label1: TLabel;
     Label2: TLabel;
@@ -25,48 +25,48 @@ type
   end;
 
 var
-  Form2: TForm2;
+  frmImportando: TfrmImportando;
 
 implementation
 
 {$R *.dfm}
 
-procedure TForm2.atualizaItens(min: integer; max: integer);
+procedure TfrmImportando.atualizaItens(min: integer; max: integer);
 begin
-  Form2.Label2.Caption := IntToStr(min) + ' / ' + IntToStr(max);
-  Form2.Label2.Left := (Width - Form2.Label2.Width ) div 2;
-  //Form2.Label2.Top := (Height - Form2.Label2.Height) div 2;
+  frmImportando.Label2.Caption := IntToStr(min) + ' / ' + IntToStr(max);
+  frmImportando.Label2.Left := (Width - frmImportando.Label2.Width ) div 2;
+  //frmImportando.Label2.Top := (Height - frmImportando.Label2.Height) div 2;
   Application.ProcessMessages; //Isso aqui faz a magica da atualizacao na tela acontecer
 end;
 
-procedure TForm2.atualizaStatus(status: string);
+procedure TfrmImportando.atualizaStatus(status: string);
 begin
-  Form2.Label3.Caption := status;
-  Form2.Label3.Left := (Width - Form2.Label3.Width ) div 2;
-  //Form2.Label3.Top := (Height - Form2.Label3.Height) div 2;
+  frmImportando.Label3.Caption := status;
+  frmImportando.Label3.Left := (Width - frmImportando.Label3.Width ) div 2;
+  //frmImportando.Label3.Top := (Height - frmImportando.Label3.Height) div 2;
   Application.ProcessMessages; //Isso aqui faz a magica da atualizacao na tela acontecer
 end;
 
-procedure TForm2.BitBtn1Click(Sender: TObject);
+procedure TfrmImportando.BitBtn1Click(Sender: TObject);
 begin
-  Form2.Close;
+  frmImportando.Close;
 end;
 
-procedure TForm2.fim(status: integer);
+procedure TfrmImportando.fim(status: integer);
 begin
   if status = 1 then
   begin
-    Form2.Label2.Caption := Form2.Label2.Caption + ' - Concluído!';
-    Form2.Label2.Font.Color := clGreen;
-    Form2.BitBtn1.Caption := 'Fechar';
+    frmImportando.Label2.Caption := frmImportando.Label2.Caption + ' - Concluído!';
+    frmImportando.Label2.Font.Color := clGreen;
+    frmImportando.BitBtn1.Caption := 'Fechar';
   end
   else begin
-    Form2.Label2.Caption := Form2.Label2.Caption + ' - Erro.';
-    Form2.Label2.Font.Color := clRed;
-    Form2.BitBtn1.Caption := 'Fechar';
+    frmImportando.Label2.Caption := frmImportando.Label2.Caption + ' - Erro.';
+    frmImportando.Label2.Font.Color := clRed;
+    frmImportando.BitBtn1.Caption := 'Fechar';
   end;
-  Form2.Label2.Left := (Width - Form2.Label2.Width ) div 2;
-  //Form2.Label2.Top := (Height - Form2.Label2.Height) div 2;
+  frmImportando.Label2.Left := (Width - frmImportando.Label2.Width ) div 2;
+  //frmImportando.Label2.Top := (Height - frmImportando.Label2.Height) div 2;
 end;
 
 end.

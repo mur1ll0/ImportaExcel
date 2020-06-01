@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, Data.SqlExpr;
 
 type
-  TForm3 = class(TForm)
+  TfrmEmpr = class(TForm)
     LabelRazao: TLabel;
     razaoSocial: TEdit;
     LabelFantasia: TLabel;
@@ -48,7 +48,7 @@ type
   end;
 
 var
-  Form3: TForm3;
+  frmEmpr: TfrmEmpr;
 
 implementation
 
@@ -59,9 +59,9 @@ uses importa_excel;
 
 
 //Botão Cancelar (Sair)
-procedure TForm3.cancelClick(Sender: TObject);
+procedure TfrmEmpr.cancelClick(Sender: TObject);
 begin
-  Form3.Close;
+  Close;
 end;
 
 
@@ -71,9 +71,9 @@ var
   queryTemp: TSQLQuery;
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add(comando);
     queryTemp.Open;
@@ -81,19 +81,19 @@ begin
     Result := queryTemp.Fields[0].AsString;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
 
 //Ao criar formulario, carregar dados
-procedure TForm3.emprChange(Sender: TObject);
+procedure TfrmEmpr.emprChange(Sender: TObject);
 begin
   if empr.Text <> '' then
     FormActivate(Self);
 end;
 
-procedure TForm3.FormActivate(Sender: TObject);
+procedure TfrmEmpr.FormActivate(Sender: TObject);
 var
   crt,cidade: string;
 begin
@@ -125,7 +125,7 @@ end;
 
 
 //Botão para salvar no banco
-procedure TForm3.saveClick(Sender: TObject);
+procedure TfrmEmpr.saveClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
   crt: Integer;
@@ -156,9 +156,9 @@ begin
   try
     try
       //Abrir conexoes
-      Form1.conDestino.Open;
+      frmPrinc.conDestino.Open;
       SQL := TSQLDataSet.Create(Nil);
-      SQL.SQLConnection := Form1.conDestino;
+      SQL.SQLConnection := frmPrinc.conDestino;
 
       //Executar COMANDO
       SQL.CommandText := 'UPDATE DADOS_EMPRE SET '+
@@ -172,7 +172,7 @@ begin
                           'CGC = '+''''+cgc+''''+','+
                           'CEP = '+''''+UpperCase(cep.Text)+''''+','+
                           'NOME_FANTASIA = '+''''+fant+''''+','+
-                          'CODI_CIDA = '+''''+IntToStr(TForm1.buscaCidade(UpperCase(cida.Text), UpperCase(uf.Text)))+''''+','+
+                          'CODI_CIDA = '+''''+IntToStr(TfrmPrinc.buscaCidade(UpperCase(cida.Text), UpperCase(uf.Text)))+''''+','+
                           'BAIRRO = '+''''+UpperCase(bair.Text)+''''+','+
                           'CRT = '+IntToStr(crt)+' '+
                       'WHERE (CODI = '+''''+empr.Text+''''+');';
@@ -326,9 +326,9 @@ begin
 
   finally
     SQL.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
     ShowMessage('Dados da empresa salvos.');
-    Form3.Close;
+    Close;
   end;
 end;
 

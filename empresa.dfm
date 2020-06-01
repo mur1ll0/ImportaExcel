@@ -1,4 +1,4 @@
-object Form3: TForm3
+object frmEmpr: TfrmEmpr
   Left = 0
   Top = 0
   Caption = 'Dados Empresa'

@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Clipbrd;
 
 type
-  TForm4 = class(TForm)
+  TfrmColunas = class(TForm)
     LabelTipoImp: TLabel;
     ListColunas: TListBox;
     procedure MostrarColunas();
@@ -21,13 +21,13 @@ type
   end;
 
 var
-  Form4: TForm4;
+  frmColunas: TfrmColunas;
 
 implementation
 
 {$R *.dfm}
 
-procedure TForm4.MostrarColunas();
+procedure TfrmColunas.MostrarColunas();
 begin
   ListColunas.Items.Clear;
   //Se for Clientes/Fornecedores
@@ -185,13 +185,13 @@ begin
   ;
 end;
 
-procedure TForm4.FormShow(Sender: TObject);
+procedure TfrmColunas.FormShow(Sender: TObject);
 begin
   MostrarColunas;
 end;
 
 
-procedure TForm4.ListColunasKeyDown(Sender: TObject; var Key: Word;
+procedure TfrmColunas.ListColunasKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
    //RECONHECER CTRL+C

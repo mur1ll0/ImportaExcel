@@ -2,19 +2,21 @@ program ImportaExcel;
 
 uses
   Vcl.Forms,
-  importa_excel in 'importa_excel.pas' {Form1},
-  importando in 'importando.pas' {Form2},
-  empresa in 'empresa.pas' {Form3},
-  Colunas in 'Colunas.pas' {Form4};
+  importa_excel in 'importa_excel.pas' {frmPrinc},
+  importando in 'importando.pas' {frmImportando},
+  empresa in 'empresa.pas' {frmEmpr},
+  Colunas in 'Colunas.pas' {frmColunas},
+  uSubstituir in 'uSubstituir.pas' {frmSubstituir};
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
-  Application.CreateForm(TForm3, Form3);
-  Application.CreateForm(TForm4, Form4);
+  Application.CreateForm(TfrmPrinc, frmPrinc);
+  Application.CreateForm(TfrmImportando, frmImportando);
+  Application.CreateForm(TfrmEmpr, frmEmpr);
+  Application.CreateForm(TfrmColunas, frmColunas);
+  Application.CreateForm(TfrmSubstituir, frmSubstituir);
   Application.Run;
 end.

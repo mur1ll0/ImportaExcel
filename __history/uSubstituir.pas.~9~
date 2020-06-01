@@ -1,0 +1,66 @@
+unit uSubstituir;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+
+type
+  TfrmSubstituir = class(TForm)
+    rgSelecao: TRadioGroup;
+    Label1: TLabel;
+    edtOldValue: TEdit;
+    Label2: TLabel;
+    edtNewValue: TEdit;
+    btnReplace: TButton;
+    procedure btnReplaceClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmSubstituir: TfrmSubstituir;
+
+implementation
+
+uses importa_excel;
+
+{$R *.dfm}
+
+procedure TfrmSubstituir.btnReplaceClick(Sender: TObject);
+var
+  temp: string;
+begin
+  temp := frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col,frmPrinc.StringGrid1.Row];
+
+  case rgSelecao.ItemIndex of
+    //Célula
+    0: begin
+      temp := stringreplace(temp, edtOldValue.Text, edtNewValue.Text,[rfReplaceAll, rfIgnoreCase]);
+      frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col,frmPrinc.StringGrid1.Row] := temp;
+    end;
+    //Coluna
+    1: begin
+
+    end;
+    //Tudo
+    2: begin
+
+    end;
+  end;
+end;
+
+procedure TfrmSubstituir.FormShow(Sender: TObject);
+begin
+  edtOldValue.Text := frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col,frmPrinc.StringGrid1.Row];
+
+  if edtOldValue.Text = '' then
+    edtOldValue.SetFocus
+  else edtNewValue.SetFocus;
+end;
+
+end.

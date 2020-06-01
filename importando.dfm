@@ -1,4 +1,4 @@
-object Form2: TForm2
+object frmImportando: TfrmImportando
   Left = 0
   Top = 0
   Caption = 'Importando Dados'

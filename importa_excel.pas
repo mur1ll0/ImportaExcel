@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, Vcl.Buttons, ComObj, IniFiles,
   Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto,
-  Vcl.Menus, empresa, Colunas, System.StrUtils;
+  Vcl.Menus, empresa, Colunas, System.StrUtils, uSubstituir;
 
 type
-  TForm1 = class(TForm)
+  TfrmPrinc = class(TForm)
     btnLoadOrigem: TBitBtn;
     opnDadosOrigem: TOpenDialog;
     StringGrid1: TStringGrid;
@@ -48,6 +48,8 @@ type
     conOrigem: TSQLConnection;
     btnTXT: TBitBtn;
     lblColUpdate: TLabel;
+    N1: TMenuItem;
+    mnuSubstituir: TMenuItem;
 
     function quantidadeEmpresas(colEmpr: Integer): Integer;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -82,6 +84,7 @@ type
     procedure StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
       Rect: TRect; State: TGridDrawState);
     function VerificaUpdate(coluna: String): Integer;
+    procedure mnuSubstituirClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -91,7 +94,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  frmPrinc: TfrmPrinc;
   colUpdate: Array of string;
   colUpdateCount: Integer;
   gridTemp: Array of Array of string;
@@ -100,7 +103,7 @@ var
 implementation
 
 //Função para definir a quantidade de empresas
-function TForm1.quantidadeEmpresas(colEmpr: Integer): Integer;
+function TfrmPrinc.quantidadeEmpresas(colEmpr: Integer): Integer;
 var
   i, max: Integer;
 begin
@@ -370,7 +373,7 @@ end;
 
 
 //Botão para selecionar arquivo
-procedure TForm1.btnAbrirOrigemClick(Sender: TObject);
+procedure TfrmPrinc.btnAbrirOrigemClick(Sender: TObject);
 var
   arquivo : String;
 
@@ -385,7 +388,7 @@ end;
 
 
 //Botão para selecionar arquivo
-procedure TForm1.BtnOpenDB(Sender: TObject);
+procedure TfrmPrinc.BtnOpenDB(Sender: TObject);
 var
   arquivo : String;
 
@@ -401,7 +404,7 @@ end;
 
 
 //Função para redimensionar coluna
-procedure TForm1.AutoSizeCol(Grid: TStringGrid; Column: integer);
+procedure TfrmPrinc.AutoSizeCol(Grid: TStringGrid; Column: integer);
 var
   i, W, WMax: integer;
 begin
@@ -423,7 +426,7 @@ end;
 
 
 //Função para Remover linhas em branco
-procedure TForm1.RemoveWhiteRows(Grid: TStringGrid);
+procedure TfrmPrinc.RemoveWhiteRows(Grid: TStringGrid);
 var
   i, j: integer;
   remove: Boolean;
@@ -447,7 +450,7 @@ end;
 
 
 //Função para Remover espaços no inicio e fim da string
-procedure TForm1.RemoveSpaces(Grid: TStringGrid);
+procedure TfrmPrinc.RemoveSpaces(Grid: TStringGrid);
 var
   i, j: integer;
 begin
@@ -464,7 +467,7 @@ end;
 
 
 //Botão para Carregar arquivo Excel na StringGrid
-procedure TForm1.btnLoadOrigemClick(Sender: TObject);
+procedure TfrmPrinc.btnLoadOrigemClick(Sender: TObject);
 var
   i: integer;
   fileExt :string;
@@ -560,9 +563,9 @@ var
 begin
   try
     try
-      Form1.conDestino.Open;
+      frmPrinc.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.conDestino;
+      queryTemp.SQLConnection := frmPrinc.conDestino;
       queryTemp.SQL.Clear;
 
       //Desativar Trigger das cidades
@@ -594,21 +597,21 @@ begin
       Result := queryTemp.FieldByName('CODI').AsInteger;
     end;
     queryTemp.Close;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
 
 //Função para buscar a cidade no banco.
-class function TForm1.buscaCidade(Cidade, UF: string): Integer;
+class function TfrmPrinc.buscaCidade(Cidade, UF: string): Integer;
 var
   queryTemp: TSQLQuery;
 
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('SELECT * FROM CIDADE WHERE CID_DESC = :PDESC AND CID_UF = :PUF');
     queryTemp.ParamByName('PDESC').AsString := Cidade;
@@ -623,7 +626,7 @@ begin
       Result := queryTemp.FieldByName('CID_CODI').AsInteger;
     end;
     queryTemp.Close;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -635,9 +638,9 @@ var
 
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select tp.codi from titup tp where tp.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -649,7 +652,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -661,9 +664,9 @@ var
 
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select tr.codi from titur tr where tr.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -675,7 +678,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -687,9 +690,9 @@ var
 
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select g.codi from grup_prod g where g.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -701,7 +704,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -713,9 +716,9 @@ var
 
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select sg.codi from sub_grup_prod sg where sg.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -727,7 +730,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -739,9 +742,9 @@ var
 
 begin
   try
-    Form1.conDestino.Open;
+    frmPrinc.conDestino.Open;
     queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := Form1.conDestino;
+    queryTemp.SQLConnection := frmPrinc.conDestino;
     queryTemp.SQL.Clear;
     queryTemp.SQL.Add('select m.codi from marca m where m.codi = :PCODI');
     queryTemp.ParamByName('PCODI').AsString := Codigo;
@@ -753,7 +756,7 @@ begin
       Result := True;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -766,9 +769,9 @@ var
 begin
   try
     try
-      Form1.conDestino.Open;
+      frmPrinc.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.conDestino;
+      queryTemp.SQLConnection := frmPrinc.conDestino;
       queryTemp.SQL.Clear;
       //queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
       //queryTemp.ParamByName('PNOME').AsString := clieforn;
@@ -786,7 +789,7 @@ begin
     end;
   finally
     queryTemp.Free;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -801,9 +804,9 @@ var
 begin
   try
     try
-      Form1.conDestino.Open;
+      frmPrinc.conDestino.Open;
       queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := Form1.conDestino;
+      queryTemp.SQLConnection := frmPrinc.conDestino;
       queryTemp.SQL.Clear;
       queryTemp.CommandText := sql;
       queryTemp.ExecSQL;
@@ -823,7 +826,7 @@ begin
       Result := queryTemp.FieldByName('CODI').AsInteger;
     end;
     queryTemp.Close;
-    Form1.conDestino.Close;
+    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -834,13 +837,13 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then Result := ''
+  if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then Result := ''
   else
     try
       try
-        Form1.conDestino.Open;
+        frmPrinc.conDestino.Open;
         queryTemp := TSQLQuery.Create(nil);
-        queryTemp.SQLConnection := Form1.conDestino;
+        queryTemp.SQLConnection := frmPrinc.conDestino;
         queryTemp.SQL.Clear;
         queryTemp.CommandText := sql;
         queryTemp.ExecSQL;
@@ -856,7 +859,7 @@ begin
       end;
     finally
       queryTemp.Free;
-      Form1.conDestino.Close;
+      frmPrinc.conDestino.Close;
     end;
 end;
 
@@ -904,7 +907,7 @@ end;
 
 
 //IMPORTAR DADOS
-procedure TForm1.ButImportClick(Sender: TObject);
+procedure TfrmPrinc.ButImportClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
   temp, temp2, max: String;
@@ -950,8 +953,8 @@ begin
   try
     try
       //Criar tela de loading
-      Form2.Show;
-      Form2.Label2.Font.Color := clBlack;
+      frmImportando.Show;
+      frmImportando.Label2.Font.Color := clBlack;
 
       //Carregar inicio da StartLine
       if not IsNumeric(StartLine.Text) then begin
@@ -981,12 +984,12 @@ begin
         StartLine.Text := IntToStr(k);
 
         //Se clicou em cancelar, quebra o laço das linhas e finaliza importação.
-        //if Form2.Active=False then break; - Usando Active, se minimizar a tela cancela.
-        if Form2.Visible=False then break;
+        //if frmImportando.Active=False then break; - Usando Active, se minimizar a tela cancela.
+        if frmImportando.Visible=False then break;
 
 
         //Atualizar Status
-        Form2.atualizaItens(k,StringGrid1.RowCount-1);
+        frmImportando.atualizaItens(k,StringGrid1.RowCount-1);
 
         //----------------------------------------------------------------------
         //----------------------------------------------------------------------
@@ -995,7 +998,7 @@ begin
         begin
           //ShowMessage('Importar Clie/Forn');
 
-          Form2.atualizaStatus('Clie/Forn '+ IntToStr(k));
+          frmImportando.atualizaStatus('Clie/Forn '+ IntToStr(k));
 
           colClieForn := '';
           dadosClieForn := '';
@@ -1090,7 +1093,7 @@ begin
                 temp2 := querySelect('select g.codi from grupo_cliente g where g.descr = '''+temp+'''');
                 //Se não encontrar a string, cadastrar sub grupo
                 if temp2='' then begin
-                  if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                  if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then begin
                     //Carregar arquivo TXT
                     AssignFile(fileTXT, DBPath.Text);
                     if not FileExists(DBPath.Text) then ReWrite(fileTXT)
@@ -1204,7 +1207,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 colClieForn := colClieForn + ',data_nasc';
@@ -1831,7 +1834,7 @@ begin
 
                 //Se for INSERT
                 if colUpdateCount <= 0 then begin
-                  Form2.atualizaStatus('Inserindo dados na tabela CLIEFORN.');
+                  frmImportando.atualizaStatus('Inserindo dados na tabela CLIEFORN.');
 
                   //Desativar Trigger das cidades
                   SQL.CommandText := 'ALTER TRIGGER clieforn_biu0 INACTIVE;';
@@ -1845,7 +1848,7 @@ begin
                 end
                 //Se for UPDATE
                 else begin
-                  Form2.atualizaStatus('Atualizando dados na tabela CLIEFORN.');
+                  frmImportando.atualizaStatus('Atualizando dados na tabela CLIEFORN.');
 
                   if dadosUpdateClieForn = '' then Exit;
 
@@ -1881,7 +1884,7 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da CLIEFORN.');
+                frmImportando.atualizaStatus('Comandos da CLIEFORN.');
                 WriteLn(fileTXT, '----------Comandos da CLIEFORN----------');
 
                 //Se for INSERT
@@ -1923,7 +1926,7 @@ begin
         else if SelectImport.Text = 'Produtos' then
         begin
 
-          Form2.atualizaStatus('Produto '+IntToStr(k));
+          frmImportando.atualizaStatus('Produto '+IntToStr(k));
 
           colProd := '';
           dadosProd := '';
@@ -2193,7 +2196,7 @@ begin
               temp2 := querySelect('select g.codi from grup_prod g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar grupo
               if temp2='' then begin
-                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then begin
                     //Carregar arquivo TXT
                     AssignFile(fileTXT, DBPath.Text);
                     if not FileExists(DBPath.Text) then ReWrite(fileTXT)
@@ -2280,7 +2283,7 @@ begin
               temp2 := querySelect('select g.codi from sub_grup_prod g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar sub grupo
               if temp2='' then begin
-                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then begin
                     //Carregar arquivo TXT
                     AssignFile(fileTXT, DBPath.Text);
                     if not FileExists(DBPath.Text) then ReWrite(fileTXT)
@@ -2367,7 +2370,7 @@ begin
               temp2 := querySelect('select g.codi from departamento g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar departamento
               if temp2='' then begin
-                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then begin
                     //Carregar arquivo TXT
                     AssignFile(fileTXT, DBPath.Text);
                     if not FileExists(DBPath.Text) then ReWrite(fileTXT)
@@ -2457,7 +2460,7 @@ begin
               temp2 := querySelect('select g.codi from marca g where g.descr = '''+temp+'''');
               //Se não encontrar a string, cadastrar marca
               if temp2='' then begin
-                if UpperCase( ExtractFileExt(Form1.DBPath.Text) ) = '.TXT' then begin
+                if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then begin
                     //Carregar arquivo TXT
                     AssignFile(fileTXT, DBPath.Text);
                     if not FileExists(DBPath.Text) then ReWrite(fileTXT)
@@ -3213,7 +3216,7 @@ begin
                 SQL.SQLConnection := conDestino;
 
                 //Executar INSERTs
-                Form2.atualizaStatus('Inserindo dados na tabela PROD.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela PROD.');
                 SQL.CommandText := 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');';
                 SQL.ExecSQL;
 
@@ -3237,37 +3240,37 @@ begin
                 for i := 1 to qtdEmpr do begin
                   //Testa se é a empresa onde o produto foi cadastrado
                   if i = StrToInt(temp) then begin
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
                     SQL.CommandText := 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
                     SQL.CommandText := 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
                     SQL.CommandText := 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela MVA.');
                     SQL.CommandText := 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela ITENS.');
                     SQL.CommandText := 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
                     SQL.CommandText := 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');';
                     SQL.ExecSQL;
                   end
                   //Se não, cria registro em branco na outra empresa
                   else begin
-                    Form2.atualizaStatus('Inserindo registro na tabela PROD_TRIBUTOS para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela PROD_TRIBUTOS para Empresa '+IntToStr(i));
                     SQL.CommandText := 'insert into prod_tributos ('+ colRegistroProdTrib + ',trib_empr) values ' + '(' + dadosRegistroProdTrib + ','+IntToStr(i)+');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo registro na tabela PROD_ADICIONAIS para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela PROD_ADICIONAIS para Empresa '+IntToStr(i));
                     SQL.CommandText := 'insert into prod_adicionais ('+ colRegistroProdAdic +',adic_empr) values ' + '(' + dadosRegistroProdAdic + ','+IntToStr(i)+ ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo registro na tabela PROD_CUSTOS para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela PROD_CUSTOS para Empresa '+IntToStr(i));
                     SQL.CommandText := 'insert into prod_custos ('+ colRegistroProdCust +',cust_empr) values ' + '(' + dadosRegistroProdCust + ','+IntToStr(i)+ ');';
                     SQL.ExecSQL;
-                    Form2.atualizaStatus('Inserindo registro na tabela MVA para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela MVA para Empresa '+IntToStr(i));
                     SQL.CommandText := 'insert into mva ('+ colRegistroMVA +',mva_empr) values ' + '(' + dadosRegistroMVA + ','+IntToStr(i)+ ');';
                     SQL.ExecSQL;
                   end;
@@ -3297,10 +3300,10 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da PROD.');
+                frmImportando.atualizaStatus('Comandos da PROD.');
                 WriteLn(fileTXT, '----------Comandos da PROD----------');
 
-                Form2.atualizaStatus('Inserindo dados na tabela PROD.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela PROD.');
                 WriteLn(fileTXT, 'insert into prod ('+ colProd +') values ' + '(' + dadosProd + ');');
                 WriteLn(fileTXT, 'COMMIT WORK;');
 
@@ -3324,37 +3327,37 @@ begin
                 for i := 1 to qtdEmpr do begin
                   //Testa se é a empresa onde o produto foi cadastrado
                   if i = StrToInt(temp) then begin
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_TRIBUTOS.');
                     WriteLn(fileTXT, 'insert into prod_tributos ('+ colProdTrib +') values ' + '(' + dadosProdTrib + ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_ADICIONAIS.');
                     WriteLn(fileTXT, 'insert into prod_adicionais ('+ colProdAdic +') values ' + '(' + dadosProdAdic + ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_CUSTOS.');
                     WriteLn(fileTXT, 'insert into prod_custos ('+ colProdCust +') values ' + '(' + dadosProdCust + ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo dados na tabela MVA.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela MVA.');
                     WriteLn(fileTXT, 'insert into mva ('+ colMVA +') values ' + '(' + dadosMVA + ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo dados na tabela ITENS.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela ITENS.');
                     WriteLn(fileTXT, 'insert into itens ('+ colItens +') values ' + '(' + dadosItens + ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
+                    frmImportando.atualizaStatus('Inserindo dados na tabela PROD_FORN.');
                     WriteLn(fileTXT, 'insert into prod_forn ('+ colProdForn +') values ' + '(' + dadosProdForn + ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
                   end
                   //Se não, cria registro em branco na outra empresa
                   else begin
-                    Form2.atualizaStatus('Inserindo registro na tabela PROD_TRIBUTOS para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela PROD_TRIBUTOS para Empresa '+IntToStr(i));
                     WriteLn(fileTXT, 'insert into prod_tributos ('+ colRegistroProdTrib + ',trib_empr) values ' + '(' + dadosRegistroProdTrib + ','+IntToStr(i)+');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo registro na tabela PROD_ADICIONAIS para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela PROD_ADICIONAIS para Empresa '+IntToStr(i));
                     WriteLn(fileTXT, 'insert into prod_adicionais ('+ colRegistroProdAdic +',adic_empr) values ' + '(' + dadosRegistroProdAdic + ','+IntToStr(i)+ ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo registro na tabela PROD_CUSTOS para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela PROD_CUSTOS para Empresa '+IntToStr(i));
                     WriteLn(fileTXT, 'insert into prod_custos ('+ colRegistroProdCust +',cust_empr) values ' + '(' + dadosRegistroProdCust + ','+IntToStr(i)+ ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
-                    Form2.atualizaStatus('Inserindo registro na tabela MVA para Empresa '+IntToStr(i));
+                    frmImportando.atualizaStatus('Inserindo registro na tabela MVA para Empresa '+IntToStr(i));
                     WriteLn(fileTXT, 'insert into mva ('+ colRegistroMVA +',mva_empr) values ' + '(' + dadosRegistroMVA + ','+IntToStr(i)+ ');');
                     WriteLn(fileTXT, 'COMMIT WORK;');
                   end;
@@ -3381,7 +3384,7 @@ begin
         begin
           //ShowMessage('Importar Grupos');
 
-          Form2.atualizaStatus('Grupo '+IntToStr(k));
+          frmImportando.atualizaStatus('Grupo '+IntToStr(k));
 
           colGrupo := '';
           dadosGrupo := '';
@@ -3444,7 +3447,7 @@ begin
                 SQL.SQLConnection := conDestino;
 
                 //Executar INSERT
-                Form2.atualizaStatus('Inserindo dados na tabela GRUP_PROD.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela GRUP_PROD.');
                 SQL.CommandText := 'insert into grup_prod ('+ colGrupo +') values ' + '(' + dadosGrupo + ');';
                 SQL.ExecSQL;
 
@@ -3471,7 +3474,7 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da GRUP_PROD.');
+                frmImportando.atualizaStatus('Comandos da GRUP_PROD.');
                 WriteLn(fileTXT, '----------Comandos da GRUP_PROD----------');
 
                 WriteLn(fileTXT, 'insert into grup_prod ('+ colGrupo +') values ' + '(' + dadosGrupo + ');');
@@ -3498,7 +3501,7 @@ begin
         begin
           //ShowMessage('Importar SubGrupos');
 
-          Form2.atualizaStatus('SubGrupo '+IntToStr(k));
+          frmImportando.atualizaStatus('SubGrupo '+IntToStr(k));
 
           colSubGrupo := '';
           dadosSubGrupo := '';
@@ -3561,7 +3564,7 @@ begin
                 SQL.SQLConnection := conDestino;
 
                 //Executar INSERT
-                Form2.atualizaStatus('Inserindo dados na tabela SUB_GRUP_PROD.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela SUB_GRUP_PROD.');
                 SQL.CommandText := 'insert into sub_grup_prod ('+ colSubGrupo +') values ' + '(' + dadosSubGrupo + ');';
                 SQL.ExecSQL;
 
@@ -3588,7 +3591,7 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da SUB_GRUP_PROD.');
+                frmImportando.atualizaStatus('Comandos da SUB_GRUP_PROD.');
                 WriteLn(fileTXT, '----------Comandos da SUB_GRUP_PROD----------');
 
                 WriteLn(fileTXT, 'insert into sub_grup_prod ('+ colSubGrupo +') values ' + '(' + dadosSubGrupo + ');');
@@ -3615,7 +3618,7 @@ begin
         begin
           //ShowMessage('Importar Marcas');
 
-          Form2.atualizaStatus('Marca '+IntToStr(k));
+          frmImportando.atualizaStatus('Marca '+IntToStr(k));
 
           colMarca := '';
           dadosMarca := '';
@@ -3665,7 +3668,7 @@ begin
                 SQL.SQLConnection := conDestino;
 
                 //Executar INSERT
-                Form2.atualizaStatus('Inserindo dados na tabela MARCA.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela MARCA.');
                 SQL.CommandText := 'insert into marca ('+ colMarca +') values ' + '(' + dadosMarca + ');';
                 SQL.ExecSQL;
 
@@ -3692,7 +3695,7 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da MARCA.');
+                frmImportando.atualizaStatus('Comandos da MARCA.');
                 WriteLn(fileTXT, '----------Comandos da MARCA----------');
 
                 WriteLn(fileTXT, 'insert into marca ('+ colMarca +') values ' + '(' + dadosMarca + ');');
@@ -3719,7 +3722,7 @@ begin
         begin
           //ShowMessage('Importar Títulos a Pagar');
 
-          Form2.atualizaStatus('Títulos a Pagar '+IntToStr(k));
+          frmImportando.atualizaStatus('Títulos a Pagar '+IntToStr(k));
 
           colTituP := '';
           dadosTituP := '';
@@ -3891,7 +3894,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 colTituP := colTituP + ',data';
@@ -3914,7 +3917,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 colTituP := colTituP + ',venc';
@@ -4023,7 +4026,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 dadosBTitu := dadosBTitu + ',''' + temp + '''';
@@ -4072,13 +4075,13 @@ begin
                 SQL.SQLConnection := conDestino;
 
                 //Executar INSERT
-                Form2.atualizaStatus('Inserindo dados na tabela TITUP.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela TITUP.');
                 SQL.CommandText := 'insert into titup ('+ colTituP +') values ' + '(' + dadosTituP + ');';
                 SQL.ExecSQL;
 
                 if saldo <= 0.0 then begin
                   //Inserir na BTITUP
-                  Form2.atualizaStatus('Inserindo dados na tabela BTITUP.');
+                  frmImportando.atualizaStatus('Inserindo dados na tabela BTITUP.');
                   SQL.CommandText := 'insert into btitup ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
                   SQL.ExecSQL;
                 end;
@@ -4106,7 +4109,7 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da TITUP.');
+                frmImportando.atualizaStatus('Comandos da TITUP.');
                 WriteLn(fileTXT, '----------Comandos da TITUP----------');
 
                 WriteLn(fileTXT, 'insert into TITUP ('+ colMarca +') values ' + '(' + dadosMarca + ');');
@@ -4114,7 +4117,7 @@ begin
 
                 if saldo <= 0.0 then begin
                   //Inserir na BTITUP
-                  Form2.atualizaStatus('Comandos BTITUP.');
+                  frmImportando.atualizaStatus('Comandos BTITUP.');
                   WriteLn(fileTXT, '----------Comandos da BTITUP----------');
                   WriteLn(fileTXT, 'insert into btitup ('+ colBTitu +') values ' + '(' + dadosBTitu +');');
                   WriteLn(fileTXT, 'COMMIT WORK;');
@@ -4141,7 +4144,7 @@ begin
         begin
           //ShowMessage('Importar Títulos a Receber');
 
-          Form2.atualizaStatus('Títulos a Receber '+IntToStr(k));
+          frmImportando.atualizaStatus('Títulos a Receber '+IntToStr(k));
 
           colTituR := '';
           dadosTituR := '';
@@ -4313,7 +4316,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 colTituR := colTituR + ',data';
@@ -4336,7 +4339,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 colTituR := colTituR + ',venc';
@@ -4443,7 +4446,7 @@ begin
               temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
               temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
-              if temp.Length = 8 then
+              if temp.Length >= 8 then
               begin
                 temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
                 dadosBTitu := dadosBTitu + ',''' + temp + '''';
@@ -4492,13 +4495,13 @@ begin
                 SQL.SQLConnection := conDestino;
 
                 //Executar INSERT
-                Form2.atualizaStatus('Inserindo dados na tabela TITUR.');
+                frmImportando.atualizaStatus('Inserindo dados na tabela TITUR.');
                 SQL.CommandText := 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');';
                 SQL.ExecSQL;
 
                 if saldo <= 0.0 then begin
                   //Inserir na BTITUP
-                  Form2.atualizaStatus('Inserindo dados na tabela BTITUR.');
+                  frmImportando.atualizaStatus('Inserindo dados na tabela BTITUR.');
                   SQL.CommandText := 'insert into btitur ('+ colBTitu +') values ' + '(' + dadosBTitu +');';
                   SQL.ExecSQL;
                 end;
@@ -4526,7 +4529,7 @@ begin
                 if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                 else append(fileTXT);
 
-                Form2.atualizaStatus('Comandos da TITUR.');
+                frmImportando.atualizaStatus('Comandos da TITUR.');
                 WriteLn(fileTXT, '----------Comandos da TITUR----------');
 
                 WriteLn(fileTXT, 'insert into titur ('+ colTituR +') values ' + '(' + dadosTituR + ');');
@@ -4534,7 +4537,7 @@ begin
 
                 if saldo <= 0.0 then begin
                   //Inserir na BTITUP
-                  Form2.atualizaStatus('Comandos BTITUR.');
+                  frmImportando.atualizaStatus('Comandos BTITUR.');
                   WriteLn(fileTXT, '----------Comandos da BTITUR----------');
                   WriteLn(fileTXT, 'insert into btitur ('+ colBTitu +') values ' + '(' + dadosBTitu +');');
                   WriteLn(fileTXT, 'COMMIT WORK;');
@@ -4580,7 +4583,7 @@ begin
           max := querySelect('select max(codi) from clieforn');
           if StrToInt(max) > 0 then
           begin
-            Form2.atualizaStatus('Alterando generator do Clie/Forn.');
+            frmImportando.atualizaStatus('Alterando generator do Clie/Forn.');
             SQL.CommandText := 'ALTER SEQUENCE GEN_CLIEFORN_ID RESTART WITH ' + max + ';';
             SQL.ExecSQL;
           end;
@@ -4592,13 +4595,13 @@ begin
           max := querySelect('select max(codi) from prod');
           if StrToInt(max) > 0 then
           begin
-            Form2.atualizaStatus('Alterar Generator do Produto.');
+            frmImportando.atualizaStatus('Alterar Generator do Produto.');
             SQL.CommandText := 'ALTER SEQUENCE GEN_PROD_ID RESTART WITH ' + max + ';';
             SQL.ExecSQL;
           end;
 
           //Atualizar MARGEM1
-          Form2.atualizaStatus('Ajustando MARGENS.');
+          frmImportando.atualizaStatus('Ajustando MARGENS.');
           SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
           SQL.ExecSQL;
           SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
@@ -4607,7 +4610,7 @@ begin
           SQL.CommandText := 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;';
           SQL.ExecSQL;
           //Criar registro na PROD_AJUS
-          Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
+          frmImportando.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
           SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
           SQL.ExecSQL;
         end
@@ -4618,7 +4621,7 @@ begin
           max := querySelect('select max(codi) from grup_prod');
           if StrToInt(max) > 0 then
           begin
-            Form2.atualizaStatus('Alterar Generator dos Grupos.');
+            frmImportando.atualizaStatus('Alterar Generator dos Grupos.');
             SQL.CommandText := 'ALTER SEQUENCE GEN_GRUP_PROD_ID RESTART WITH ' + max + ';';
             SQL.ExecSQL;
           end;
@@ -4630,7 +4633,7 @@ begin
           max := querySelect('select max(codi) from sub_grup_prod');
           if StrToInt(max) > 0 then
           begin
-            Form2.atualizaStatus('Alterar Generator dos SubGrupos.');
+            frmImportando.atualizaStatus('Alterar Generator dos SubGrupos.');
             SQL.CommandText := 'ALTER SEQUENCE GEN_SUB_GRUP_PROD_ID RESTART WITH ' + max + ';';
             SQL.ExecSQL;
           end;
@@ -4642,7 +4645,7 @@ begin
           max := querySelect('select max(codi) from marca');
           if StrToInt(max) > 0 then
           begin
-            Form2.atualizaStatus('Alterar Generator das Marcas.');
+            frmImportando.atualizaStatus('Alterar Generator das Marcas.');
             SQL.CommandText := 'ALTER SEQUENCE GEN_MARCA_ID RESTART WITH ' + max + ';';
             SQL.ExecSQL;
           end;
@@ -4662,7 +4665,7 @@ begin
 
         if SelectImport.Text='Clie/Forn' then
         begin
-          Form2.atualizaStatus('Alterando generator do Clie/Forn.');
+          frmImportando.atualizaStatus('Alterando generator do Clie/Forn.');
           WriteLn(fileTXT, 'select gen_id(gen_clieforn_id, abs((select max(CODI) from clieforn) - (select gen_id(gen_clieforn_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
           WriteLn(fileTXT, 'COMMIT WORK;');
         end
@@ -4670,12 +4673,12 @@ begin
         else if SelectImport.Text='Produtos' then
         begin
           //Arrumar Generator dos Produtos
-          Form2.atualizaStatus('Alterar Generator do Produto.');
+          frmImportando.atualizaStatus('Alterar Generator do Produto.');
           WriteLn(fileTXT, 'select gen_id(gen_prod_id, abs((select max(CODI) from prod) - (select gen_id(gen_prod_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
           WriteLn(fileTXT, 'COMMIT WORK;');
 
           //Atualizar MARGEM1
-          Form2.atualizaStatus('Ajustando MARGENS.');
+          frmImportando.atualizaStatus('Ajustando MARGENS.');
           WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
           WriteLn(fileTXT, 'COMMIT WORK;');
           WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
@@ -4684,7 +4687,7 @@ begin
           WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;');
           WriteLn(fileTXT, 'COMMIT WORK;');
           //Criar registro na PROD_AJUS
-          Form2.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
+          frmImportando.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
           WriteLn(fileTXT, 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);');
           WriteLn(fileTXT, 'COMMIT WORK;');
         end
@@ -4692,7 +4695,7 @@ begin
         else if SelectImport.Text='Grupos' then
         begin
           //Arrumar Generator dos Grupos
-          Form2.atualizaStatus('Alterar Generator dos Grupos.');
+          frmImportando.atualizaStatus('Alterar Generator dos Grupos.');
           WriteLn(fileTXT, 'select gen_id(gen_grup_prod_id, abs((select max(CODI) from grup_prod) - (select gen_id(gen_grup_prod_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
           WriteLn(fileTXT, 'COMMIT WORK;');
         end
@@ -4700,7 +4703,7 @@ begin
         else if SelectImport.Text='SubGrupos' then
         begin
           //Arrumar Generator dos SubGrupos
-          Form2.atualizaStatus('Alterar Generator dos SubGrupos.');
+          frmImportando.atualizaStatus('Alterar Generator dos SubGrupos.');
           WriteLn(fileTXT, 'select gen_id(GEN_SUB_GRUP_PROD_ID, abs((select max(CODI) from sub_grup_prod) - (select gen_id(GEN_SUB_GRUP_PROD_ID,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
           WriteLn(fileTXT, 'COMMIT WORK;');
         end
@@ -4708,7 +4711,7 @@ begin
         else if SelectImport.Text='Marcas' then
         begin
           //Arrumar Generator das MARCAS
-          Form2.atualizaStatus('Alterar Generator das Marcas.');
+          frmImportando.atualizaStatus('Alterar Generator das Marcas.');
           WriteLn(fileTXT, 'select gen_id(GEN_MARCA_ID, abs((select max(CODI) from marca) - (select gen_id(GEN_MARCA_ID,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
           WriteLn(fileTXT, 'COMMIT WORK;');
         end
@@ -4726,7 +4729,7 @@ begin
       end;
     end;
   finally
-    Form2.fim(status);
+    frmImportando.fim(status);
 
   end;
 
@@ -4822,7 +4825,7 @@ end;
 
 
 //Botão Salvar StringGrid em planilha
-procedure TForm1.btnSalvarClick(Sender: TObject);
+procedure TfrmPrinc.btnSalvarClick(Sender: TObject);
 var
   fileExt: string;
 
@@ -4870,7 +4873,7 @@ begin
 end;
 
 
-procedure TForm1.btnTXTClick(Sender: TObject);
+procedure TfrmPrinc.btnTXTClick(Sender: TObject);
 begin
   //Sugerir extensão inicial
   SaveDialog1.Filter := 'Text File(*.txt)|*.TXT|SQL File (*.sql)|*.SQL|';
@@ -4909,7 +4912,7 @@ end;
 
 
 //Mostrar quias as colunas estão disponíveis para importar
-procedure TForm1.ColunasClick(Sender: TObject);
+procedure TfrmPrinc.ColunasClick(Sender: TObject);
 begin
   if SelectImport.Text = 'Tipo de Importação' then
   begin
@@ -4917,15 +4920,15 @@ begin
   end
   else begin
     //Criar tela de colunas
-    Form4.LabelTipoImp.Caption := SelectImport.Text;
-    Form4.LabelTipoImp.Left := (Form4.Width - Form4.LabelTipoImp.Width ) div 2;
-    Form4.Show;
+    frmColunas.LabelTipoImp.Caption := SelectImport.Text;
+    frmColunas.LabelTipoImp.Left := (frmColunas.Width - frmColunas.LabelTipoImp.Width ) div 2;
+    frmColunas.Show;
   end;
 end;
 
 
 //Carregar Cabeçalho de outra tabela nesta tabela
-procedure TForm1.Cabealho1Click(Sender: TObject);
+procedure TfrmPrinc.Cabealho1Click(Sender: TObject);
 var
   arquivo: string;
 
@@ -4943,7 +4946,7 @@ end;
 
 
 //Limpar dados de clientes e fornecedores do banco
-procedure TForm1.LimpaClieFornClick(Sender: TObject);
+procedure TfrmPrinc.LimpaClieFornClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -4967,7 +4970,7 @@ end;
 
 
 //Limpar dados de grupos do banco
-procedure TForm1.LimpaGruposClick(Sender: TObject);
+procedure TfrmPrinc.LimpaGruposClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -4991,7 +4994,7 @@ end;
 
 
 //Limpar dados de marcas do banco
-procedure TForm1.LimpaMarcasClick(Sender: TObject);
+procedure TfrmPrinc.LimpaMarcasClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -5015,7 +5018,7 @@ end;
 
 
 //Limpar dados de produtos do banco
-procedure TForm1.LimpaProdutosClick(Sender: TObject);
+procedure TfrmPrinc.LimpaProdutosClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -5059,7 +5062,7 @@ end;
 
 
 //Limpar dados de subgrupos do banco
-procedure TForm1.LimpaSubGruposClick(Sender: TObject);
+procedure TfrmPrinc.LimpaSubGruposClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -5083,7 +5086,7 @@ end;
 
 
 //Limpar dados de Titulos a pagar do banco
-procedure TForm1.LimpaTituPClick(Sender: TObject);
+procedure TfrmPrinc.LimpaTituPClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -5107,7 +5110,7 @@ end;
 
 
 //Limpar dados de Titulos a receber do banco
-procedure TForm1.LimpaTituRClick(Sender: TObject);
+procedure TfrmPrinc.LimpaTituRClick(Sender: TObject);
 var
   SQL: TSQLDataSet;
 begin
@@ -5130,8 +5133,13 @@ begin
 end;
 
 
+procedure TfrmPrinc.mnuSubstituirClick(Sender: TObject);
+begin
+  frmSubstituir.Show;
+end;
+
 //Deletar Linha da StringGrid
-procedure TForm1.DeleteRow(Grid: TStringGrid; ARow: Integer);
+procedure TfrmPrinc.DeleteRow(Grid: TStringGrid; ARow: Integer);
 var
   i: Integer;
 begin
@@ -5197,12 +5205,18 @@ begin
 
 
 //Evento ao apertar Botões do Teclado na StringGrid
-procedure TForm1.StringGrid1KeyDown(Sender: TObject; var Key: Word;
+procedure TfrmPrinc.StringGrid1KeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
   i,j,but: integer;
   temp: string;
 begin
+
+   //RECONHECER CTRL+H
+   if ((Shift = [ssCtrl]) and (Key = $48)) then
+   begin
+    mnuSubstituir.Click;
+   end;
 
    //RECONHECER CTRL+Z
    if ((Shift = [ssCtrl]) and (Key = 90)) then
@@ -5295,7 +5309,7 @@ end;
 
 
 //Botão Adicionar Coluna na StringGrid
-procedure TForm1.AdicionarColunaClick(Sender: TObject);
+procedure TfrmPrinc.AdicionarColunaClick(Sender: TObject);
 var
   i: Integer;
 begin
@@ -5309,7 +5323,7 @@ end;
 
 
 //Botão Adicionar Linha na StringGrid
-procedure TForm1.AdicionarLinhaClick(Sender: TObject);
+procedure TfrmPrinc.AdicionarLinhaClick(Sender: TObject);
 begin
   StringGridToArray(StringGrid1);
   InsertRow(StringGrid1);
@@ -5317,7 +5331,7 @@ end;
 
 
 //Botão Deletar Coluna na StringGrid
-procedure TForm1.DeletarColunaClick(Sender: TObject);
+procedure TfrmPrinc.DeletarColunaClick(Sender: TObject);
 var
   i: Integer;
 begin
@@ -5330,7 +5344,7 @@ end;
 
 
 //Botão Deletar Linha na StringGrid
-procedure TForm1.DeletarLinhaClick(Sender: TObject);
+procedure TfrmPrinc.DeletarLinhaClick(Sender: TObject);
 begin
   StringGridToArray(StringGrid1);
   DeleteRow(StringGrid1, StringGrid1.Row);
@@ -5338,7 +5352,7 @@ end;
 
 
 //Reconhecer Right Click na celula
-procedure TForm1.StringGrid1MouseDown(Sender: TObject; Button: TMouseButton;
+procedure TfrmPrinc.StringGrid1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
   PMouse: TPoint;
@@ -5477,10 +5491,10 @@ begin
         else begin
           //Testar se é uma coluna válida para adicionar nos updates
           k := 0; //K é um flag, se ficar 0 depois do FOR da EXIT
-          Form4.LabelTipoImp.Caption := SelectImport.Text;
-          Form4.MostrarColunas;
-          for i := 0 to Form4.ListColunas.Count-1 do begin
-            if LowerCase(Form4.ListColunas.Items[i]) = StringGrid1.Cells[Col,0] then begin
+          frmColunas.LabelTipoImp.Caption := SelectImport.Text;
+          frmColunas.MostrarColunas;
+          for i := 0 to frmColunas.ListColunas.Count-1 do begin
+            if LowerCase(frmColunas.ListColunas.Items[i]) = StringGrid1.Cells[Col,0] then begin
               k := 1;
               Break;
             end;
@@ -5536,7 +5550,7 @@ begin
 end;
 
 
-procedure TForm1.StringGrid1DblClick(Sender: TObject);
+procedure TfrmPrinc.StringGrid1DblClick(Sender: TObject);
 var
   PMouse: TPoint;
   Col, Row: integer;
@@ -5566,7 +5580,7 @@ begin
 end;
 
 
-procedure TForm1.StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
+procedure TfrmPrinc.StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
   Rect: TRect; State: TGridDrawState);
 var
   i, CellLeftMargin, CellTopMargin: Integer;
@@ -5594,7 +5608,7 @@ end;
 
 
 //Botão abrir cadastro da empresa
-procedure TForm1.DadosEmprClick(Sender: TObject);
+procedure TfrmPrinc.DadosEmprClick(Sender: TObject);
 begin
   if DBPath.Text = 'Caminho da base de dados - FDB' then
   begin
@@ -5602,13 +5616,13 @@ begin
   end
   else begin
     //Criar tela de loading
-    Form3.Show;
+    frmEmpr.Show;
   end;
 end;
 
 
 //Verificar se coluna é Update ou não
-function TForm1.VerificaUpdate(coluna: String): Integer;
+function TfrmPrinc.VerificaUpdate(coluna: String): Integer;
 var
   i: Integer;
 begin
