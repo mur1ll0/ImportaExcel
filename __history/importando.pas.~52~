@@ -20,8 +20,6 @@ type
 
   private
     { Private declarations }
-    erro: Boolean;
-    linha: Integer;
   public
     { Public declarations }
   end;
@@ -31,13 +29,10 @@ var
 
 implementation
 
-uses importa_excel;
-
 {$R *.dfm}
 
 procedure TfrmImportando.atualizaItens(min: integer; max: integer);
 begin
-  linha := min;
   frmImportando.Label2.Caption := IntToStr(min) + ' / ' + IntToStr(max);
   frmImportando.Label2.Left := (Width - frmImportando.Label2.Width ) div 2;
   //frmImportando.Label2.Top := (Height - frmImportando.Label2.Height) div 2;
@@ -53,14 +48,7 @@ begin
 end;
 
 procedure TfrmImportando.BitBtn1Click(Sender: TObject);
-var
-  i: Integer;
 begin
-  if erro then begin
-    frmPrinc.StringGrid1.Row := linha;
-    frmPrinc.StringGrid1.SetFocus;
-  end;
-
   frmImportando.Close;
 end;
 
@@ -75,8 +63,7 @@ begin
   else begin
     frmImportando.Label2.Caption := frmImportando.Label2.Caption + ' - Erro.';
     frmImportando.Label2.Font.Color := clRed;
-    frmImportando.BitBtn1.Caption := 'Ir para Erro';
-    erro := True;
+    frmImportando.BitBtn1.Caption := 'Fechar';
   end;
   frmImportando.Label2.Left := (Width - frmImportando.Label2.Width ) div 2;
   //frmImportando.Label2.Top := (Height - frmImportando.Label2.Height) div 2;

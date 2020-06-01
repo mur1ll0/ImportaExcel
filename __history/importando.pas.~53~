@@ -58,7 +58,6 @@ var
 begin
   if erro then begin
     frmPrinc.StringGrid1.Row := linha;
-    frmPrinc.StringGrid1.SetFocus;
   end;
 
   frmImportando.Close;
