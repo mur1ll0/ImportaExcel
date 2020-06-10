@@ -1989,6 +1989,8 @@ begin
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(StringGrid1.Cells[i,k])) + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + StringGrid1.Cells[i,k] + '''';
+            colItens := colItens + 'empr';
+            dadosItens := dadosItens + '''' + StringGrid1.Cells[i,k] + '''';
 
             //Registros para outras empresas
             colRegistroProdTrib := colRegistroProdTrib + 'trib_prod_empr';
@@ -2045,6 +2047,8 @@ begin
             dadosMVA := dadosMVA + '''' + '1' + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + '1' + '''';
+            colItens := colItens + 'empr';
+            dadosItens := dadosItens + '''' + '1' + '''';
 
             //Registros para outras empresas
             colRegistroProdTrib := colRegistroProdTrib + 'trib_prod_empr';
@@ -2081,8 +2085,8 @@ begin
             dadosMVA := dadosMVA + ',' + 'gen_id(gen_mva_id,1)';
             colMVA := colMVA + ',codi_prod';
             dadosMVA := dadosMVA + ',''' + StringGrid1.Cells[i,k] + '''';
-            colItens := colItens + 'codi';
-            dadosItens := dadosItens + 'gen_id(gen_itens_id,1)';
+            colItens := colItens + ',codi';
+            dadosItens := dadosItens + ',gen_id(gen_itens_id,1)';
             colItens := colItens + ',prodcod';
             dadosItens := dadosItens + ',''' + StringGrid1.Cells[i,k] + '''';
             colProdForn := colProdForn + ',prod';
@@ -2153,8 +2157,8 @@ begin
             dadosMVA := dadosMVA + ',' + 'gen_id(gen_prod_id,0)';
             colMVA := colMVA + ',id';
             dadosMVA := dadosMVA + ',' + 'gen_id(gen_mva_id,1)';
-            colItens := colItens + 'codi';
-            dadosItens := dadosItens + 'gen_id(gen_itens_id,1)';
+            colItens := colItens + ',codi';
+            dadosItens := dadosItens + ',gen_id(gen_itens_id,1)';
             colItens := colItens + ',prodcod';
             dadosItens := dadosItens + ',' + 'gen_id(gen_prod_id,0)';
             colProdForn := colProdForn + ',prod';
