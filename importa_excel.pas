@@ -2250,6 +2250,11 @@ begin
             dadosRegistroMVA := dadosRegistroMVA + ',' + 'gen_id(gen_prod_id,0)';
 
             prodCod := getProdCodUpdate(k);
+            if prodCod = '' then begin
+              Mensagem('Utilize ao menos uma das seguintes colunas para substituir o código: REFE, REFE_ORIGINAL, CODI_BARRA, CODI_BARRA_COM',mtWarning,[],[],'Precisa mais informações');
+              status := 0;
+              Break;
+            end;
           end;
 
           //Grupo, subgrupo, departamento, marca e tipo são obrigatórios, se não tiver colocar padroes
