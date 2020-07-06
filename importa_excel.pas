@@ -3146,6 +3146,23 @@ begin
               end;
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('custo_medio') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_custo_medio='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_custo_medio = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_custo_medio = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_custo_medio = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo_medio = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_custo_medio=' + '''' + temp + '''';
+              end;
             end
             //IPI (IPI agregado ao custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='ipi') then
@@ -3161,6 +3178,23 @@ begin
               temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('ipi') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_ipi='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_ipi = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_ipi = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_ipi = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_ipi = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_ipi=' + '''' + temp + '''';
+              end;
             end
             //PIS (PIS agregado ao custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='pis') then
@@ -3176,6 +3210,23 @@ begin
               temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('pis') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_pis='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_pis = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_pis = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_pis = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_pis = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_pis=' + '''' + temp + '''';
+              end;
             end
             //COFINS (COFINS agregado ao custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='cofins') then
@@ -3191,6 +3242,23 @@ begin
               temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('cofins') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_cofins='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_cofins = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_cofins = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_cofins = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_cofins = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_cofins=' + '''' + temp + '''';
+              end;
             end
             //ICMS (ICMS agregado ao custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='icms') then
@@ -3206,6 +3274,23 @@ begin
               temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('icms') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_icms='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_icms = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_icms = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_icms = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_icms = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_icms=' + '''' + temp + '''';
+              end;
             end
             //FRETE
             else if (LowerCase(StringGrid1.Cells[i,0])='frete') then
@@ -3221,6 +3306,23 @@ begin
               temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('frete') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_frete='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_frete = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_frete = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_frete = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_frete = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_frete=' + '''' + temp + '''';
+              end;
             end
             //CUSTO_REAL (Custo Real)
             else if (LowerCase(StringGrid1.Cells[i,0])='custo_real') then
@@ -3235,6 +3337,23 @@ begin
               end;
               temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
+              //Testa se é Update
+              if VerificaUpdate('custo_real') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_custo_real='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_custo_real = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_custo_real = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_custo_real = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo_real = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_custo_real=' + '''' + temp + '''';
+              end;
             end
             //PRECO_PRAZO (Preço a Prazo)
             else if (LowerCase(StringGrid1.Cells[i,0])='preco_prazo') then
@@ -3254,6 +3373,23 @@ begin
               begin
                 colProdCust := colProdCust + ',cust_preco_vista';
                 dadosProdCust := dadosProdCust + ',' + temp;
+              end;
+              //Testa se é Update
+              if VerificaUpdate('preco_prazo') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_preco_prazo='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_preco_prazo = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_preco_prazo = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_preco_prazo = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_preco_prazo = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_preco_prazo=' + '''' + temp + '''';
               end;
             end
             //PRECO_VISTA (Preço a Vista)
@@ -3275,29 +3411,61 @@ begin
                 colProdCust := colProdCust + ',cust_preco_prazo';
                 dadosProdCust := dadosProdCust + ',' + temp;
               end;
+              //Testa se é Update
+              if VerificaUpdate('preco_vista') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_preco_vista='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_preco_vista = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_preco_vista = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_preco_vista = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_preco_vista = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_preco_vista=' + '''' + temp + '''';
+              end;
             end
             //CSOSN
             else if (LowerCase(StringGrid1.Cells[i,0])='csosn') then
             begin
               if StringGrid1.Cells[i,k]='' then begin
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
-                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
-                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
-                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
-                dadosProdTrib := dadosProdTrib + ',''' + '900' + '''';
+                temp := '900';
               end
               else begin
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
-                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
-                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
-                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
-                colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
-                dadosProdTrib := dadosProdTrib + ',''' + StringGrid1.Cells[i,k] + '''';
+                temp := StringGrid1.Cells[i,k];
+              end;
+              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTADUAL';
+              dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL';
+              dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_ESTA_CF';
+              dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+              colProdTrib := colProdTrib + ',TRIB_SN_CSOSN_INTER_CF';
+              dadosProdTrib := dadosProdTrib + ',''' + temp + '''';
+
+              //Testa se é Update
+              if VerificaUpdate('csosn') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_SN_CSOSN_ESTADUAL='+''''+temp+'''';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
+                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CSOSN ESTADUAL
