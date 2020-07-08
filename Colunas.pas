@@ -101,6 +101,7 @@ begin
     ListColunas.Items.add('CUSTO_REAL');
     ListColunas.Items.add('PRECO_PRAZO');
     ListColunas.Items.add('PRECO_VISTA');
+    ListColunas.Items.add('MARGEM');
     ListColunas.Items.add('CSOSN');
     ListColunas.Items.add('CSOSN_ESTA');
     ListColunas.Items.add('CSOSN_INTER');

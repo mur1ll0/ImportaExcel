@@ -7,9 +7,10 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Clipbrd;
 
 type
-  TForm4 = class(TForm)
+  TfrmColunas = class(TForm)
     LabelTipoImp: TLabel;
     ListColunas: TListBox;
+    procedure MostrarColunas();
     procedure FormShow(Sender: TObject);
     procedure ListColunasKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -20,13 +21,13 @@ type
   end;
 
 var
-  Form4: TForm4;
+  frmColunas: TfrmColunas;
 
 implementation
 
 {$R *.dfm}
 
-procedure TForm4.FormShow(Sender: TObject);
+procedure TfrmColunas.MostrarColunas();
 begin
   ListColunas.Items.Clear;
   //Se for Clientes/Fornecedores
@@ -83,21 +84,38 @@ begin
     ListColunas.Items.add('LOCALIZACAO');
     ListColunas.Items.add('CODI_BARRA');
     ListColunas.Items.add('CODI_BARRA_COM');
+    ListColunas.Items.add('OBS');
     ListColunas.Items.add('NCM');
     ListColunas.Items.add('CEST');
     ListColunas.Items.add('UNID');
     ListColunas.Items.add('PESL');
     ListColunas.Items.add('PESB');
+    ListColunas.Items.add('FATOR_CONV');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
+    ListColunas.Items.add('IPI');
+    ListColunas.Items.add('PIS');
+    ListColunas.Items.add('COFINS');
+    ListColunas.Items.add('ICMS');
+    ListColunas.Items.add('FRETE');
     ListColunas.Items.add('CUSTO_REAL');
     ListColunas.Items.add('PRECO_PRAZO');
     ListColunas.Items.add('PRECO_VISTA');
     ListColunas.Items.add('CSOSN');
+    ListColunas.Items.add('CSOSN_ESTA');
+    ListColunas.Items.add('CSOSN_INTER');
     ListColunas.Items.add('CST');
+    ListColunas.Items.add('CST_ESTA');
+    ListColunas.Items.add('CST_INTER');
     ListColunas.Items.add('ALIQ_ICMS');
+    ListColunas.Items.add('REDU_ESTA');
+    ListColunas.Items.add('REDU_INTER');
+    ListColunas.Items.add('CST_IPI');
     ListColunas.Items.add('ALIQ_IPI');
     ListColunas.Items.add('CST_PIS');
+    ListColunas.Items.add('ALIQ_PIS');
+    ListColunas.Items.add('CST_COFINS');
+    ListColunas.Items.add('ALIQ_COFINS');
     ListColunas.Items.add('ATIVO');
   end
   else if LabelTipoImp.Caption = 'Grupos' then
@@ -165,21 +183,15 @@ begin
     ListColunas.Items.add('HIST');
   end
   ;
+end;
 
-
-  {
-
-SubGrupos
-Marcas
-Produtos
-Títulos a Pagar
-Títulos a Receber
-}
-
+procedure TfrmColunas.FormShow(Sender: TObject);
+begin
+  MostrarColunas;
 end;
 
 
-procedure TForm4.ListColunasKeyDown(Sender: TObject; var Key: Word;
+procedure TfrmColunas.ListColunasKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
    //RECONHECER CTRL+C

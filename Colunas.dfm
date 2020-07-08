@@ -40,6 +40,5 @@ object frmColunas: TfrmColunas
     ScrollWidth = 5
     TabOrder = 0
     OnKeyDown = ListColunasKeyDown
-    ExplicitHeight = 557
   end
 end

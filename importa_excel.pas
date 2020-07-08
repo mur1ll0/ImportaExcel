@@ -3429,6 +3429,38 @@ begin
                 dadosUpdateProd := dadosUpdateProd + 'cust_preco_vista=' + '''' + temp + '''';
               end;
             end
+            //MARGEM (Margem de Valor)
+            else if (LowerCase(StringGrid1.Cells[i,0])='margem') then
+            begin
+              colProdCust := colProdCust + ',cust_margem1';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+
+              //Testa se é Update
+              if VerificaUpdate('margem') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_margem1='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'cust_margem1=' + '''' + temp + '''';
+              end;
+            end
             //CSOSN
             else if (LowerCase(StringGrid1.Cells[i,0])='csosn') then
             begin
@@ -5431,12 +5463,24 @@ begin
 
           //Se for INSERT
           if colUpdateCount <= 0 then begin
-            //Atualizar MARGEM1
-            frmImportando.atualizaStatus('Ajustando MARGENS.');
-            SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
-            SQL.ExecSQL;
-            SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
-            SQL.ExecSQL;
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;';
+              SQL.ExecSQL;
+            end
+            //Se não existir coluna margem, recalcular margem
+            else begin
+              //Atualizar MARGEM1
+              frmImportando.atualizaStatus('Ajustando MARGENS.');
+              SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
+              SQL.ExecSQL;
+              SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
+              SQL.ExecSQL;
+            end;
+
             //Atualizar MARGEM2
             SQL.CommandText := 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;';
             SQL.ExecSQL;
@@ -5525,12 +5569,27 @@ begin
             frmImportando.atualizaStatus('Alterar Generator do Produto.');
             WriteLn(fileTXT, 'select gen_id(gen_prod_id, abs((select max(CODI) from prod) - (select gen_id(gen_prod_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
             WriteLn(fileTXT, 'COMMIT WORK;');
-            //Atualizar MARGEM1
-            frmImportando.atualizaStatus('Ajustando MARGENS.');
-            WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
-            WriteLn(fileTXT, 'COMMIT WORK;');
-            WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
-            WriteLn(fileTXT, 'COMMIT WORK;');
+
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo-(pc.cust_preco_prazo * pc.cust_margem2 /100) where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+            end
+            //Se não existir coluna margem, recalcular margem
+            else begin
+              //Atualizar MARGEM1
+              frmImportando.atualizaStatus('Ajustando MARGENS.');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+            end;
+
             //Atualizar MARGEM2
             WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;');
             WriteLn(fileTXT, 'COMMIT WORK;');
