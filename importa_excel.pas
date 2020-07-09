@@ -3440,7 +3440,13 @@ begin
               else begin
                 temp := StringGrid1.Cells[i,k];
               end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
+
+              //Testar se precisa multiplicar por 100
+              if StrToFloat(temp) < 1 then
+                temp := FloatToStr( StrToFloat(temp) * 100 );
+
               dadosProdCust := dadosProdCust + ',' + temp;
 
               //Testa se é Update
@@ -5470,6 +5476,8 @@ begin
               frmImportando.atualizaStatus('Ajustando Preços.');
               SQL.CommandText := 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;';
               SQL.ExecSQL;
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;';
+              SQL.ExecSQL;
             end
             //Se não existir coluna margem, recalcular margem
             else begin
@@ -5577,7 +5585,7 @@ begin
               frmImportando.atualizaStatus('Ajustando Preços.');
               WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;');
               WriteLn(fileTXT, 'COMMIT WORK;');
-              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo-(pc.cust_preco_prazo * pc.cust_margem2 /100) where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;');
               WriteLn(fileTXT, 'COMMIT WORK;');
             end
             //Se não existir coluna margem, recalcular margem
