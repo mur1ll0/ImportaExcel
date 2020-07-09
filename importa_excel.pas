@@ -4333,7 +4333,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -4450,7 +4452,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -4554,7 +4558,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -4968,7 +4974,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -5388,7 +5396,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
