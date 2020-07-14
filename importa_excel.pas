@@ -3442,11 +3442,13 @@ begin
               end;
               temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
               temp := corrigeFloat(temp);
+              temp := stringreplace(temp, '.', ',',[rfReplaceAll, rfIgnoreCase]);
 
               //Testar se precisa multiplicar por 100
               if StrToFloat(temp) < 1 then
                 temp := FloatToStr( StrToFloat(temp) * 100 );
 
+              temp := corrigeFloat(temp);
               dadosProdCust := dadosProdCust + ',' + temp;
 
               //Testa se é Update
