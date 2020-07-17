@@ -3129,8 +3129,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_custo=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_custo=' + '''' + temp + '''';
               end;
             end
             //CUSTO_MEDIO (Custo Medio)
@@ -3160,8 +3160,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo_medio = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_custo_medio=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_custo_medio=' + '''' + temp + '''';
               end;
             end
             //IPI (IPI agregado ao custo)
@@ -3192,8 +3192,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_ipi = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_ipi=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_ipi=' + '''' + temp + '''';
               end;
             end
             //PIS (PIS agregado ao custo)
@@ -3224,8 +3224,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_pis = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_pis=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_pis=' + '''' + temp + '''';
               end;
             end
             //COFINS (COFINS agregado ao custo)
@@ -3256,8 +3256,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_cofins = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_cofins=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_cofins=' + '''' + temp + '''';
               end;
             end
             //ICMS (ICMS agregado ao custo)
@@ -3288,8 +3288,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_icms = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_icms=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_icms=' + '''' + temp + '''';
               end;
             end
             //FRETE
@@ -3320,8 +3320,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_frete = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_frete=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_frete=' + '''' + temp + '''';
               end;
             end
             //CUSTO_REAL (Custo Real)
@@ -3351,8 +3351,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo_real = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_custo_real=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_custo_real=' + '''' + temp + '''';
               end;
             end
             //PRECO_PRAZO (Preço a Prazo)
@@ -3388,8 +3388,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_preco_prazo = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_preco_prazo=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_preco_prazo=' + '''' + temp + '''';
               end;
             end
             //PRECO_VISTA (Preço a Vista)
@@ -3425,8 +3425,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_preco_vista = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_preco_vista=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_preco_vista=' + '''' + temp + '''';
               end;
             end
             //MARGEM (Margem de Valor)
@@ -3465,8 +3465,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_margem1=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_margem1=' + '''' + temp + '''';
               end;
             end
             //CSOSN
@@ -3501,11 +3501,11 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CSOSN ESTADUAL
@@ -3536,9 +3536,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
               end;
             end
             //CSOSN INTERESTADUAL
@@ -3569,9 +3569,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_INTERESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CST
@@ -3606,11 +3606,11 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CST ESTADUAL
@@ -3641,9 +3641,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
               end;
             end
             //CST INTERESTADUAL
@@ -3674,9 +3674,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_ICMS_INTERESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //ALIQ_ICMS (Alíquota de ICMS)
@@ -3706,8 +3706,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_ICMS_ESTADUAL=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL=' + '''' + temp + '''';
               end;
             end
             //REDU_ESTA (Redução da Alíquota de ICMS Estadual)
@@ -3737,8 +3737,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_REDU_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_REDU_ICMS_ESTADUAL=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_REDU_ICMS_ESTADUAL=' + '''' + temp + '''';
               end;
             end
             //REDU_INTER (Redução da Alíquota de ICMS Interestadual)
@@ -3768,8 +3768,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_REDU_ICMS_INTERESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_REDU_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_REDU_ICMS_INTERESTADUAL=' + '''' + temp + '''';
               end;
             end
             //CST_IPI (Código de CST IPI)
@@ -3797,8 +3797,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_IPI = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_IPI=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_IPI=' + '''' + temp + '''';
               end;
             end
             //ALIQ_IPI (Alíquota de IPI)
@@ -3828,8 +3828,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_IPI = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_IPI=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_IPI=' + '''' + temp + '''';
               end;
             end
             //CST_PIS (Código de CST PIS)
@@ -3857,8 +3857,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_PIS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_PIS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_PIS=' + '''' + temp + '''';
               end;
             end
             //ALIQ_PIS (Alíquota de PIS)
@@ -3888,8 +3888,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_PIS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_PIS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_PIS=' + '''' + temp + '''';
               end;
             end
             //CST_COFINS (Código de CST COFINS)
@@ -3917,8 +3917,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_COFINS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_COFINS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_COFINS=' + '''' + temp + '''';
               end;
             end
             //ALIQ_COFINS (Alíquota de COFINS)
@@ -3948,8 +3948,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_COFINS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_COFINS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_COFINS=' + '''' + temp + '''';
               end;
             end
             //ATIVO
