@@ -3570,7 +3570,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
                 dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
               end;
             end
@@ -3675,7 +3675,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
                 dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
               end;
             end
@@ -3707,7 +3707,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_ICMS_ESTADUAL=' + '''' + temp + '''';
               end;
             end
             //REDU_ESTA (Redução da Alíquota de ICMS Estadual)
@@ -3738,7 +3738,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_REDU_ICMS_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_REDU_ICMS_ESTADUAL=' + '''' + temp + '''';
               end;
             end
             //REDU_INTER (Redução da Alíquota de ICMS Interestadual)
@@ -3769,7 +3769,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_REDU_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_REDU_ICMS_INTERESTADUAL=' + '''' + temp + '''';
               end;
             end
             //CST_IPI (Código de CST IPI)
@@ -3829,7 +3829,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_IPI=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_IPI=' + '''' + temp + '''';
               end;
             end
             //CST_PIS (Código de CST PIS)
@@ -3858,7 +3858,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_PIS=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_PIS=' + '''' + temp + '''';
               end;
             end
             //ALIQ_PIS (Alíquota de PIS)
@@ -3889,7 +3889,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_PIS=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_PIS=' + '''' + temp + '''';
               end;
             end
             //CST_COFINS (Código de CST COFINS)
@@ -3918,7 +3918,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_COFINS=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_COFINS=' + '''' + temp + '''';
               end;
             end
             //ALIQ_COFINS (Alíquota de COFINS)
@@ -3949,7 +3949,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_ALIQ_COFINS=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_COFINS=' + '''' + temp + '''';
               end;
             end
             //ATIVO
