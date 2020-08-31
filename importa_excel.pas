@@ -1458,6 +1458,33 @@ begin
                 dadosClieForn := dadosClieForn + ',''' + 'ISENTO' + '''';
               end;
             end
+            //INSCR_PRODUTOR (INSCRICAO DE PRODUTOR RURAL)
+            else if (LowerCase(StringGrid1.Cells[i,0])='inscr_produtor') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,20));
+              if temp.Length > 1 then
+              begin
+                colClieForn := colClieForn + ',inscr_produtor';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('inscr_produtor') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'inscr_produtor=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'inscr_produtor=' + '''' + temp + '''';
+                end;
+              end
+              else begin
+                colClieForn := colClieForn + ',inscr_produtor';
+                dadosClieForn := dadosClieForn + ',''' + 'ISENTO' + '''';
+              end;
+            end
             //ENDE (ENDERECO)
             else if (LowerCase(StringGrid1.Cells[i,0])='ende') then
             begin
@@ -6432,6 +6459,8 @@ begin
           frmColunas.LabelTipoImp.Caption := SelectImport.Text;
           frmColunas.MostrarColunas;
           for i := 0 to frmColunas.ListColunas.Count-1 do begin
+            if StringGrid1.Cells[Col,0] = '' then
+              Continue;
             if LowerCase(frmColunas.ListColunas.Items[i]) = LowerCase(StringGrid1.Cells[Col,0]) then begin
               k := 1;
               Break;

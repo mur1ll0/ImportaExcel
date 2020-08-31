@@ -45,6 +45,7 @@ begin
     ListColunas.Items.add('CPF_CNPJ');
     ListColunas.Items.add('RG');
     ListColunas.Items.add('INSC');
+    ListColunas.Items.add('INSCR_PRODUTOR');
     ListColunas.Items.add('ENDE');
     ListColunas.Items.add('BAIR');
     ListColunas.Items.add('COMP');
