@@ -77,6 +77,8 @@ begin
     ListColunas.Items.add('MARCA');
     ListColunas.Items.add('TIPO');
     ListColunas.Items.add('QTD');
+    ListColunas.Items.add('EST');
+    ListColunas.Items.add('MAX');
     ListColunas.Items.add('FORN');
     ListColunas.Items.add('DESCR');
     ListColunas.Items.add('DESCR2');
@@ -92,6 +94,7 @@ begin
     ListColunas.Items.add('PESL');
     ListColunas.Items.add('PESB');
     ListColunas.Items.add('FATOR_CONV');
+    ListColunas.Items.add('QTD_MINIMA');
     ListColunas.Items.add('CUSTO');
     ListColunas.Items.add('CUSTO_MEDIO');
     ListColunas.Items.add('IPI');

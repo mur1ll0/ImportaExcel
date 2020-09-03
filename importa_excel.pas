@@ -2729,14 +2729,124 @@ begin
                   '    from prod_esto pe '+
                   '    where ('+temp+'-pe.qtd) <> 0 ';
             end;
-          end
-          else begin
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '6' + '''';
+          end;
+
+          //EST
+          i:=BuscaColuna(StringGrid1,'est');
+          if (i<>-1) then
+          begin
+            if StringGrid1.Cells[i,k]='' then
+            begin
+              temp := '0';
+            end
+            else begin
+              temp := StringGrid1.Cells[i,k];
+            end;
+            temp := corrigeFloat(temp);
+            dadosItens := dadosItens + ',' + temp;
+            colItens := colItens + ',qtd';
+            //Testa se é Update
+            if VerificaUpdate('est') = 1 then begin
+              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+              condUpdateProd := condUpdateProd + 'codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+              condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+              condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+              condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+              condUpdateItens := condUpdateItens + 'cod_prod in (select cod_prod from prod_esto where qtd = '+temp+')';
+            end
+            else begin
+              {
+               Comando para inserir na ITENS quando a diferenca de estoque for diferente de 0
+              }
+              //Comando Insert na itens - Ainda nao tem condição no WHERE, pois irá usar condUpdateItens concatenado
+              dadosUpdateItens := dadosUpdateItens + ' insert into ITENS (CODI,PRODCOD,NUME,TIPO,EPV,QTD,EMPR) '+
+                  '    select '+
+                  '        gen_id(gen_itens_id,1) CODI, '+
+                  '        '+prodCod+' PRODCOD, '+
+                  '        gen_id(gen_prod_ajus_id,0)+1 NUME, '+
+                  '        case '+
+                  '            when ('+temp+'-pe.qtd) > 0 then 5 '+
+                  '            when ('+temp+'-pe.qtd) < 0 then 2 '+
+                  '        end TIPO, '+
+                  '        ''A'' EPV, '+
+                  '        ABS('+temp+'-pe.qtd) QTD, '+
+                  '        '+prodEmpr+' EMPR '+
+                  '    from prod_esto pe '+
+                  '    where ('+temp+'-pe.qtd) <> 0 ';
+            end;
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '5' + '''';
+          end;
+
+          //MAX
+          i:=BuscaColuna(StringGrid1,'max');
+          if (i<>-1) then
+          begin
+            if StringGrid1.Cells[i,k]='' then
+            begin
+              temp := '0';
+            end
+            else begin
+              temp := StringGrid1.Cells[i,k];
+            end;
+            temp := corrigeFloat(temp);
+            dadosItens := dadosItens + ',' + temp;
+            colItens := colItens + ',qtd';
+            //Testa se é Update
+            if VerificaUpdate('est') = 1 then begin
+              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+              condUpdateProd := condUpdateProd + 'codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+              condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+              condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+              condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+              condUpdateItens := condUpdateItens + 'cod_prod in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+            end
+            else begin
+              {
+               Comando para inserir na ITENS quando a diferenca de estoque for diferente de 0
+              }
+              //Comando Insert na itens - Ainda nao tem condição no WHERE, pois irá usar condUpdateItens concatenado
+              dadosUpdateItens := dadosUpdateItens + ' insert into ITENS (CODI,PRODCOD,NUME,TIPO,EPV,QTD,EMPR) '+
+                  '    select '+
+                  '        gen_id(gen_itens_id,1) CODI, '+
+                  '        '+prodCod+' PRODCOD, '+
+                  '        gen_id(gen_prod_ajus_id,0)+1 NUME, '+
+                  '        case '+
+                  '            when ('+temp+'-pe.qtd) > 0 then 4 '+
+                  '            when ('+temp+'-pe.qtd) < 0 then 1 '+
+                  '        end TIPO, '+
+                  '        ''A'' EPV, '+
+                  '        ABS('+temp+'-pe.qtd) QTD, '+
+                  '        '+prodEmpr+' EMPR '+
+                  '    from prod_esto pe '+
+                  '    where ('+temp+'-pe.qtd) <> 0 ';
+            end;
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '4' + '''';
+          end;
+
+          //Se não tiver informação de estoque, coloca padrões
+          if (BuscaColuna(StringGrid1,'qtd')=-1) and (BuscaColuna(StringGrid1,'est')=-1) and (BuscaColuna(StringGrid1,'max')=-1) then begin
             colItens := colItens + ',qtd';
             dadosItens := dadosItens + ',''' + '0' + '''';
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '6' + '''';
           end;
           //Campos adicionais para a itens
-          colItens := colItens + ',tipo';
-          dadosItens := dadosItens + ',''' + '6' + '''';
           colItens := colItens + ',epv';
           dadosItens := dadosItens + ',''' + 'A' + '''';
           colItens := colItens + ',nume';
@@ -3119,6 +3229,20 @@ begin
               end;
               temp := corrigeFloat(temp);
               dadosProd := dadosProd + ',' + temp;
+            end
+            //QTD_MINIMA (Quantidade Mínima)
+            else if (LowerCase(StringGrid1.Cells[i,0])='qtd_minima') then
+            begin
+              colProdAdic := colProdAdic + ',adic_qtd_minima';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := corrigeFloat(temp);
+              dadosProdAdic := dadosProdAdic + ',' + temp;
             end
             //CUSTO (Custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='custo') then
