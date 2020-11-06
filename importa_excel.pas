@@ -3836,6 +3836,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3867,6 +3868,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_ESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3898,6 +3900,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_INTERESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3939,7 +3942,7 @@ begin
                 if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
                 condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_IPI = '+''''+temp+''')';
                 if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_IPI='+''''+temp+'''';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_IPI='+''''+StringGrid1.Cells[i,k]+'''';
                 if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
                 condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_IPI = '+''''+temp+''')';
                 if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
@@ -3949,7 +3952,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_IPI=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_IPI=' + '''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
             //ALIQ_IPI (Alíquota de IPI)
@@ -3999,7 +4002,7 @@ begin
                 if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
                 condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_PIS = '+''''+temp+''')';
                 if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_PIS='+''''+temp+'''';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_PIS='+''''+StringGrid1.Cells[i,k]+'''';
                 if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
                 condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_PIS = '+''''+temp+''')';
                 if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
@@ -4009,7 +4012,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_PIS=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_PIS=' + '''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
             //ALIQ_PIS (Alíquota de PIS)
@@ -4018,6 +4021,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_PIS';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -4059,7 +4063,7 @@ begin
                 if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
                 condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_COFINS = '+''''+temp+''')';
                 if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_COFINS='+''''+temp+'''';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_COFINS='+''''+StringGrid1.Cells[i,k]+'''';
                 if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
                 condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_COFINS = '+''''+temp+''')';
                 if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
@@ -4069,7 +4073,7 @@ begin
               end
               else begin
                 if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
-                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_COFINS=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_COFINS=' + '''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
             //ALIQ_COFINS (Alíquota de COFINS)
@@ -4078,6 +4082,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_COFINS';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
