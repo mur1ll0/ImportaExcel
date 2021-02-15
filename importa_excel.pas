@@ -91,7 +91,7 @@ type
     { Private declarations }
   public
     { Public declarations }
-    class function buscaCidade(Cidade, UF: string): Integer;
+    class function buscaCidade(Cidade, UF: string): String;
   end;
 
 var
@@ -604,30 +604,36 @@ end;
 
 
 //Função para buscar a cidade no banco.
-class function TfrmPrinc.buscaCidade(Cidade, UF: string): Integer;
+class function TfrmPrinc.buscaCidade(Cidade, UF: string): String;
 var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('SELECT * FROM CIDADE WHERE CID_DESC = :PDESC AND CID_UF = :PUF');
-    queryTemp.ParamByName('PDESC').AsString := Cidade;
-    queryTemp.ParamByName('PUF').AsString := UF;
-    queryTemp.Open;
-  finally
-    if queryTemp.IsEmpty then
-    begin
-      Result := -1;
-    end
-    else begin
-      Result := queryTemp.FieldByName('CID_CODI').AsInteger;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := '(SELECT CID_CODI FROM CIDADE WHERE CID_DESC = '''+Cidade+''' AND CID_UF = '''+UF+''')'
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('SELECT * FROM CIDADE WHERE CID_DESC = :PDESC AND CID_UF = :PUF');
+      queryTemp.ParamByName('PDESC').AsString := Cidade;
+      queryTemp.ParamByName('PUF').AsString := UF;
+      queryTemp.Open;
+    finally
+      if queryTemp.IsEmpty then
+      begin
+        Result := '';
+      end
+      else begin
+        Result := queryTemp.FieldByName('CID_CODI').AsString;
+      end;
+      queryTemp.Close;
+      frmPrinc.conDestino.Close;
     end;
-    queryTemp.Close;
-    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -1123,8 +1129,8 @@ begin
           begin
             temp2 := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
             temp2 := stringreplace(temp2, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
-            temp := IntToStr(buscaCidade(temp2, temp));
-            if StrToInt(temp) > 0 then
+            temp := buscaCidade(temp2, temp);
+            if (temp <> '') then
             begin
               colClieForn := colClieForn + ',cida,codi_cida';
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
@@ -1136,7 +1142,7 @@ begin
               end
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-                dadosUpdateClieForn := dadosUpdateClieForn + 'cida=' + '''' + temp2 + ''', codi_cida=' + '''' + temp + '''';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'cida=' + '''' + temp2 + ''', codi_cida=' + temp;
               end;
             end;
           end;

@@ -172,7 +172,7 @@ begin
                           'CGC = '+''''+cgc+''''+','+
                           'CEP = '+''''+UpperCase(cep.Text)+''''+','+
                           'NOME_FANTASIA = '+''''+fant+''''+','+
-                          'CODI_CIDA = '+''''+TfrmPrinc.buscaCidade(UpperCase(cida.Text), UpperCase(uf.Text))+''''+','+
+                          'CODI_CIDA = '+''''+IntToStr(TfrmPrinc.buscaCidade(UpperCase(cida.Text), UpperCase(uf.Text)))+''''+','+
                           'BAIRRO = '+''''+UpperCase(bair.Text)+''''+','+
                           'CRT = '+IntToStr(crt)+' '+
                       'WHERE (CODI = '+''''+empr.Text+''''+');';
