@@ -5679,6 +5679,40 @@ begin
               SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
               SQL.ExecSQL;
             end;
+
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;';
+              SQL.ExecSQL;
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;';
+              SQL.ExecSQL;;
+            end
+            //Se não existir coluna margem, ve se tem alguma coluna de preço e recalcular margem
+            else begin
+              //Preço A PRAZO
+              i:=BuscaColuna(StringGrid1,'preco_prazo');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM1
+                frmImportando.atualizaStatus('Ajustando MARGEM 1.');
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
+                SQL.ExecSQL;
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
+                SQL.ExecSQL;
+              end;
+              //Preço A VISTA
+              i:=BuscaColuna(StringGrid1,'preco_vista');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM2
+                frmImportando.atualizaStatus('Ajustando MARGEM 2.');
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_preco_prazo>0;';
+                SQL.ExecSQL;
+              end;
+            end;
           end;
 
         end
@@ -5788,6 +5822,40 @@ begin
               frmImportando.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
               WriteLn(fileTXT, 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);');
               WriteLn(fileTXT, 'COMMIT WORK;');
+            end;
+
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+            end
+            //Se não existir coluna margem, ve se tem alguma coluna de preço e recalcular margem
+            else begin
+              //Preço A PRAZO
+              i:=BuscaColuna(StringGrid1,'preco_prazo');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM1
+                frmImportando.atualizaStatus('Ajustando MARGEM 1.');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              end;
+              //Preço A VISTA
+              i:=BuscaColuna(StringGrid1,'preco_vista');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM2
+                frmImportando.atualizaStatus('Ajustando MARGEM 2.');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_preco_prazo>0;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              end;
             end;
           end;
         end
