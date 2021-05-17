@@ -1564,6 +1564,22 @@ begin
                 dadosUpdateClieForn := dadosUpdateClieForn + 'cep=' + '''' + temp + '''';
               end;
             end
+            //PROX (PROXIMIDADE)
+            else if (LowerCase(StringGrid1.Cells[i,0])='prox') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',prox';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('prox') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'prox=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'prox=' + '''' + temp + '''';
+              end;
+            end
             //FONE
             else if (LowerCase(StringGrid1.Cells[i,0])='fone') then
             begin
@@ -1644,6 +1660,159 @@ begin
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
                 dadosUpdateClieForn := dadosUpdateClieForn + 'firm=' + '''' + temp + '''';
+              end;
+            end
+            //TRABALHA_DESDE (Trabalha na empresa desde quando)
+            else if (LowerCase(StringGrid1.Cells[i,0])='trabalha_desde') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length >= 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                colClieForn := colClieForn + ',desd';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('desd') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end;
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com a data desc
+                //Se os caracteres da data de nascimento do cliente forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                colClieForn := colClieForn + ',desd';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('desd') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end;
+              end;
+            end
+            //ENDE_FIRM (Endereço da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='ende_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',ende_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('ende_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'ende_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'ende_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CARG (Cargo da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='carg') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',carg';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('carg') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'carg=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'carg=' + '''' + temp + '''';
+              end;
+            end
+            //SALA (Sala da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='sala') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',sala';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('sala') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'sala=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'sala=' + '''' + temp + '''';
+              end;
+            end
+            //BAIR_FIRM (Bairro da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='bair_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',bair_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('bair_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'bair_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'bair_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CIDA_FIRM (Cidade da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cida_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',cida_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('cida_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'cida_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'cida_firm=' + '''' + temp + '''';
+              end;
+            end
+            //UF_FIRM (UF da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='uf_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',uf_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('uf_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'uf_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'uf_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CEP_FIRM (CEP da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cep_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',cep_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('cep_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'cep_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'cep_firm=' + '''' + temp + '''';
               end;
             end
             //ESTA_CIVI (Estado Civil)
@@ -1732,6 +1901,101 @@ begin
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
                 dadosUpdateClieForn := dadosUpdateClieForn + 'conj_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CONJ_FIRM (Trabalho do Conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='conj_firm') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,60));
+              colClieForn := colClieForn + ',conj_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('conj_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'conj_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'conj_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CONJ_SALA (Sala de Trabalho do Conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='conj_sala') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,60));
+              colClieForn := colClieForn + ',conj_sala';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('conj_sala') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'conj_sala=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'conj_sala=' + '''' + temp + '''';
+              end;
+            end
+            //CONJ_CARG (Cargo do Conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='conj_carg') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,60));
+              colClieForn := colClieForn + ',conj_carg';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('conj_carg') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'conj_carg=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'conj_carg=' + '''' + temp + '''';
+              end;
+            end
+            //DATA_CONJ (Data da união com conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='data_conj') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length >= 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                colClieForn := colClieForn + ',data_conj';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('data_conj') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end;
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com a data desc
+                //Se os caracteres da data de nascimento do cliente forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                colClieForn := colClieForn + ',data_conj';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('data_conj') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end;
               end;
             end
             //OBS

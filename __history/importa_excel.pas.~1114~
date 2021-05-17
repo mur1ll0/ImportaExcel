@@ -91,7 +91,7 @@ type
     { Private declarations }
   public
     { Public declarations }
-    class function buscaCidade(Cidade, UF: string): Integer;
+    class function buscaCidade(Cidade, UF: string): String;
   end;
 
 var
@@ -604,30 +604,36 @@ end;
 
 
 //Função para buscar a cidade no banco.
-class function TfrmPrinc.buscaCidade(Cidade, UF: string): Integer;
+class function TfrmPrinc.buscaCidade(Cidade, UF: string): String;
 var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('SELECT * FROM CIDADE WHERE CID_DESC = :PDESC AND CID_UF = :PUF');
-    queryTemp.ParamByName('PDESC').AsString := Cidade;
-    queryTemp.ParamByName('PUF').AsString := UF;
-    queryTemp.Open;
-  finally
-    if queryTemp.IsEmpty then
-    begin
-      Result := -1;
-    end
-    else begin
-      Result := queryTemp.FieldByName('CID_CODI').AsInteger;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := '(SELECT CID_CODI FROM CIDADE WHERE CID_DESC = '''+Cidade+''' AND CID_UF = '''+UF+''')'
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('SELECT * FROM CIDADE WHERE CID_DESC = :PDESC AND CID_UF = :PUF');
+      queryTemp.ParamByName('PDESC').AsString := Cidade;
+      queryTemp.ParamByName('PUF').AsString := UF;
+      queryTemp.Open;
+    finally
+      if queryTemp.IsEmpty then
+      begin
+        Result := '';
+      end
+      else begin
+        Result := queryTemp.FieldByName('CID_CODI').AsString;
+      end;
+      queryTemp.Close;
+      frmPrinc.conDestino.Close;
     end;
-    queryTemp.Close;
-    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -1123,8 +1129,8 @@ begin
           begin
             temp2 := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
             temp2 := stringreplace(temp2, '''', QuotedStr(''''),[rfReplaceAll, rfIgnoreCase]);
-            temp := IntToStr(buscaCidade(temp2, temp));
-            if StrToInt(temp) > 0 then
+            temp := buscaCidade(temp2, temp);
+            if (temp <> '') then
             begin
               colClieForn := colClieForn + ',cida,codi_cida';
               dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
@@ -1136,7 +1142,7 @@ begin
               end
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-                dadosUpdateClieForn := dadosUpdateClieForn + 'cida=' + '''' + temp2 + ''', codi_cida=' + '''' + temp + '''';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'cida=' + '''' + temp2 + ''', codi_cida=' + temp;
               end;
             end;
           end;
@@ -1455,6 +1461,33 @@ begin
               end
               else begin
                 colClieForn := colClieForn + ',insc';
+                dadosClieForn := dadosClieForn + ',''' + 'ISENTO' + '''';
+              end;
+            end
+            //INSCR_PRODUTOR (INSCRICAO DE PRODUTOR RURAL)
+            else if (LowerCase(StringGrid1.Cells[i,0])='inscr_produtor') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,20));
+              if temp.Length > 1 then
+              begin
+                colClieForn := colClieForn + ',inscr_produtor';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('inscr_produtor') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'inscr_produtor=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'inscr_produtor=' + '''' + temp + '''';
+                end;
+              end
+              else begin
+                colClieForn := colClieForn + ',inscr_produtor';
                 dadosClieForn := dadosClieForn + ',''' + 'ISENTO' + '''';
               end;
             end
@@ -2702,14 +2735,124 @@ begin
                   '    from prod_esto pe '+
                   '    where ('+temp+'-pe.qtd) <> 0 ';
             end;
-          end
-          else begin
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '6' + '''';
+          end;
+
+          //EST
+          i:=BuscaColuna(StringGrid1,'est');
+          if (i<>-1) then
+          begin
+            if StringGrid1.Cells[i,k]='' then
+            begin
+              temp := '0';
+            end
+            else begin
+              temp := StringGrid1.Cells[i,k];
+            end;
+            temp := corrigeFloat(temp);
+            dadosItens := dadosItens + ',' + temp;
+            colItens := colItens + ',qtd';
+            //Testa se é Update
+            if VerificaUpdate('est') = 1 then begin
+              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+              condUpdateProd := condUpdateProd + 'codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+              condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+              condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+              condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select cod_prod from prod_esto where qtd = '+temp+')';
+              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+              condUpdateItens := condUpdateItens + 'cod_prod in (select cod_prod from prod_esto where qtd = '+temp+')';
+            end
+            else begin
+              {
+               Comando para inserir na ITENS quando a diferenca de estoque for diferente de 0
+              }
+              //Comando Insert na itens - Ainda nao tem condição no WHERE, pois irá usar condUpdateItens concatenado
+              dadosUpdateItens := dadosUpdateItens + ' insert into ITENS (CODI,PRODCOD,NUME,TIPO,EPV,QTD,EMPR) '+
+                  '    select '+
+                  '        gen_id(gen_itens_id,1) CODI, '+
+                  '        '+prodCod+' PRODCOD, '+
+                  '        gen_id(gen_prod_ajus_id,0)+1 NUME, '+
+                  '        case '+
+                  '            when ('+temp+'-pe.qtd) > 0 then 5 '+
+                  '            when ('+temp+'-pe.qtd) < 0 then 2 '+
+                  '        end TIPO, '+
+                  '        ''A'' EPV, '+
+                  '        ABS('+temp+'-pe.qtd) QTD, '+
+                  '        '+prodEmpr+' EMPR '+
+                  '    from prod_esto pe '+
+                  '    where ('+temp+'-pe.qtd) <> 0 ';
+            end;
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '5' + '''';
+          end;
+
+          //MAX
+          i:=BuscaColuna(StringGrid1,'max');
+          if (i<>-1) then
+          begin
+            if StringGrid1.Cells[i,k]='' then
+            begin
+              temp := '0';
+            end
+            else begin
+              temp := StringGrid1.Cells[i,k];
+            end;
+            temp := corrigeFloat(temp);
+            dadosItens := dadosItens + ',' + temp;
+            colItens := colItens + ',qtd';
+            //Testa se é Update
+            if VerificaUpdate('est') = 1 then begin
+              if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+              condUpdateProd := condUpdateProd + 'codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+              condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+              condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+              condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+              if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+              condUpdateItens := condUpdateItens + 'cod_prod in (select cod_prod from prod_esto where qtd_max = '+temp+')';
+            end
+            else begin
+              {
+               Comando para inserir na ITENS quando a diferenca de estoque for diferente de 0
+              }
+              //Comando Insert na itens - Ainda nao tem condição no WHERE, pois irá usar condUpdateItens concatenado
+              dadosUpdateItens := dadosUpdateItens + ' insert into ITENS (CODI,PRODCOD,NUME,TIPO,EPV,QTD,EMPR) '+
+                  '    select '+
+                  '        gen_id(gen_itens_id,1) CODI, '+
+                  '        '+prodCod+' PRODCOD, '+
+                  '        gen_id(gen_prod_ajus_id,0)+1 NUME, '+
+                  '        case '+
+                  '            when ('+temp+'-pe.qtd) > 0 then 4 '+
+                  '            when ('+temp+'-pe.qtd) < 0 then 1 '+
+                  '        end TIPO, '+
+                  '        ''A'' EPV, '+
+                  '        ABS('+temp+'-pe.qtd) QTD, '+
+                  '        '+prodEmpr+' EMPR '+
+                  '    from prod_esto pe '+
+                  '    where ('+temp+'-pe.qtd) <> 0 ';
+            end;
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '4' + '''';
+          end;
+
+          //Se não tiver informação de estoque, coloca padrões
+          if (BuscaColuna(StringGrid1,'qtd')=-1) and (BuscaColuna(StringGrid1,'est')=-1) and (BuscaColuna(StringGrid1,'max')=-1) then begin
             colItens := colItens + ',qtd';
             dadosItens := dadosItens + ',''' + '0' + '''';
+            //Setar tipo do item
+            colItens := colItens + ',tipo';
+            dadosItens := dadosItens + ',''' + '6' + '''';
           end;
           //Campos adicionais para a itens
-          colItens := colItens + ',tipo';
-          dadosItens := dadosItens + ',''' + '6' + '''';
           colItens := colItens + ',epv';
           dadosItens := dadosItens + ',''' + 'A' + '''';
           colItens := colItens + ',nume';
@@ -3093,6 +3236,20 @@ begin
               temp := corrigeFloat(temp);
               dadosProd := dadosProd + ',' + temp;
             end
+            //QTD_MINIMA (Quantidade Mínima)
+            else if (LowerCase(StringGrid1.Cells[i,0])='qtd_minima') then
+            begin
+              colProdAdic := colProdAdic + ',adic_qtd_minima';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := corrigeFloat(temp);
+              dadosProdAdic := dadosProdAdic + ',' + temp;
+            end
             //CUSTO (Custo)
             else if (LowerCase(StringGrid1.Cells[i,0])='custo') then
             begin
@@ -3129,8 +3286,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_custo=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_custo=' + '''' + temp + '''';
               end;
             end
             //CUSTO_MEDIO (Custo Medio)
@@ -3160,8 +3317,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo_medio = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_custo_medio=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_custo_medio=' + '''' + temp + '''';
               end;
             end
             //IPI (IPI agregado ao custo)
@@ -3192,8 +3349,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_ipi = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_ipi=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_ipi=' + '''' + temp + '''';
               end;
             end
             //PIS (PIS agregado ao custo)
@@ -3224,8 +3381,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_pis = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_pis=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_pis=' + '''' + temp + '''';
               end;
             end
             //COFINS (COFINS agregado ao custo)
@@ -3256,8 +3413,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_cofins = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_cofins=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_cofins=' + '''' + temp + '''';
               end;
             end
             //ICMS (ICMS agregado ao custo)
@@ -3288,8 +3445,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_icms = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_icms=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_icms=' + '''' + temp + '''';
               end;
             end
             //FRETE
@@ -3320,8 +3477,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_frete = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_frete=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_frete=' + '''' + temp + '''';
               end;
             end
             //CUSTO_REAL (Custo Real)
@@ -3351,8 +3508,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_custo_real = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_custo_real=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_custo_real=' + '''' + temp + '''';
               end;
             end
             //PRECO_PRAZO (Preço a Prazo)
@@ -3388,8 +3545,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_preco_prazo = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_preco_prazo=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_preco_prazo=' + '''' + temp + '''';
               end;
             end
             //PRECO_VISTA (Preço a Vista)
@@ -3425,8 +3582,48 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_preco_vista = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'cust_preco_vista=' + '''' + temp + '''';
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_preco_vista=' + '''' + temp + '''';
+              end;
+            end
+            //MARGEM (Margem de Valor)
+            else if (LowerCase(StringGrid1.Cells[i,0])='margem') then
+            begin
+              colProdCust := colProdCust + ',cust_margem1';
+              if StringGrid1.Cells[i,k]='' then
+              begin
+                temp := '0';
+              end
+              else begin
+                temp := StringGrid1.Cells[i,k];
+              end;
+              temp := stringreplace(temp, '%', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := corrigeFloat(temp);
+              temp := stringreplace(temp, '.', ',',[rfReplaceAll, rfIgnoreCase]);
+
+              //Testar se precisa multiplicar por 100
+              if StrToFloat(temp) < 1 then
+                temp := FloatToStr( StrToFloat(temp) * 100 );
+
+              temp := corrigeFloat(temp);
+              dadosProdCust := dadosProdCust + ',' + temp;
+
+              //Testa se é Update
+              if VerificaUpdate('margem') = 1 then begin
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_margem1='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'codi in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select cust_prod_codi from prod_custos where cust_margem1 = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProdCust <> '' then dadosUpdateProdCust := dadosUpdateProdCust + ', ';
+                dadosUpdateProdCust := dadosUpdateProdCust + 'cust_margem1=' + '''' + temp + '''';
               end;
             end
             //CSOSN
@@ -3461,11 +3658,11 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CSOSN ESTADUAL
@@ -3496,9 +3693,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_SN_CSOSN_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_ESTA_CF=' + '''' + temp + '''';
               end;
             end
             //CSOSN INTERESTADUAL
@@ -3529,9 +3726,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_SN_CSOSN_INTERESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_SN_CSOSN_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_SN_CSOSN_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CST
@@ -3566,11 +3763,11 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //CST ESTADUAL
@@ -3601,9 +3798,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_ICMS_ESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_ESTA_CF=' + '''' + temp + '''';
               end;
             end
             //CST INTERESTADUAL
@@ -3634,9 +3831,9 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_ICMS_INTERESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_ICMS_INTER_CF=' + '''' + temp + '''';
               end;
             end
             //ALIQ_ICMS (Alíquota de ICMS)
@@ -3645,6 +3842,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_ICMS_ESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3666,8 +3864,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_ICMS_ESTADUAL=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_ICMS_ESTADUAL=' + '''' + temp + '''';
               end;
             end
             //REDU_ESTA (Redução da Alíquota de ICMS Estadual)
@@ -3676,6 +3874,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_ESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3697,8 +3896,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_REDU_ICMS_ESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_REDU_ICMS_ESTADUAL=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_REDU_ICMS_ESTADUAL=' + '''' + temp + '''';
               end;
             end
             //REDU_INTER (Redução da Alíquota de ICMS Interestadual)
@@ -3707,6 +3906,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_REDU_ICMS_INTERESTADUAL';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3728,8 +3928,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_REDU_ICMS_INTERESTADUAL = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_REDU_ICMS_INTERESTADUAL=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_REDU_ICMS_INTERESTADUAL=' + '''' + temp + '''';
               end;
             end
             //CST_IPI (Código de CST IPI)
@@ -3748,7 +3948,7 @@ begin
                 if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
                 condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_IPI = '+''''+temp+''')';
                 if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_IPI='+''''+temp+'''';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_IPI='+''''+StringGrid1.Cells[i,k]+'''';
                 if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
                 condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_IPI = '+''''+temp+''')';
                 if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
@@ -3757,8 +3957,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_IPI = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_IPI=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + ',TRIB_CST_IPI=' + '''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
             //ALIQ_IPI (Alíquota de IPI)
@@ -3788,8 +3988,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_IPI = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_IPI=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_IPI=' + '''' + temp + '''';
               end;
             end
             //CST_PIS (Código de CST PIS)
@@ -3808,7 +4008,7 @@ begin
                 if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
                 condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_PIS = '+''''+temp+''')';
                 if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_PIS='+''''+temp+'''';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_PIS='+''''+StringGrid1.Cells[i,k]+'''';
                 if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
                 condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_PIS = '+''''+temp+''')';
                 if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
@@ -3817,8 +4017,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_PIS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_PIS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_PIS=' + '''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
             //ALIQ_PIS (Alíquota de PIS)
@@ -3827,6 +4027,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_PIS';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3848,8 +4049,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_PIS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_PIS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_PIS=' + '''' + temp + '''';
               end;
             end
             //CST_COFINS (Código de CST COFINS)
@@ -3868,7 +4069,7 @@ begin
                 if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
                 condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_COFINS = '+''''+temp+''')';
                 if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_COFINS='+''''+temp+'''';
+                condUpdateProdTrib := condUpdateProdTrib + 'TRIB_CST_COFINS='+''''+StringGrid1.Cells[i,k]+'''';
                 if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
                 condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select trib_prod_codi from prod_tributos where TRIB_CST_COFINS = '+''''+temp+''')';
                 if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
@@ -3877,8 +4078,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_CST_COFINS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_CST_COFINS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_CST_COFINS=' + '''' + StringGrid1.Cells[i,k] + '''';
               end;
             end
             //ALIQ_COFINS (Alíquota de COFINS)
@@ -3887,6 +4088,7 @@ begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProdTrib := colProdTrib + ',TRIB_ALIQ_COFINS';
                 dadosProdTrib := dadosProdTrib + ',''' + '0' + '''';
+                temp := '0';
               end
               else begin
                 temp := stringreplace(StringGrid1.Cells[i,k], '%', '',[rfReplaceAll, rfIgnoreCase]);
@@ -3908,8 +4110,8 @@ begin
                 condUpdateItens := condUpdateItens + 'cod_prod in (select trib_prod_codi from prod_tributos where TRIB_ALIQ_COFINS = '+''''+temp+''')';
               end
               else begin
-                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                dadosUpdateProd := dadosUpdateProd + ',TRIB_ALIQ_COFINS=' + '''' + temp + '''';
+                if dadosUpdateProdTrib <> '' then dadosUpdateProdTrib := dadosUpdateProdTrib + ', ';
+                dadosUpdateProdTrib := dadosUpdateProdTrib + 'TRIB_ALIQ_COFINS=' + '''' + temp + '''';
               end;
             end
             //ATIVO
@@ -3917,7 +4119,8 @@ begin
             begin
               if StringGrid1.Cells[i,k]='' then begin
                 colProd := colProd + ',ATIVO';
-                dadosProd := dadosProd + ',''' + 'S' + '''';
+                temp := 'S';
+                dadosProd := dadosProd + ',''' + temp + '''';
               end
               else begin
                 colProd := colProd + ',ATIVO';
@@ -3948,6 +4151,23 @@ begin
                 end;
 
                 dadosProd := dadosProd + ',''' + temp + '''';
+              end;
+              //Testa se é Update
+              if VerificaUpdate('ativo') = 1 then begin
+                if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                condUpdateProd := condUpdateProd + 'ATIVO='+''''+temp+'''';
+                if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where ATIVO = '+''''+temp+''')';
+                if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where ATIVO = '+''''+temp+''')';
+                if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where ATIVO = '+''''+temp+''')';
+                if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where ATIVO = '+''''+temp+''')';
+              end
+              else begin
+                if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                dadosUpdateProd := dadosUpdateProd + 'ATIVO=' + '''' + temp + '''';
               end;
             end
             ;
@@ -4277,7 +4497,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -4394,7 +4616,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -4498,7 +4722,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -4912,7 +5138,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -5332,7 +5560,9 @@ begin
             end;
           end
           //Gravar comandos em TXT
-          else if UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT' then begin
+          else if (UpperCase( ExtractFileExt(DBPath.Text) ) = '.TXT') or
+                  (UpperCase( ExtractFileExt(DBPath.Text) ) = '.SQL')
+          then begin
             try
               try
                 //Carregar arquivo TXT
@@ -5413,12 +5643,26 @@ begin
 
           //Se for INSERT
           if colUpdateCount <= 0 then begin
-            //Atualizar MARGEM1
-            frmImportando.atualizaStatus('Ajustando MARGENS.');
-            SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
-            SQL.ExecSQL;
-            SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
-            SQL.ExecSQL;
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;';
+              SQL.ExecSQL;
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;';
+              SQL.ExecSQL;
+            end
+            //Se não existir coluna margem, recalcular margem
+            else begin
+              //Atualizar MARGEM1
+              frmImportando.atualizaStatus('Ajustando MARGENS.');
+              SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
+              SQL.ExecSQL;
+              SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
+              SQL.ExecSQL;
+            end;
+
             //Atualizar MARGEM2
             SQL.CommandText := 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;';
             SQL.ExecSQL;
@@ -5434,6 +5678,40 @@ begin
               frmImportando.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
               SQL.CommandText := 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);';
               SQL.ExecSQL;
+            end;
+
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;';
+              SQL.ExecSQL;
+              SQL.CommandText := 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;';
+              SQL.ExecSQL;;
+            end
+            //Se não existir coluna margem, ve se tem alguma coluna de preço e recalcular margem
+            else begin
+              //Preço A PRAZO
+              i:=BuscaColuna(StringGrid1,'preco_prazo');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM1
+                frmImportando.atualizaStatus('Ajustando MARGEM 1.');
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;';
+                SQL.ExecSQL;
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;';
+                SQL.ExecSQL;
+              end;
+              //Preço A VISTA
+              i:=BuscaColuna(StringGrid1,'preco_vista');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM2
+                frmImportando.atualizaStatus('Ajustando MARGEM 2.');
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_preco_prazo>0;';
+                SQL.ExecSQL;
+              end;
             end;
           end;
 
@@ -5507,12 +5785,27 @@ begin
             frmImportando.atualizaStatus('Alterar Generator do Produto.');
             WriteLn(fileTXT, 'select gen_id(gen_prod_id, abs((select max(CODI) from prod) - (select gen_id(gen_prod_id,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
             WriteLn(fileTXT, 'COMMIT WORK;');
-            //Atualizar MARGEM1
-            frmImportando.atualizaStatus('Ajustando MARGENS.');
-            WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
-            WriteLn(fileTXT, 'COMMIT WORK;');
-            WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
-            WriteLn(fileTXT, 'COMMIT WORK;');
+
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+            end
+            //Se não existir coluna margem, recalcular margem
+            else begin
+              //Atualizar MARGEM1
+              frmImportando.atualizaStatus('Ajustando MARGENS.');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+            end;
+
             //Atualizar MARGEM2
             WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2 = (cast(pc.cust_preco_vista as numeric (18,2))/cast(pc.cust_preco_prazo as numeric (18,2)) -1)*100 where cast(pc.cust_preco_prazo as numeric (18,2))>0;');
             WriteLn(fileTXT, 'COMMIT WORK;');
@@ -5529,6 +5822,40 @@ begin
               frmImportando.atualizaStatus('Inserindo dados na tabela PROD_AJUS.');
               WriteLn(fileTXT, 'insert into prod_ajus (codi,data) values (gen_id(gen_prod_ajus_id,1),CURRENT_DATE);');
               WriteLn(fileTXT, 'COMMIT WORK;');
+            end;
+
+            //Verificar se existe coluna margem, recalcular preços
+            i:=BuscaColuna(StringGrid1,'margem');
+            if (i<>-1) then
+            begin
+              frmImportando.atualizaStatus('Ajustando Preços.');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_prazo = pc.cust_custo_real+(pc.cust_custo_real * pc.cust_margem1 /100) where pc.cust_custo_real>0;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+              WriteLn(fileTXT, 'update prod_custos pc set pc.cust_preco_vista = pc.cust_preco_prazo;');
+              WriteLn(fileTXT, 'COMMIT WORK;');
+            end
+            //Se não existir coluna margem, ve se tem alguma coluna de preço e recalcular margem
+            else begin
+              //Preço A PRAZO
+              i:=BuscaColuna(StringGrid1,'preco_prazo');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM1
+                frmImportando.atualizaStatus('Ajustando MARGEM 1.');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1= abs(pc.cust_preco_prazo - pc.cust_custo_real)/pc.cust_custo_real where pc.cust_custo_real>0;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem1 = pc.cust_margem1 * 100;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              end;
+              //Preço A VISTA
+              i:=BuscaColuna(StringGrid1,'preco_vista');
+              if (i<>-1) then
+              begin
+                //Atualizar MARGEM2
+                frmImportando.atualizaStatus('Ajustando MARGEM 2.');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_preco_prazo>0;');
+                WriteLn(fileTXT, 'COMMIT WORK;');
+              end;
             end;
           end;
         end
@@ -6335,6 +6662,8 @@ begin
           frmColunas.LabelTipoImp.Caption := SelectImport.Text;
           frmColunas.MostrarColunas;
           for i := 0 to frmColunas.ListColunas.Count-1 do begin
+            if StringGrid1.Cells[Col,0] = '' then
+              Continue;
             if LowerCase(frmColunas.ListColunas.Items[i]) = LowerCase(StringGrid1.Cells[Col,0]) then begin
               k := 1;
               Break;
