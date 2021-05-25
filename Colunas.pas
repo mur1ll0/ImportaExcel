@@ -92,6 +92,7 @@ begin
     ListColunas.Items.add('EST');
     ListColunas.Items.add('MAX');
     ListColunas.Items.add('FORN');
+    ListColunas.Items.add('COLECAO');
     ListColunas.Items.add('DESCR');
     ListColunas.Items.add('DESCR2');
     ListColunas.Items.add('REFE');
