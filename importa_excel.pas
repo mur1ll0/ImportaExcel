@@ -3146,8 +3146,7 @@ begin
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,30));
-              //Se for letras, buscar código.
-              if not (IsNumeric(temp)) then
+              if temp <> '' then
               begin
                 temp2 := querySelect('select pc.codi from prod_colecao pc where pc.descri= '''+temp+'''');
                 //Se não encontrar a string, cadastrar grupo
@@ -3157,12 +3156,12 @@ begin
                       AssignFile(fileTXT, DBPath.Text);
                       if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                       else append(fileTXT);
-                      WriteLn(fileTXT, 'insert into prod_colecao (CODI,DESCR) values (case when (select pc.codi from prod_colecao pc where pc.descri= = '''+temp+''') is null then gen_id(gen_prod_colecao_id,1 ) else (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') end,'''+temp+''');');
+                      WriteLn(fileTXT, 'insert into prod_colecao (CODI,DESCRI) values (case when (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') is null then gen_id(gen_prod_colecao_id,1 ) else (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') end,'''+temp+''');');
                       WriteLn(fileTXT, 'COMMIT WORK;');
                       CloseFile(fileTXT);
                     end
                   else begin
-                    queryInsert('insert into prod_colecao (CODI,DESCR) values (gen_id(gen_prod_colecao_id,1),'''+temp+''');');
+                    queryInsert('insert into prod_colecao (CODI,DESCRI) values (gen_id(gen_prod_colecao_id,1),'''+temp+''');');
                   end;
                   colProd := colProd + ',codi_colecao';
                   dadosProd := dadosProd + ',' + 'gen_id(gen_prod_colecao_id,0)';
@@ -3174,47 +3173,15 @@ begin
                 //Testa se é Update
                 if VerificaUpdate('colecao') = 1 then begin
                   if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
-                  condUpdateProd := condUpdateProd + 'codi_colecao=(select codi from prod_colecao where descr='+''''+temp+''')';
+                  condUpdateProd := condUpdateProd + 'codi_colecao=(select codi from prod_colecao where DESCRI='+''''+temp+''')';
                   if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
+                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                   if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
-                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
+                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                   if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
-                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
+                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                   if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
-                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
-                end
-                else begin
-                  if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                  dadosUpdateProd := dadosUpdateProd + 'codi_colecao=' + '''' + temp + '''';
-                end;
-              end
-              else begin
-                //Se for números, considera como código
-                //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
-                temp2 := querySelect('select pc.codi from prod_colecao pc where pc.codi = '''+temp+'''');
-                //Se não encontrar o codigo, colocamos o generator
-                if temp2='' then begin
-                  colProd := colProd + ',codi_colecao';
-                  dadosProd := dadosProd + ',' + 'gen_id(gen_prod_colecao_id,0)';
-                end
-                //Se encontrar usa o código
-                else begin
-                  colProd := colProd + ',codi_colecao';
-                  dadosProd := dadosProd + ',''' + temp2 + '''';
-                end;
-                //Testa se é Update
-                if VerificaUpdate('colecao') = 1 then begin
-                  if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
-                  condUpdateProd := condUpdateProd + 'codi_colecao='+''''+temp+'''';
-                  if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = '+''''+temp+''')';
-                  if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
-                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = '+''''+temp+''')';
-                  if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
-                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = '+''''+temp+''')';
-                  if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
-                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = '+''''+temp+''')';
+                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                 end
                 else begin
                   if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';

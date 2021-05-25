@@ -17,6 +17,7 @@ type
     procedure atualizaItens(min: integer; max: integer);
     procedure atualizaStatus(status: string);
     procedure BitBtn1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
 
   private
     { Private declarations }
@@ -80,6 +81,12 @@ begin
   end;
   frmImportando.Label2.Left := (Width - frmImportando.Label2.Width ) div 2;
   //frmImportando.Label2.Top := (Height - frmImportando.Label2.Height) div 2;
+end;
+
+procedure TfrmImportando.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  frmImportando.Label2.Font.Color := clHotLight;
+  frmImportando.BitBtn1.Caption := 'Cancelar';
 end;
 
 end.
