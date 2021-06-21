@@ -166,6 +166,33 @@ begin
 end;
 
 
+//Função para criar caixa de diálogos
+function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
+  Caption: ARRAY OF string; dlgcaption: string): Integer;
+var
+  aMsgdlg: TForm;
+  i: Integer;
+  Dlgbutton: Tbutton;
+  Captionindex: Integer;
+begin
+  aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
+  aMsgdlg.Caption := dlgcaption;
+  aMsgdlg.BiDiMode := bdRightToLeft;
+  Captionindex := 0;
+  for i := 0 to aMsgdlg.componentcount - 1 Do
+  begin
+    if (aMsgdlg.components[i] is Tbutton) then
+    Begin
+      Dlgbutton := Tbutton(aMsgdlg.components[i]);
+      if Captionindex <= High(Caption) then
+        Dlgbutton.Caption := Caption[Captionindex];
+      inc(Captionindex);
+    end;
+  end;
+  Result := aMsgdlg.Showmodal;
+end;
+
+
 //Função para carregar apenas o cabeçalho de uma planilha na StringGrid
 function XlsHeaderLoad(AGrid: TStringGrid; AXLSFile: string): Boolean;
 const
@@ -242,62 +269,93 @@ var
   XLApp, Sheet: OLEVariant;
   RangeMatrix: Variant;
   i, j, x, y, k, r: Integer;
+  but: Integer;
 begin
   Result := False;
   // Create Excel-OLE Object
   XLApp := CreateOleObject('Excel.Application');
   try
-    // Hide Excel
-    XLApp.Visible := False;
+    try
 
-    // Open the Workbook
-    XLApp.Workbooks.Open(AXLSFile);
+      // Hide Excel
+      XLApp.Visible := False;
 
-    AGrid.RowCount := 0;
-    AGrid.ColCount := 1;
-    k := 0;
-    j := 1;
-    //Percorrer os WorkSheets
-    for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
-    begin
-      Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
+      // Open the Workbook
+      XLApp.Workbooks.Open(AXLSFile);
 
-      //Retirar Filtros, para que não fique linhas escondidas
-      if (Sheet.AutoFilterMode = True) then
+      but := 0;
+      AGrid.RowCount := 0;
+      AGrid.ColCount := 1;
+      k := 0;
+      j := 1;
+      //Percorrer os WorkSheets
+      for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
       begin
-        Sheet.AutoFilterMode := False;
-      end;
+        Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
 
-      //Receber valores da ultima linha e coluna
-      x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
-      y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
-
-      //Setar tamanho do StringGrid
-      AGrid.RowCount := AGrid.RowCount + x;
-      if y > AGrid.ColCount  then
-      begin
-        AGrid.ColCount := y + 1;
-      end;
-
-      // Assign the Variant associated with the WorkSheet to the Delphi Variant
-      RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
-
-      //Iterar linhas
-      while k < AGrid.RowCount-1 do
-      begin
-        AGrid.Cells[0,k] := IntToStr(k);
-        //Iterar colunas
-        for r := 1 to AGrid.ColCount-1 do
+        //Retirar Filtros, para que não fique linhas escondidas
+        if (Sheet.AutoFilterMode = True) then
         begin
-          AGrid.Cells[r,k] := RangeMatrix[j,r];
+          Sheet.AutoFilterMode := False;
         end;
-        k := k + 1;
-        j := j + 1;
+
+        //Receber valores da ultima linha e coluna
+        x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
+        y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
+
+        //Setar tamanho do StringGrid
+        AGrid.RowCount := AGrid.RowCount + x;
+        if y > AGrid.ColCount  then
+        begin
+          AGrid.ColCount := y + 1;
+        end;
+
+        // Assign the Variant associated with the WorkSheet to the Delphi Variant
+        RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
+
+        //Iterar linhas
+        while k < AGrid.RowCount-1 do
+        begin
+          if but = 1 then Break;
+
+          AGrid.Cells[0,k] := IntToStr(k);
+          //Iterar colunas
+          for r := 1 to AGrid.ColCount-1 do
+          begin
+            try
+              AGrid.Cells[r,k] := RangeMatrix[j,r];
+            except
+              on E:Exception do
+              begin
+                if but = 7 then Continue;
+
+                but := Mensagem('Erro no arquivo Excel linha: '+IntToStr(j)+' coluna: '+IntToStr(r)+' ('+RangeMatrix[1,r]+')'+#13+E.Message+#13+'Continuar irá deixar célula em branco. Ignorar irá deixar célula em branco para todos os erros sem perguntar.', mtCustom,[mbYes, mbNo, mbOK],['Continuar', 'Ignorar','Parar'],'Erro no arquivo Excel');
+                if (but = 6) then begin
+                  AGrid.Cells[r,k] := '';
+                end
+                else if (but = 7) then begin
+                  Continue;
+                end
+                else if (but = 1) then begin
+                  raise Exception.Create('Erro no arquivo Excel. Verificar se existem células contendo:'+#13+'#DIV/0!'+#13+'#N/A'+#13+'#NAME?'+#13+'#NULL!'+#13+'#NUM!'+#13+'#REF!'+#13+'#VALUE!');
+                end;
+              end;
+            end;
+          end;
+          k := k + 1;
+          j := j + 1;
+        end;
+
+        //Fazer proximos WorksSheet começar da 2 linha
+        j := 2;
+        AGrid.RowCount := AGrid.RowCount - 1;
       end;
 
-      //Fazer proximos WorksSheet começar da 2 linha
-      j := 2;
-      AGrid.RowCount := AGrid.RowCount - 1;
+    except
+      on E:Exception do
+      begin
+        ShowMessage(E.Message);
+      end;
     end;
 
   finally
@@ -343,33 +401,6 @@ begin
     oFileStrings.Free;
     oRowStrings.Free;
   end;
-end;
-
-
-//Função para criar caixa de diálogos
-function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
-  Caption: ARRAY OF string; dlgcaption: string): Integer;
-var
-  aMsgdlg: TForm;
-  i: Integer;
-  Dlgbutton: Tbutton;
-  Captionindex: Integer;
-begin
-  aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
-  aMsgdlg.Caption := dlgcaption;
-  aMsgdlg.BiDiMode := bdRightToLeft;
-  Captionindex := 0;
-  for i := 0 to aMsgdlg.componentcount - 1 Do
-  begin
-    if (aMsgdlg.components[i] is Tbutton) then
-    Begin
-      Dlgbutton := Tbutton(aMsgdlg.components[i]);
-      if Captionindex <= High(Caption) then
-        Dlgbutton.Caption := Caption[Captionindex];
-      inc(Captionindex);
-    end;
-  end;
-  Result := aMsgdlg.Showmodal;
 end;
 
 
