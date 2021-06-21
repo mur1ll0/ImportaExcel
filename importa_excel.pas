@@ -1181,8 +1181,24 @@ begin
 
           for i := 0 to StringGrid1.ColCount-1 do
           begin
+            //EMPRESA
+            if ((LowerCase(StringGrid1.Cells[i,0])='empresa') and (StringGrid1.Cells[i,0]<>'')) then
+            begin
+              colClieForn := colClieForn + ',empresa';
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+              //Testa se é Update
+              if VerificaUpdate('empresa') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'empresa=' + '''' + temp2 + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'empresa=' + '''' + temp2 + '''';
+              end;
+            end
             //GRUPO
-            if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
+            else if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
             begin
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
@@ -6269,8 +6285,20 @@ begin
     Sheet.Name := 'String Grid';
 
     for col := 1 to stringGrid.ColCount - 1 do
+    begin
       for row := 0 to stringGrid.RowCount - 1 do
-        Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
+      begin
+        try
+          Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
+        except
+          on E:Exception do
+          begin
+            Mensagem('Erro gravando Excel. Verifique o arquivo resultante e se estiver com problemas tente salvar em CSV.'+#13+E.Message, mtCustom,[mbOK], ['Ok'], 'Erro salvando Excel.');
+            Break;
+          end;
+        end;
+      end;
+    end;
     try
       Sheet.Columns.Autofit;
       XLApp.Workbooks[1].SaveAs(FileName);

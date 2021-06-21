@@ -36,6 +36,7 @@ begin
     ListColunas.Items.add('CODI');
     ListColunas.Items.add('UF');
     ListColunas.Items.add('CIDA');
+    ListColunas.Items.add('EMPRESA');
     ListColunas.Items.add('GRUPO');
     ListColunas.Items.add('NOME');
     ListColunas.Items.add('NOME_FANT');
