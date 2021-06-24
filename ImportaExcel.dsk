@@ -62,9 +62,9 @@ TabDockLeftClients=DockSite3=0
 [View0]
 CustomEditViewType=TEditView
 Module=C:\ImportaExcel\importa_excel.pas
-CursorX=1
-CursorY=1
-TopLine=49
+CursorX=63
+CursorY=1188
+TopLine=1165
 LeftCol=1
 Elisions=
 Bookmarks={1,4075,1}{2,4560,1}
@@ -234,6 +234,11 @@ LRDockWidth=1896
 Dockable=1
 StayOnTop=0
 SplitPos=111
+
+[PropInspDesignerSelection]
+ArrangeBy=Name
+SelectedItem=Action,
+ExpandedItems=Anchors=0,BorderIcons=0,Constraints=0,Font=0,GlassFrame=0,HorzScrollBar=0
 
 [ModelViewTool]
 PercentageSizes=1

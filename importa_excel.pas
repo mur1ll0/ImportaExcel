@@ -1186,15 +1186,15 @@ begin
             begin
               colClieForn := colClieForn + ',empresa';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
-              dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
               //Testa se é Update
               if VerificaUpdate('empresa') = 1 then begin
                 if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
-                condUpdateClieForn := condUpdateClieForn + 'empresa=' + '''' + temp2 + '''';
+                condUpdateClieForn := condUpdateClieForn + 'empresa=' + '''' + temp + '''';
               end
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-                dadosUpdateClieForn := dadosUpdateClieForn + 'empresa=' + '''' + temp2 + '''';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'empresa=' + '''' + temp + '''';
               end;
             end
             //GRUPO
