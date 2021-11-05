@@ -2400,6 +2400,8 @@ begin
             dadosProdCust := dadosProdCust + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+            colMVA := colMVA + ',mva_empr';
+            dadosMVA := dadosMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + prodEmpr + '''';
             colItens := colItens + 'empr';
@@ -2414,6 +2416,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+            colRegistroMVA := colRegistroMVA + ',mva_empr';
+            dadosRegistroMVA := dadosRegistroMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
 
             //Testa se é Update
             if VerificaUpdate('empr') = 1 then begin
@@ -2459,6 +2463,8 @@ begin
             dadosProdCust := dadosProdCust + ',''' + '1' + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + '1' + '''';
+            colMVA := colMVA + ',mva_empr';
+            dadosMVA := dadosMVA + ',''' + '1' + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + '1' + '''';
             colItens := colItens + 'empr';
@@ -2473,6 +2479,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + '1' + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + '1' + '''';
+            colRegistroMVA := colRegistroMVA + ',mva_empr';
+            dadosRegistroMVA := dadosRegistroMVA + ',''' + '1' + '''';
           end;
 
           //Codigo é obrigatório, se não tiver preenche com o generator
