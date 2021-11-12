@@ -2416,8 +2416,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
-            colRegistroMVA := colRegistroMVA + ',mva_empr';
-            dadosRegistroMVA := dadosRegistroMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+//            colRegistroMVA := colRegistroMVA + ',mva_empr';
+//            dadosRegistroMVA := dadosRegistroMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
 
             //Testa se é Update
             if VerificaUpdate('empr') = 1 then begin
@@ -2479,8 +2479,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + '1' + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + '1' + '''';
-            colRegistroMVA := colRegistroMVA + ',mva_empr';
-            dadosRegistroMVA := dadosRegistroMVA + ',''' + '1' + '''';
+//            colRegistroMVA := colRegistroMVA + ',mva_empr';
+//            dadosRegistroMVA := dadosRegistroMVA + ',''' + '1' + '''';
           end;
 
           //Codigo é obrigatório, se não tiver preenche com o generator
