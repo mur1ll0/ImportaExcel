@@ -1252,15 +1252,15 @@ begin
                 else begin
                   colClieForn := colClieForn + ',codi_grupo_clie';
                   dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
-                  //Testa se é Update
-                  if VerificaUpdate('grupo') = 1 then begin
-                    if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
-                    condUpdateClieForn := condUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
-                  end
-                  else begin
-                    if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-                    dadosUpdateClieForn := dadosUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
-                  end;
+                end;
+                //Testa se é Update
+                if VerificaUpdate('grupo') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
                 end;
               end;
             end

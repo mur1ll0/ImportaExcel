@@ -166,6 +166,33 @@ begin
 end;
 
 
+//Função para criar caixa de diálogos
+function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
+  Caption: ARRAY OF string; dlgcaption: string): Integer;
+var
+  aMsgdlg: TForm;
+  i: Integer;
+  Dlgbutton: Tbutton;
+  Captionindex: Integer;
+begin
+  aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
+  aMsgdlg.Caption := dlgcaption;
+  aMsgdlg.BiDiMode := bdRightToLeft;
+  Captionindex := 0;
+  for i := 0 to aMsgdlg.componentcount - 1 Do
+  begin
+    if (aMsgdlg.components[i] is Tbutton) then
+    Begin
+      Dlgbutton := Tbutton(aMsgdlg.components[i]);
+      if Captionindex <= High(Caption) then
+        Dlgbutton.Caption := Caption[Captionindex];
+      inc(Captionindex);
+    end;
+  end;
+  Result := aMsgdlg.Showmodal;
+end;
+
+
 //Função para carregar apenas o cabeçalho de uma planilha na StringGrid
 function XlsHeaderLoad(AGrid: TStringGrid; AXLSFile: string): Boolean;
 const
@@ -242,62 +269,93 @@ var
   XLApp, Sheet: OLEVariant;
   RangeMatrix: Variant;
   i, j, x, y, k, r: Integer;
+  but: Integer;
 begin
   Result := False;
   // Create Excel-OLE Object
   XLApp := CreateOleObject('Excel.Application');
   try
-    // Hide Excel
-    XLApp.Visible := False;
+    try
 
-    // Open the Workbook
-    XLApp.Workbooks.Open(AXLSFile);
+      // Hide Excel
+      XLApp.Visible := False;
 
-    AGrid.RowCount := 0;
-    AGrid.ColCount := 1;
-    k := 0;
-    j := 1;
-    //Percorrer os WorkSheets
-    for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
-    begin
-      Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
+      // Open the Workbook
+      XLApp.Workbooks.Open(AXLSFile);
 
-      //Retirar Filtros, para que não fique linhas escondidas
-      if (Sheet.AutoFilterMode = True) then
+      but := 0;
+      AGrid.RowCount := 0;
+      AGrid.ColCount := 1;
+      k := 0;
+      j := 1;
+      //Percorrer os WorkSheets
+      for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
       begin
-        Sheet.AutoFilterMode := False;
-      end;
+        Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
 
-      //Receber valores da ultima linha e coluna
-      x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
-      y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
-
-      //Setar tamanho do StringGrid
-      AGrid.RowCount := AGrid.RowCount + x;
-      if y > AGrid.ColCount  then
-      begin
-        AGrid.ColCount := y + 1;
-      end;
-
-      // Assign the Variant associated with the WorkSheet to the Delphi Variant
-      RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
-
-      //Iterar linhas
-      while k < AGrid.RowCount-1 do
-      begin
-        AGrid.Cells[0,k] := IntToStr(k);
-        //Iterar colunas
-        for r := 1 to AGrid.ColCount-1 do
+        //Retirar Filtros, para que não fique linhas escondidas
+        if (Sheet.AutoFilterMode = True) then
         begin
-          AGrid.Cells[r,k] := RangeMatrix[j,r];
+          Sheet.AutoFilterMode := False;
         end;
-        k := k + 1;
-        j := j + 1;
+
+        //Receber valores da ultima linha e coluna
+        x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
+        y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
+
+        //Setar tamanho do StringGrid
+        AGrid.RowCount := AGrid.RowCount + x;
+        if y > AGrid.ColCount  then
+        begin
+          AGrid.ColCount := y + 1;
+        end;
+
+        // Assign the Variant associated with the WorkSheet to the Delphi Variant
+        RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
+
+        //Iterar linhas
+        while k < AGrid.RowCount-1 do
+        begin
+          if but = 1 then Break;
+
+          AGrid.Cells[0,k] := IntToStr(k);
+          //Iterar colunas
+          for r := 1 to AGrid.ColCount-1 do
+          begin
+            try
+              AGrid.Cells[r,k] := RangeMatrix[j,r];
+            except
+              on E:Exception do
+              begin
+                if but = 7 then Continue;
+
+                but := Mensagem('Erro no arquivo Excel linha: '+IntToStr(j)+' coluna: '+IntToStr(r)+' ('+RangeMatrix[1,r]+')'+#13+E.Message+#13+'Continuar irá deixar célula em branco. Ignorar irá deixar célula em branco para todos os erros sem perguntar.', mtCustom,[mbYes, mbNo, mbOK],['Continuar', 'Ignorar','Parar'],'Erro no arquivo Excel');
+                if (but = 6) then begin
+                  AGrid.Cells[r,k] := '';
+                end
+                else if (but = 7) then begin
+                  Continue;
+                end
+                else if (but = 1) then begin
+                  raise Exception.Create('Erro no arquivo Excel. Verificar se existem células contendo:'+#13+'#DIV/0!'+#13+'#N/A'+#13+'#NAME?'+#13+'#NULL!'+#13+'#NUM!'+#13+'#REF!'+#13+'#VALUE!');
+                end;
+              end;
+            end;
+          end;
+          k := k + 1;
+          j := j + 1;
+        end;
+
+        //Fazer proximos WorksSheet começar da 2 linha
+        j := 2;
+        AGrid.RowCount := AGrid.RowCount - 1;
       end;
 
-      //Fazer proximos WorksSheet começar da 2 linha
-      j := 2;
-      AGrid.RowCount := AGrid.RowCount - 1;
+    except
+      on E:Exception do
+      begin
+        ShowMessage(E.Message);
+      end;
     end;
 
   finally
@@ -343,33 +401,6 @@ begin
     oFileStrings.Free;
     oRowStrings.Free;
   end;
-end;
-
-
-//Função para criar caixa de diálogos
-function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
-  Caption: ARRAY OF string; dlgcaption: string): Integer;
-var
-  aMsgdlg: TForm;
-  i: Integer;
-  Dlgbutton: Tbutton;
-  Captionindex: Integer;
-begin
-  aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
-  aMsgdlg.Caption := dlgcaption;
-  aMsgdlg.BiDiMode := bdRightToLeft;
-  Captionindex := 0;
-  for i := 0 to aMsgdlg.componentcount - 1 Do
-  begin
-    if (aMsgdlg.components[i] is Tbutton) then
-    Begin
-      Dlgbutton := Tbutton(aMsgdlg.components[i]);
-      if Captionindex <= High(Caption) then
-        Dlgbutton.Caption := Caption[Captionindex];
-      inc(Captionindex);
-    end;
-  end;
-  Result := aMsgdlg.Showmodal;
 end;
 
 
@@ -1150,8 +1181,24 @@ begin
 
           for i := 0 to StringGrid1.ColCount-1 do
           begin
+            //EMPRESA
+            if ((LowerCase(StringGrid1.Cells[i,0])='empresa') and (StringGrid1.Cells[i,0]<>'')) then
+            begin
+              colClieForn := colClieForn + ',empresa';
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('empresa') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'empresa=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'empresa=' + '''' + temp + '''';
+              end;
+            end
             //GRUPO
-            if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
+            else if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
             begin
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
@@ -1564,6 +1611,22 @@ begin
                 dadosUpdateClieForn := dadosUpdateClieForn + 'cep=' + '''' + temp + '''';
               end;
             end
+            //PROX (PROXIMIDADE)
+            else if (LowerCase(StringGrid1.Cells[i,0])='prox') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',prox';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('prox') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'prox=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'prox=' + '''' + temp + '''';
+              end;
+            end
             //FONE
             else if (LowerCase(StringGrid1.Cells[i,0])='fone') then
             begin
@@ -1644,6 +1707,159 @@ begin
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
                 dadosUpdateClieForn := dadosUpdateClieForn + 'firm=' + '''' + temp + '''';
+              end;
+            end
+            //TRABALHA_DESDE (Trabalha na empresa desde quando)
+            else if (LowerCase(StringGrid1.Cells[i,0])='trabalha_desde') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length >= 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                colClieForn := colClieForn + ',desd';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('desd') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end;
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com a data desc
+                //Se os caracteres da data de nascimento do cliente forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                colClieForn := colClieForn + ',desd';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('desd') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'desd=' + '''' + temp + '''';
+                end;
+              end;
+            end
+            //ENDE_FIRM (Endereço da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='ende_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',ende_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('ende_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'ende_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'ende_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CARG (Cargo da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='carg') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',carg';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('carg') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'carg=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'carg=' + '''' + temp + '''';
+              end;
+            end
+            //SALA (Sala da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='sala') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',sala';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('sala') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'sala=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'sala=' + '''' + temp + '''';
+              end;
+            end
+            //BAIR_FIRM (Bairro da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='bair_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',bair_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('bair_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'bair_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'bair_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CIDA_FIRM (Cidade da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cida_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',cida_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('cida_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'cida_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'cida_firm=' + '''' + temp + '''';
+              end;
+            end
+            //UF_FIRM (UF da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='uf_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',uf_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('uf_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'uf_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'uf_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CEP_FIRM (CEP da empresa)
+            else if (LowerCase(StringGrid1.Cells[i,0])='cep_firm') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              colClieForn := colClieForn + ',cep_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('cep_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'cep_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'cep_firm=' + '''' + temp + '''';
               end;
             end
             //ESTA_CIVI (Estado Civil)
@@ -1732,6 +1948,101 @@ begin
               else begin
                 if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
                 dadosUpdateClieForn := dadosUpdateClieForn + 'conj_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CONJ_FIRM (Trabalho do Conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='conj_firm') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,60));
+              colClieForn := colClieForn + ',conj_firm';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('conj_firm') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'conj_firm=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'conj_firm=' + '''' + temp + '''';
+              end;
+            end
+            //CONJ_SALA (Sala de Trabalho do Conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='conj_sala') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,60));
+              colClieForn := colClieForn + ',conj_sala';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('conj_sala') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'conj_sala=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'conj_sala=' + '''' + temp + '''';
+              end;
+            end
+            //CONJ_CARG (Cargo do Conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='conj_carg') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,60));
+              colClieForn := colClieForn + ',conj_carg';
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('conj_carg') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'conj_carg=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'conj_carg=' + '''' + temp + '''';
+              end;
+            end
+            //DATA_CONJ (Data da união com conjuge)
+            else if (LowerCase(StringGrid1.Cells[i,0])='data_conj') then
+            begin
+              temp := Trim(StringGrid1.Cells[i,k]);
+              temp := stringreplace(temp, '-', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '/', '',[rfReplaceAll, rfIgnoreCase]);
+              temp := stringreplace(temp, '.', '',[rfReplaceAll, rfIgnoreCase]);
+              if temp.Length >= 8 then
+              begin
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ (Copy(temp,5,4));
+                colClieForn := colClieForn + ',data_conj';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('data_conj') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end;
+              end
+              else if temp.Length = 6 then begin
+                temp2 := (Copy(DateToStr(Date()),9,2));
+                //Testa os dois ultimos caracteres da data atual com a data desc
+                //Se os caracteres da data de nascimento do cliente forem maiores, significa que é um século antes
+                if StrToInt(temp2)<StrToInt(Copy(temp,5,2)) then temp2 := IntToStr(StrToInt(temp2)-1);
+                temp := (Copy(temp,1,2)) +'.'+ (Copy(temp,3,2)) +'.'+ temp2 + (Copy(temp,5,2));
+                colClieForn := colClieForn + ',data_conj';
+                dadosClieForn := dadosClieForn + ',''' + temp + '''';
+                //Testa se é Update
+                if VerificaUpdate('data_conj') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'data_conj=' + '''' + temp + '''';
+                end;
               end;
             end
             //OBS
@@ -2089,6 +2400,8 @@ begin
             dadosProdCust := dadosProdCust + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+            colMVA := colMVA + ',mva_empr';
+            dadosMVA := dadosMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + prodEmpr + '''';
             colItens := colItens + 'empr';
@@ -2103,6 +2416,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+//            colRegistroMVA := colRegistroMVA + ',mva_empr';
+//            dadosRegistroMVA := dadosRegistroMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
 
             //Testa se é Update
             if VerificaUpdate('empr') = 1 then begin
@@ -2148,6 +2463,8 @@ begin
             dadosProdCust := dadosProdCust + ',''' + '1' + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + '1' + '''';
+            colMVA := colMVA + ',mva_empr';
+            dadosMVA := dadosMVA + ',''' + '1' + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + '1' + '''';
             colItens := colItens + 'empr';
@@ -2162,6 +2479,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + '1' + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + '1' + '''';
+//            colRegistroMVA := colRegistroMVA + ',mva_empr';
+//            dadosRegistroMVA := dadosRegistroMVA + ',''' + '1' + '''';
           end;
 
           //Codigo é obrigatório, se não tiver preenche com o generator
@@ -2875,8 +3194,58 @@ begin
 
           for i := 0 to StringGrid1.ColCount-1 do
           begin
+            //COLEÇÃO
+            ///-----------------------------------------------------------------}
+            if (LowerCase(StringGrid1.Cells[i,0])='colecao') then
+            begin
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
+              temp := (Copy(temp,1,30));
+              if temp <> '' then
+              begin
+                temp2 := querySelect('select pc.codi from prod_colecao pc where pc.descri= '''+temp+'''');
+                //Se não encontrar a string, cadastrar grupo
+                if temp2='' then begin
+                  if UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT' then begin
+                      //Carregar arquivo TXT
+                      AssignFile(fileTXT, DBPath.Text);
+                      if not FileExists(DBPath.Text) then ReWrite(fileTXT)
+                      else append(fileTXT);
+                      WriteLn(fileTXT, 'insert into prod_colecao (CODI,DESCRI) values (case when (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') is null then gen_id(gen_prod_colecao_id,1 ) else (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') end,'''+temp+''');');
+                      WriteLn(fileTXT, 'COMMIT WORK;');
+                      CloseFile(fileTXT);
+                    end
+                  else begin
+                    queryInsert('insert into prod_colecao (CODI,DESCRI) values (gen_id(gen_prod_colecao_id,1),'''+temp+''');');
+                  end;
+                  colProd := colProd + ',codi_colecao';
+                  dadosProd := dadosProd + ',' + 'gen_id(gen_prod_colecao_id,0)';
+                end
+                else begin
+                  colProd := colProd + ',codi_colecao';
+                  dadosProd := dadosProd + ',''' + temp2 + '''';
+                end;
+                //Testa se é Update
+                if VerificaUpdate('colecao') = 1 then begin
+                  if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
+                  condUpdateProd := condUpdateProd + 'codi_colecao=(select codi from prod_colecao where DESCRI='+''''+temp+''')';
+                  if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
+                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
+                  if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
+                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
+                  if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
+                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
+                  if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
+                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
+                end
+                else begin
+                  if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
+                  dadosUpdateProd := dadosUpdateProd + 'codi_colecao=' + '''' + temp + '''';
+                end;
+              end;
+            end
             //DESCR
-            if (LowerCase(StringGrid1.Cells[i,0])='descr') then
+            else if (LowerCase(StringGrid1.Cells[i,0])='descr') then
             begin
               colProd := colProd + ',descr';
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
@@ -5709,9 +6078,10 @@ begin
               begin
                 //Atualizar MARGEM2
                 frmImportando.atualizaStatus('Ajustando MARGEM 2.');
-                SQL.CommandText := 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_custo_real>0;';
+                SQL.CommandText := 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_preco_prazo>0;';
                 SQL.ExecSQL;
               end;
+            end;
           end;
 
         end
@@ -5852,7 +6222,7 @@ begin
               begin
                 //Atualizar MARGEM2
                 frmImportando.atualizaStatus('Ajustando MARGEM 2.');
-                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_custo_real>0;');
+                WriteLn(fileTXT, 'update prod_custos pc set pc.cust_margem2= (pc.cust_preco_prazo - pc.cust_preco_vista)*100/pc.cust_preco_prazo where pc.cust_preco_prazo>0;');
                 WriteLn(fileTXT, 'COMMIT WORK;');
               end;
             end;
@@ -5923,8 +6293,20 @@ begin
     Sheet.Name := 'String Grid';
 
     for col := 1 to stringGrid.ColCount - 1 do
+    begin
       for row := 0 to stringGrid.RowCount - 1 do
-        Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
+      begin
+        try
+          Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
+        except
+          on E:Exception do
+          begin
+            Mensagem('Erro gravando Excel. Verifique o arquivo resultante e se estiver com problemas tente salvar em CSV.'+#13+E.Message, mtCustom,[mbOK], ['Ok'], 'Erro salvando Excel.');
+            Break;
+          end;
+        end;
+      end;
+    end;
     try
       Sheet.Columns.Autofit;
       XLApp.Workbooks[1].SaveAs(FileName);
