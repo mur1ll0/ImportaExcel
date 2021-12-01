@@ -675,22 +675,28 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('select tp.codi from titup tp where tp.codi = :PCODI');
-    queryTemp.ParamByName('PCODI').AsString := Codigo;
-    queryTemp.Open;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := False
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select tp.codi from titup tp where tp.codi = :PCODI');
+      queryTemp.ParamByName('PCODI').AsString := Codigo;
+      queryTemp.Open;
 
-    if queryTemp.IsEmpty = True then
-      Result := False
-    else
-      Result := True;
-  finally
-    queryTemp.Free;
-    frmPrinc.conDestino.Close;
+      if queryTemp.IsEmpty = True then
+        Result := False
+      else
+        Result := True;
+    finally
+      queryTemp.Free;
+      frmPrinc.conDestino.Close;
+    end;
   end;
 end;
 
@@ -701,22 +707,28 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('select tr.codi from titur tr where tr.codi = :PCODI');
-    queryTemp.ParamByName('PCODI').AsString := Codigo;
-    queryTemp.Open;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := False
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select tr.codi from titur tr where tr.codi = :PCODI');
+      queryTemp.ParamByName('PCODI').AsString := Codigo;
+      queryTemp.Open;
 
-    if queryTemp.IsEmpty = True then
-      Result := False
-    else
-      Result := True;
-  finally
-    queryTemp.Free;
-    frmPrinc.conDestino.Close;
+      if queryTemp.IsEmpty = True then
+        Result := False
+      else
+        Result := True;
+    finally
+      queryTemp.Free;
+      frmPrinc.conDestino.Close;
+    end;
   end;
 end;
 
@@ -727,22 +739,28 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('select g.codi from grup_prod g where g.codi = :PCODI');
-    queryTemp.ParamByName('PCODI').AsString := Codigo;
-    queryTemp.Open;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := False
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select g.codi from grup_prod g where g.codi = :PCODI');
+      queryTemp.ParamByName('PCODI').AsString := Codigo;
+      queryTemp.Open;
 
-    if queryTemp.IsEmpty = True then
-      Result := False
-    else
-      Result := True;
-  finally
-    queryTemp.Free;
-    frmPrinc.conDestino.Close;
+      if queryTemp.IsEmpty = True then
+        Result := False
+      else
+        Result := True;
+    finally
+      queryTemp.Free;
+      frmPrinc.conDestino.Close;
+    end;
   end;
 end;
 
@@ -753,22 +771,28 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('select sg.codi from sub_grup_prod sg where sg.codi = :PCODI');
-    queryTemp.ParamByName('PCODI').AsString := Codigo;
-    queryTemp.Open;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := False
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select sg.codi from sub_grup_prod sg where sg.codi = :PCODI');
+      queryTemp.ParamByName('PCODI').AsString := Codigo;
+      queryTemp.Open;
 
-    if queryTemp.IsEmpty = True then
-      Result := False
-    else
-      Result := True;
-  finally
-    queryTemp.Free;
-    frmPrinc.conDestino.Close;
+      if queryTemp.IsEmpty = True then
+        Result := False
+      else
+        Result := True;
+    finally
+      queryTemp.Free;
+      frmPrinc.conDestino.Close;
+    end;
   end;
 end;
 
@@ -779,22 +803,28 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
-    frmPrinc.conDestino.Open;
-    queryTemp := TSQLQuery.Create(nil);
-    queryTemp.SQLConnection := frmPrinc.conDestino;
-    queryTemp.SQL.Clear;
-    queryTemp.SQL.Add('select m.codi from marca m where m.codi = :PCODI');
-    queryTemp.ParamByName('PCODI').AsString := Codigo;
-    queryTemp.Open;
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := False
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select m.codi from marca m where m.codi = :PCODI');
+      queryTemp.ParamByName('PCODI').AsString := Codigo;
+      queryTemp.Open;
 
-    if queryTemp.IsEmpty = True then
-      Result := False
-    else
-      Result := True;
-  finally
-    queryTemp.Free;
-    frmPrinc.conDestino.Close;
+      if queryTemp.IsEmpty = True then
+        Result := False
+      else
+        Result := True;
+    finally
+      queryTemp.Free;
+      frmPrinc.conDestino.Close;
+    end;
   end;
 end;
 
@@ -805,29 +835,35 @@ var
   queryTemp: TSQLQuery;
 
 begin
-  try
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then Result := 0
+  else
+  begin
     try
-      frmPrinc.conDestino.Open;
-      queryTemp := TSQLQuery.Create(nil);
-      queryTemp.SQLConnection := frmPrinc.conDestino;
-      queryTemp.SQL.Clear;
-      //queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
-      //queryTemp.ParamByName('PNOME').AsString := clieforn;
-      queryTemp.CommandText := 'select c.codi from clieforn c where c.nome = ' + clieforn + ';';
-      queryTemp.ExecSQL;
-      queryTemp.Open;
+      try
+        frmPrinc.conDestino.Open;
+        queryTemp := TSQLQuery.Create(nil);
+        queryTemp.SQLConnection := frmPrinc.conDestino;
+        queryTemp.SQL.Clear;
+        //queryTemp.SQL.Add('select c.codi from clieforn c where c.nome = :PNOME');
+        //queryTemp.ParamByName('PNOME').AsString := clieforn;
+        queryTemp.CommandText := 'select c.codi from clieforn c where c.nome = ' + clieforn + ';';
+        queryTemp.ExecSQL;
+        queryTemp.Open;
 
-      Result := queryTemp.FieldByName('CODI').AsInteger;
+        Result := queryTemp.FieldByName('CODI').AsInteger;
 
-    except
-      on e: exception do
-      begin
-        ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+      except
+        on e: exception do
+        begin
+          ShowMessage('Erro SQL: '+e.message+sLineBreak+queryTemp.CommandText);
+        end;
       end;
+    finally
+      queryTemp.Free;
+      frmPrinc.conDestino.Close;
     end;
-  finally
-    queryTemp.Free;
-    frmPrinc.conDestino.Close;
   end;
 end;
 
@@ -5520,7 +5556,7 @@ begin
                 frmImportando.atualizaStatus('Comandos da TITUP.');
                 WriteLn(fileTXT, '----------Comandos da TITUP----------');
 
-                WriteLn(fileTXT, 'insert into TITUP ('+ colMarca +') values ' + '(' + dadosMarca + ');');
+                WriteLn(fileTXT, 'insert into TITUP ('+ colTituP +') values ' + '(' + dadosTituP + ');');
                 WriteLn(fileTXT, 'COMMIT WORK;');
 
                 if saldo <= 0.0 then begin
@@ -6297,6 +6333,7 @@ begin
       for row := 0 to stringGrid.RowCount - 1 do
       begin
         try
+          Sheet.Cells[row + 1, col].NumberFormat := '@'; //Text
           Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
         except
           on E:Exception do

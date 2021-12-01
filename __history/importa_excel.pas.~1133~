@@ -166,6 +166,33 @@ begin
 end;
 
 
+//Função para criar caixa de diálogos
+function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
+  Caption: ARRAY OF string; dlgcaption: string): Integer;
+var
+  aMsgdlg: TForm;
+  i: Integer;
+  Dlgbutton: Tbutton;
+  Captionindex: Integer;
+begin
+  aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
+  aMsgdlg.Caption := dlgcaption;
+  aMsgdlg.BiDiMode := bdRightToLeft;
+  Captionindex := 0;
+  for i := 0 to aMsgdlg.componentcount - 1 Do
+  begin
+    if (aMsgdlg.components[i] is Tbutton) then
+    Begin
+      Dlgbutton := Tbutton(aMsgdlg.components[i]);
+      if Captionindex <= High(Caption) then
+        Dlgbutton.Caption := Caption[Captionindex];
+      inc(Captionindex);
+    end;
+  end;
+  Result := aMsgdlg.Showmodal;
+end;
+
+
 //Função para carregar apenas o cabeçalho de uma planilha na StringGrid
 function XlsHeaderLoad(AGrid: TStringGrid; AXLSFile: string): Boolean;
 const
@@ -242,62 +269,93 @@ var
   XLApp, Sheet: OLEVariant;
   RangeMatrix: Variant;
   i, j, x, y, k, r: Integer;
+  but: Integer;
 begin
   Result := False;
   // Create Excel-OLE Object
   XLApp := CreateOleObject('Excel.Application');
   try
-    // Hide Excel
-    XLApp.Visible := False;
+    try
 
-    // Open the Workbook
-    XLApp.Workbooks.Open(AXLSFile);
+      // Hide Excel
+      XLApp.Visible := False;
 
-    AGrid.RowCount := 0;
-    AGrid.ColCount := 1;
-    k := 0;
-    j := 1;
-    //Percorrer os WorkSheets
-    for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
-    begin
-      Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
+      // Open the Workbook
+      XLApp.Workbooks.Open(AXLSFile);
 
-      //Retirar Filtros, para que não fique linhas escondidas
-      if (Sheet.AutoFilterMode = True) then
+      but := 0;
+      AGrid.RowCount := 0;
+      AGrid.ColCount := 1;
+      k := 0;
+      j := 1;
+      //Percorrer os WorkSheets
+      for i := 1 to XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets.Count do
       begin
-        Sheet.AutoFilterMode := False;
-      end;
+        Sheet := XLApp.Workbooks[ExtractFileName(AXLSFile)].WorkSheets[i];
 
-      //Receber valores da ultima linha e coluna
-      x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
-      y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
-
-      //Setar tamanho do StringGrid
-      AGrid.RowCount := AGrid.RowCount + x;
-      if y > AGrid.ColCount  then
-      begin
-        AGrid.ColCount := y + 1;
-      end;
-
-      // Assign the Variant associated with the WorkSheet to the Delphi Variant
-      RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
-
-      //Iterar linhas
-      while k < AGrid.RowCount-1 do
-      begin
-        AGrid.Cells[0,k] := IntToStr(k);
-        //Iterar colunas
-        for r := 1 to AGrid.ColCount-1 do
+        //Retirar Filtros, para que não fique linhas escondidas
+        if (Sheet.AutoFilterMode = True) then
         begin
-          AGrid.Cells[r,k] := RangeMatrix[j,r];
+          Sheet.AutoFilterMode := False;
         end;
-        k := k + 1;
-        j := j + 1;
+
+        //Receber valores da ultima linha e coluna
+        x := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Row;
+        y := Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Column;
+
+        //Setar tamanho do StringGrid
+        AGrid.RowCount := AGrid.RowCount + x;
+        if y > AGrid.ColCount  then
+        begin
+          AGrid.ColCount := y + 1;
+        end;
+
+        // Assign the Variant associated with the WorkSheet to the Delphi Variant
+        RangeMatrix := Sheet.Range['A1', Sheet.Cells.Item[X, Y]].Value;
+
+        //Iterar linhas
+        while k < AGrid.RowCount-1 do
+        begin
+          if but = 1 then Break;
+
+          AGrid.Cells[0,k] := IntToStr(k);
+          //Iterar colunas
+          for r := 1 to AGrid.ColCount-1 do
+          begin
+            try
+              AGrid.Cells[r,k] := RangeMatrix[j,r];
+            except
+              on E:Exception do
+              begin
+                if but = 7 then Continue;
+
+                but := Mensagem('Erro no arquivo Excel linha: '+IntToStr(j)+' coluna: '+IntToStr(r)+' ('+RangeMatrix[1,r]+')'+#13+E.Message+#13+'Continuar irá deixar célula em branco. Ignorar irá deixar célula em branco para todos os erros sem perguntar.', mtCustom,[mbYes, mbNo, mbOK],['Continuar', 'Ignorar','Parar'],'Erro no arquivo Excel');
+                if (but = 6) then begin
+                  AGrid.Cells[r,k] := '';
+                end
+                else if (but = 7) then begin
+                  Continue;
+                end
+                else if (but = 1) then begin
+                  raise Exception.Create('Erro no arquivo Excel. Verificar se existem células contendo:'+#13+'#DIV/0!'+#13+'#N/A'+#13+'#NAME?'+#13+'#NULL!'+#13+'#NUM!'+#13+'#REF!'+#13+'#VALUE!');
+                end;
+              end;
+            end;
+          end;
+          k := k + 1;
+          j := j + 1;
+        end;
+
+        //Fazer proximos WorksSheet começar da 2 linha
+        j := 2;
+        AGrid.RowCount := AGrid.RowCount - 1;
       end;
 
-      //Fazer proximos WorksSheet começar da 2 linha
-      j := 2;
-      AGrid.RowCount := AGrid.RowCount - 1;
+    except
+      on E:Exception do
+      begin
+        ShowMessage(E.Message);
+      end;
     end;
 
   finally
@@ -343,33 +401,6 @@ begin
     oFileStrings.Free;
     oRowStrings.Free;
   end;
-end;
-
-
-//Função para criar caixa de diálogos
-function Mensagem(CONST Msg: string; DlgTypt: TmsgDlgType; button: TMsgDlgButtons;
-  Caption: ARRAY OF string; dlgcaption: string): Integer;
-var
-  aMsgdlg: TForm;
-  i: Integer;
-  Dlgbutton: Tbutton;
-  Captionindex: Integer;
-begin
-  aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
-  aMsgdlg.Caption := dlgcaption;
-  aMsgdlg.BiDiMode := bdRightToLeft;
-  Captionindex := 0;
-  for i := 0 to aMsgdlg.componentcount - 1 Do
-  begin
-    if (aMsgdlg.components[i] is Tbutton) then
-    Begin
-      Dlgbutton := Tbutton(aMsgdlg.components[i]);
-      if Captionindex <= High(Caption) then
-        Dlgbutton.Caption := Caption[Captionindex];
-      inc(Captionindex);
-    end;
-  end;
-  Result := aMsgdlg.Showmodal;
 end;
 
 
@@ -1150,8 +1181,24 @@ begin
 
           for i := 0 to StringGrid1.ColCount-1 do
           begin
+            //EMPRESA
+            if ((LowerCase(StringGrid1.Cells[i,0])='empresa') and (StringGrid1.Cells[i,0]<>'')) then
+            begin
+              colClieForn := colClieForn + ',empresa';
+              temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
+              dadosClieForn := dadosClieForn + ',''' + temp + '''';
+              //Testa se é Update
+              if VerificaUpdate('empresa') = 1 then begin
+                if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                condUpdateClieForn := condUpdateClieForn + 'empresa=' + '''' + temp + '''';
+              end
+              else begin
+                if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                dadosUpdateClieForn := dadosUpdateClieForn + 'empresa=' + '''' + temp + '''';
+              end;
+            end
             //GRUPO
-            if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
+            else if ((LowerCase(StringGrid1.Cells[i,0])='grupo') and (StringGrid1.Cells[i,0]<>'')) then
             begin
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
@@ -1205,15 +1252,15 @@ begin
                 else begin
                   colClieForn := colClieForn + ',codi_grupo_clie';
                   dadosClieForn := dadosClieForn + ',''' + temp2 + '''';
-                  //Testa se é Update
-                  if VerificaUpdate('grupo') = 1 then begin
-                    if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
-                    condUpdateClieForn := condUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
-                  end
-                  else begin
-                    if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-                    dadosUpdateClieForn := dadosUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
-                  end;
+                end;
+                //Testa se é Update
+                if VerificaUpdate('grupo') = 1 then begin
+                  if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+                  condUpdateClieForn := condUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
+                end
+                else begin
+                  if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+                  dadosUpdateClieForn := dadosUpdateClieForn + 'codi_grupo_clie=' + '''' + temp + '''';
                 end;
               end;
             end
@@ -2353,6 +2400,8 @@ begin
             dadosProdCust := dadosProdCust + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+            colMVA := colMVA + ',mva_empr';
+            dadosMVA := dadosMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + prodEmpr + '''';
             colItens := colItens + 'empr';
@@ -2367,6 +2416,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
+//            colRegistroMVA := colRegistroMVA + ',mva_empr';
+//            dadosRegistroMVA := dadosRegistroMVA + ',''' + UpperCase(RemoveAcento(prodEmpr)) + '''';
 
             //Testa se é Update
             if VerificaUpdate('empr') = 1 then begin
@@ -2412,6 +2463,8 @@ begin
             dadosProdCust := dadosProdCust + ',''' + '1' + '''';
             colMVA := colMVA + 'empr';
             dadosMVA := dadosMVA + '''' + '1' + '''';
+            colMVA := colMVA + ',mva_empr';
+            dadosMVA := dadosMVA + ',''' + '1' + '''';
             colProdForn := colProdForn + 'empr';
             dadosProdForn := dadosProdForn + '''' + '1' + '''';
             colItens := colItens + 'empr';
@@ -2426,6 +2479,8 @@ begin
             dadosRegistroProdCust := dadosRegistroProdCust + '''' + '1' + '''';
             colRegistroMVA := colRegistroMVA + 'empr';
             dadosRegistroMVA := dadosRegistroMVA + '''' + '1' + '''';
+//            colRegistroMVA := colRegistroMVA + ',mva_empr';
+//            dadosRegistroMVA := dadosRegistroMVA + ',''' + '1' + '''';
           end;
 
           //Codigo é obrigatório, se não tiver preenche com o generator
@@ -3146,8 +3201,7 @@ begin
               temp := UpperCase(RemoveAcento(StringGrid1.Cells[i,k]));
               temp := stringreplace(temp, '''', ' ',[rfReplaceAll, rfIgnoreCase]);
               temp := (Copy(temp,1,30));
-              //Se for letras, buscar código.
-              if not (IsNumeric(temp)) then
+              if temp <> '' then
               begin
                 temp2 := querySelect('select pc.codi from prod_colecao pc where pc.descri= '''+temp+'''');
                 //Se não encontrar a string, cadastrar grupo
@@ -3157,12 +3211,12 @@ begin
                       AssignFile(fileTXT, DBPath.Text);
                       if not FileExists(DBPath.Text) then ReWrite(fileTXT)
                       else append(fileTXT);
-                      WriteLn(fileTXT, 'insert into prod_colecao (CODI,DESCR) values (case when (select pc.codi from prod_colecao pc where pc.descri= = '''+temp+''') is null then gen_id(gen_prod_colecao_id,1 ) else (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') end,'''+temp+''');');
+                      WriteLn(fileTXT, 'insert into prod_colecao (CODI,DESCRI) values (case when (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') is null then gen_id(gen_prod_colecao_id,1 ) else (select pc.codi from prod_colecao pc where pc.descri= '''+temp+''') end,'''+temp+''');');
                       WriteLn(fileTXT, 'COMMIT WORK;');
                       CloseFile(fileTXT);
                     end
                   else begin
-                    queryInsert('insert into prod_colecao (CODI,DESCR) values (gen_id(gen_prod_colecao_id,1),'''+temp+''');');
+                    queryInsert('insert into prod_colecao (CODI,DESCRI) values (gen_id(gen_prod_colecao_id,1),'''+temp+''');');
                   end;
                   colProd := colProd + ',codi_colecao';
                   dadosProd := dadosProd + ',' + 'gen_id(gen_prod_colecao_id,0)';
@@ -3174,47 +3228,15 @@ begin
                 //Testa se é Update
                 if VerificaUpdate('colecao') = 1 then begin
                   if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
-                  condUpdateProd := condUpdateProd + 'codi_colecao=(select codi from prod_colecao where descr='+''''+temp+''')';
+                  condUpdateProd := condUpdateProd + 'codi_colecao=(select codi from prod_colecao where DESCRI='+''''+temp+''')';
                   if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
+                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                   if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
-                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
+                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                   if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
-                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
+                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                   if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
-                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = (select codi from prod_colecao where descr='+''''+temp+'''))';
-                end
-                else begin
-                  if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
-                  dadosUpdateProd := dadosUpdateProd + 'codi_colecao=' + '''' + temp + '''';
-                end;
-              end
-              else begin
-                //Se for números, considera como código
-                //Antes buscamos se existe o código cadastrado, se não encontrar colocamos o generator mesmo
-                temp2 := querySelect('select pc.codi from prod_colecao pc where pc.codi = '''+temp+'''');
-                //Se não encontrar o codigo, colocamos o generator
-                if temp2='' then begin
-                  colProd := colProd + ',codi_colecao';
-                  dadosProd := dadosProd + ',' + 'gen_id(gen_prod_colecao_id,0)';
-                end
-                //Se encontrar usa o código
-                else begin
-                  colProd := colProd + ',codi_colecao';
-                  dadosProd := dadosProd + ',''' + temp2 + '''';
-                end;
-                //Testa se é Update
-                if VerificaUpdate('colecao') = 1 then begin
-                  if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
-                  condUpdateProd := condUpdateProd + 'codi_colecao='+''''+temp+'''';
-                  if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
-                  condUpdateProdTrib := condUpdateProdTrib + 'trib_prod_codi in (select codi from prod where codi_colecao = '+''''+temp+''')';
-                  if condUpdateProdAdic <> '' then condUpdateProdAdic := condUpdateProdAdic + ' and ';
-                  condUpdateProdAdic := condUpdateProdAdic + 'adic_prod_codi in (select codi from prod where codi_colecao = '+''''+temp+''')';
-                  if condUpdateProdCust <> '' then condUpdateProdCust := condUpdateProdCust + ' and ';
-                  condUpdateProdCust := condUpdateProdCust + 'cust_prod_codi in (select codi from prod where codi_colecao = '+''''+temp+''')';
-                  if condUpdateItens <> '' then condUpdateItens := condUpdateItens + ' and ';
-                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = '+''''+temp+''')';
+                  condUpdateItens := condUpdateItens + 'cod_prod in (select codi from prod where codi_colecao = (select codi from prod_colecao where DESCRI='+''''+temp+'''))';
                 end
                 else begin
                   if dadosUpdateProd <> '' then dadosUpdateProd := dadosUpdateProd + ', ';
@@ -6271,8 +6293,20 @@ begin
     Sheet.Name := 'String Grid';
 
     for col := 1 to stringGrid.ColCount - 1 do
+    begin
       for row := 0 to stringGrid.RowCount - 1 do
-        Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
+      begin
+        try
+          Sheet.Cells[row + 1, col] := stringGrid.Cells[col, row];
+        except
+          on E:Exception do
+          begin
+            Mensagem('Erro gravando Excel. Verifique o arquivo resultante e se estiver com problemas tente salvar em CSV.'+#13+E.Message, mtCustom,[mbOK], ['Ok'], 'Erro salvando Excel.');
+            Break;
+          end;
+        end;
+      end;
+    end;
     try
       Sheet.Columns.Autofit;
       XLApp.Workbooks[1].SaveAs(FileName);
