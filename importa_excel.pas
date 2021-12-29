@@ -2528,6 +2528,8 @@ begin
             StringGrid1.Cells[i,k] := prodCod;
             colProd := colProd + ',codi';
             dadosProd := dadosProd + ',''' + prodCod + '''';
+            colProd := colProd + ',cod_mestre';
+            dadosProd := dadosProd + ',''' + prodCod + '''';
             colProdTrib := colProdTrib + ',trib_id';
             dadosProdTrib := dadosProdTrib + ',' + 'gen_id(gen_prod_tributos_id,1)';
             colProdTrib := colProdTrib + ',trib_prod_codi';
@@ -2600,6 +2602,8 @@ begin
           else begin
             colProd := colProd + ',codi';
             dadosProd := dadosProd + ',' + 'gen_id(gen_prod_id,1)';
+            colProd := colProd + ',cod_mestre';
+            dadosProd := dadosProd + ',' + 'gen_id(gen_prod_id,0)';
             colProdTrib := colProdTrib + ',trib_prod_codi';
             dadosProdTrib := dadosProdTrib + ',' + 'gen_id(gen_prod_id,0)';
             colProdTrib := colProdTrib + ',trib_id';
