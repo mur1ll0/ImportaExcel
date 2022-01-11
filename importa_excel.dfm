@@ -5,7 +5,7 @@ object frmPrinc: TfrmPrinc
   Anchors = []
   BiDiMode = bdLeftToRight
   Caption = 'Importa Excel'
-  ClientHeight = 768
+  ClientHeight = 729
   ClientWidth = 1100
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object frmPrinc: TfrmPrinc
   Position = poDesigned
   DesignSize = (
     1100
-    768)
+    729)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -76,6 +76,22 @@ object frmPrinc: TfrmPrinc
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = []
+    ParentFont = False
+    Visible = False
+  end
+  object lblTableName: TLabel
+    Left = 635
+    Top = 8
+    Width = 145
+    Height = 16
+    Anchors = [akTop, akRight]
+    Caption = 'Nome tabela CUSTOM:'
+    DragMode = dmAutomatic
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clCaptionText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
     ParentFont = False
     Visible = False
   end
@@ -286,6 +302,7 @@ object frmPrinc: TfrmPrinc
     Anchors = [akTop, akRight]
     TabOrder = 4
     Text = 'Tipo de Importa'#231#227'o'
+    OnChange = SelectImportChange
     Items.Strings = (
       'Clie/Forn'
       'Grupos'
@@ -293,7 +310,8 @@ object frmPrinc: TfrmPrinc
       'Marcas'
       'Produtos'
       'T'#237'tulos a Pagar'
-      'T'#237'tulos a Receber')
+      'T'#237'tulos a Receber'
+      'CUSTOM')
   end
   object ButImport: TBitBtn
     AlignWithMargins = True
@@ -550,6 +568,15 @@ object frmPrinc: TfrmPrinc
     TabOrder = 10
     OnClick = btnTXTClick
   end
+  object edtTableName: TEdit
+    Left = 786
+    Top = 5
+    Width = 121
+    Height = 21
+    TabOrder = 11
+    Text = 'TABLE'
+    Visible = False
+  end
   object opnDadosOrigem: TOpenDialog
     Options = [ofEnableSizing]
     Left = 542
@@ -612,36 +639,36 @@ object frmPrinc: TfrmPrinc
     Top = 40
     object t1: TMenuItem
       Caption = 'Carregar'
-      object Cabealho1: TMenuItem
+      object mnuCabecalho: TMenuItem
         Caption = 'Cabe'#231'alho'
-        OnClick = Cabealho1Click
+        OnClick = mnuCabecalhoClick
       end
-      object DadosEmpr: TMenuItem
+      object mnuDadosEmpr: TMenuItem
         Caption = 'Dados da Empresa'
-        OnClick = DadosEmprClick
+        OnClick = mnuDadosEmprClick
       end
-      object Colunas: TMenuItem
+      object mnuColunas: TMenuItem
         Caption = 'Colunas'
-        OnClick = ColunasClick
+        OnClick = mnuColunasClick
       end
     end
     object Editar1: TMenuItem
       Caption = 'Editar'
-      object AdicionarColuna: TMenuItem
+      object mnuAdicionarColuna: TMenuItem
         Caption = 'Adicionar Coluna (F1)'
-        OnClick = AdicionarColunaClick
+        OnClick = mnuAdicionarColunaClick
       end
-      object AdicionarLinha: TMenuItem
+      object mnuAdicionarLinha: TMenuItem
         Caption = 'Adicionar Linha (F3)'
-        OnClick = AdicionarLinhaClick
+        OnClick = mnuAdicionarLinhaClick
       end
-      object DeletarColuna: TMenuItem
+      object mnuDeletarColuna: TMenuItem
         Caption = 'Deletar Coluna (Del)'
-        OnClick = DeletarColunaClick
+        OnClick = mnuDeletarColunaClick
       end
-      object DeletarLinha: TMenuItem
+      object mnuDeletarLinha: TMenuItem
         Caption = 'Deletar Linha (Del)'
-        OnClick = DeletarLinhaClick
+        OnClick = mnuDeletarLinhaClick
       end
       object N1: TMenuItem
         Caption = '-'
@@ -653,33 +680,33 @@ object frmPrinc: TfrmPrinc
     end
     object Limpar: TMenuItem
       Caption = 'Limpar'
-      object LimpaClieForn: TMenuItem
+      object mnuLimpaClieForn: TMenuItem
         Caption = 'Clie/Forn'#13#10
-        OnClick = LimpaClieFornClick
+        OnClick = mnuLimpaClieFornClick
       end
-      object LimpaGrupos: TMenuItem
+      object mnuLimpaGrupos: TMenuItem
         Caption = 'Grupos'#13#10
-        OnClick = LimpaGruposClick
+        OnClick = mnuLimpaGruposClick
       end
-      object LimpaSubGrupos: TMenuItem
+      object mnuLimpaSubGrupos: TMenuItem
         Caption = 'SubGrupos'#13#10
-        OnClick = LimpaSubGruposClick
+        OnClick = mnuLimpaSubGruposClick
       end
-      object LimpaMarcas: TMenuItem
+      object mnuLimpaMarcas: TMenuItem
         Caption = 'Marcas'
-        OnClick = LimpaMarcasClick
+        OnClick = mnuLimpaMarcasClick
       end
-      object LimpaProdutos: TMenuItem
+      object mnuLimpaProdutos: TMenuItem
         Caption = 'Produtos'
-        OnClick = LimpaProdutosClick
+        OnClick = mnuLimpaProdutosClick
       end
-      object LimpaTituP: TMenuItem
+      object mnuLimpaTituP: TMenuItem
         Caption = 'T'#237'tulos a Pagar'
-        OnClick = LimpaTituPClick
+        OnClick = mnuLimpaTituPClick
       end
-      object LimpaTituR: TMenuItem
+      object mnuLimpaTituR: TMenuItem
         Caption = 'T'#237'tulos a Receber'
-        OnClick = LimpaTituRClick
+        OnClick = mnuLimpaTituRClick
       end
     end
   end

@@ -6,7 +6,8 @@ uses
   importando in 'importando.pas' {frmImportando},
   empresa in 'empresa.pas' {frmEmpr},
   Colunas in 'Colunas.pas' {frmColunas},
-  uSubstituir in 'uSubstituir.pas' {frmSubstituir};
+  uSubstituir in 'uSubstituir.pas' {frmSubstituir},
+  uUtil in 'Units\uUtil.pas';
 
 {$R *.res}
 
