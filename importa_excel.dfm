@@ -674,9 +674,15 @@ object frmPrinc: TfrmPrinc
       object N1: TMenuItem
         Caption = '-'
       end
+      object mnuProcurar: TMenuItem
+        Caption = 'Procurar (CTRL + F)'
+      end
       object mnuSubstituir: TMenuItem
         Caption = 'Substituir (CTRL + H)'
         OnClick = mnuSubstituirClick
+      end
+      object mnuDividir: TMenuItem
+        Caption = 'Dividir (CTRL + D)'
       end
     end
     object Limpar: TMenuItem

@@ -52,6 +52,8 @@ type
     mnuSubstituir: TMenuItem;
     lblTableName: TLabel;
     edtTableName: TEdit;
+    mnuProcurar: TMenuItem;
+    mnuDividir: TMenuItem;
 
     function quantidadeEmpresas(colEmpr: Integer): Integer;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -89,6 +91,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    function StringGridToArray(Grid: TStringGrid): Integer;
     function cadastraClieForn(colClieForn,dadosClieForn: string): Integer;
     class function buscaCidade(Cidade, UF: string): String;
     function temCodTituloP(Codigo: String): Boolean;
@@ -1196,7 +1199,7 @@ begin
 end;
 
 //Função para salvar StringGrid em um array de string
-function StringGridToArray(Grid: TStringGrid): Integer;
+function TfrmPrinc.StringGridToArray(Grid: TStringGrid): Integer;
 var
   i,j: integer;
 begin

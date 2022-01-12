@@ -6,7 +6,6 @@ uses
   importando in 'importando.pas' {frmImportando},
   empresa in 'empresa.pas' {frmEmpr},
   Colunas in 'Colunas.pas' {frmColunas},
-  uSubstituir in 'uSubstituir.pas' {frmSubstituir},
   uUtil in 'Units\uUtil.pas',
   uImportaClieForn in 'Units\uImportaClieForn.pas',
   uImportaProduto in 'Units\uImportaProduto.pas',
@@ -15,7 +14,8 @@ uses
   uImportaMarca in 'Units\uImportaMarca.pas',
   uImportaTituP in 'Units\uImportaTituP.pas',
   uImportaTituR in 'Units\uImportaTituR.pas',
-  uImportaCUSTOM in 'Units\uImportaCUSTOM.pas';
+  uImportaCUSTOM in 'Units\uImportaCUSTOM.pas',
+  uSubstituir in 'Units\uSubstituir.pas' {frmSubstituir};
 
 {$R *.res}
 

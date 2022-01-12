@@ -15,6 +15,7 @@ uses
   function queryInsert(sql: string): Integer;
   function querySelect(sql: String): String;
   function IsNumeric(S : String) : Boolean;
+  function PrimeiraMaiuscula(texto: string) : string;
 
   //Funções para GRID
   procedure DeleteRow(Grid: TStringGrid; ARow: Integer);
@@ -222,6 +223,11 @@ begin
   Except
     Result := False;
   end;
+end;
+
+function PrimeiraMaiuscula(texto: string) : string;
+begin
+  Result := UpperCase(Copy(texto,1,1)) + LowerCase(Copy(texto,2,Length(texto)-1));
 end;
 
 
