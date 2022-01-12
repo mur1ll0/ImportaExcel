@@ -108,6 +108,14 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="Units\uUtil.pas"/>
+        <DCCReference Include="Units\uImportaClieForn.pas"/>
+        <DCCReference Include="Units\uImportaProduto.pas"/>
+        <DCCReference Include="Units\uImportaGrupo.pas"/>
+        <DCCReference Include="Units\uImportaSubGrupo.pas"/>
+        <DCCReference Include="Units\uImportaMarca.pas"/>
+        <DCCReference Include="Units\uImportaTituP.pas"/>
+        <DCCReference Include="Units\uImportaTituR.pas"/>
+        <DCCReference Include="Units\uImportaCUSTOM.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

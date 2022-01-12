@@ -31,6 +31,7 @@ uses
   procedure CSV_To_StringGrid(StringGrid1: TStringGrid; AFileName: TFileName);
   function XlsHeaderLoad(AGrid: TStringGrid; AXLSFile: string): Boolean;
   function Xls_To_StringGrid(AGrid: TStringGrid; AXLSFile: string): Boolean;
+  function VerificaUpdate(coluna: String): Integer;
 
 implementation
 
@@ -668,6 +669,20 @@ begin
       XLAPP := Unassigned;
       Sheet := Unassigned;
       Result := True;
+    end;
+  end;
+end;
+
+//Verificar se coluna é Update ou não
+function VerificaUpdate(coluna: String): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 0 to colUpdateCount-1 do begin
+    if LowerCase(coluna) = LowerCase(colUpdate[i]) then begin
+      Result := 1;
+      Break;
     end;
   end;
 end;

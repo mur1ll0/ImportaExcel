@@ -573,6 +573,7 @@ object frmPrinc: TfrmPrinc
     Top = 5
     Width = 121
     Height = 21
+    Anchors = [akTop, akRight]
     TabOrder = 11
     Text = 'TABLE'
     Visible = False
