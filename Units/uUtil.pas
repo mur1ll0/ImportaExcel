@@ -129,7 +129,7 @@ var
 begin
   aMsgdlg := createMessageDialog(Msg, DlgTypt, button);
   aMsgdlg.Caption := dlgcaption;
-  aMsgdlg.BiDiMode := bdRightToLeft;
+  aMsgdlg.BiDiMode := bdLeftToRight;
   Captionindex := 0;
   for i := 0 to aMsgdlg.componentcount - 1 Do
   begin

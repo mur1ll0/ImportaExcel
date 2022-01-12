@@ -15,7 +15,8 @@ uses
   uImportaTituP in 'Units\uImportaTituP.pas',
   uImportaTituR in 'Units\uImportaTituR.pas',
   uImportaCUSTOM in 'Units\uImportaCUSTOM.pas',
-  uSubstituir in 'Units\uSubstituir.pas' {frmSubstituir};
+  uSubstituir in 'Units\uSubstituir.pas' {frmSubstituir},
+  uProcurar in 'Units\uProcurar.pas' {frmProcurar};
 
 {$R *.res}
 
@@ -27,5 +28,6 @@ begin
   Application.CreateForm(TfrmEmpr, frmEmpr);
   Application.CreateForm(TfrmColunas, frmColunas);
   Application.CreateForm(TfrmSubstituir, frmSubstituir);
+  Application.CreateForm(TfrmProcurar, frmProcurar);
   Application.Run;
 end.

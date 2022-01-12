@@ -6,19 +6,12 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, Vcl.Buttons, ComObj, IniFiles,
   Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto, Vcl.Menus, System.StrUtils,
-  empresa, Colunas, uSubstituir, uUtil;
+  empresa, Colunas, uSubstituir, uUtil, uProcurar, Vcl.ExtCtrls;
 
 type
   TfrmPrinc = class(TForm)
-    btnLoadOrigem: TBitBtn;
     opnDadosOrigem: TOpenDialog;
     StringGrid1: TStringGrid;
-    FilePath: TEdit;
-    btnAbrirOrigem: TBitBtn;
-    SelectImport: TComboBox;
-    ButImport: TBitBtn;
-    DBPath: TEdit;
-    ButOpenDB: TBitBtn;
     opnDadosDestino: TOpenDialog;
     conDestino: TSQLConnection;
     btnSalvar: TBitBtn;
@@ -41,19 +34,27 @@ type
     mnuDeletarLinha: TMenuItem;
     mnuDadosEmpr: TMenuItem;
     mnuColunas: TMenuItem;
-    Label1: TLabel;
-    StartLine: TEdit;
-    Label2: TLabel;
-    Label3: TLabel;
     conOrigem: TSQLConnection;
-    btnTXT: TBitBtn;
-    lblColUpdate: TLabel;
     N1: TMenuItem;
     mnuSubstituir: TMenuItem;
-    lblTableName: TLabel;
-    edtTableName: TEdit;
     mnuProcurar: TMenuItem;
     mnuDividir: TMenuItem;
+    pnlTop: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    lblColUpdate: TLabel;
+    lblTableName: TLabel;
+    btnLoadOrigem: TBitBtn;
+    FilePath: TEdit;
+    btnAbrirOrigem: TBitBtn;
+    SelectImport: TComboBox;
+    ButImport: TBitBtn;
+    DBPath: TEdit;
+    ButOpenDB: TBitBtn;
+    StartLine: TEdit;
+    btnTXT: TBitBtn;
+    edtTableName: TEdit;
 
     function quantidadeEmpresas(colEmpr: Integer): Integer;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -86,6 +87,7 @@ type
     procedure mnuSubstituirClick(Sender: TObject);
     function getProdCodUpdate(line: Integer) : string;
     procedure SelectImportChange(Sender: TObject);
+    procedure mnuProcurarClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -1444,6 +1446,11 @@ begin
 end;
 
 
+procedure TfrmPrinc.mnuProcurarClick(Sender: TObject);
+begin
+  frmProcurar.Show;
+end;
+
 procedure TfrmPrinc.mnuSubstituirClick(Sender: TObject);
 begin
   frmSubstituir.Show;
@@ -1462,6 +1469,12 @@ begin
    if ((Shift = [ssCtrl]) and (Key = $48)) then
    begin
     mnuSubstituir.Click;
+   end;
+
+   //RECONHECER CTRL+F
+   if ((Shift = [ssCtrl]) and (Key = $46)) then
+   begin
+    mnuProcurar.Click;
    end;
 
    //RECONHECER CTRL+Z

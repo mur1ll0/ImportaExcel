@@ -2,26 +2,11 @@
 Coordinates=10,10,80,58
 
 []
-Coordinates=589,166,91,36
+Coordinates=332,353,66,58
+Visible=True
 
 [SaveDialog1]
 Coordinates=322,1,87,36
-
-[ButImport]
-Coordinates=30,87,70,58
-
-[FilePath]
-Coordinates=0,0,62,58
-Visible=True
-
-[ButOpenDB]
-Coordinates=81,1,83,58
-
-[SelectImport]
-Coordinates=183,1,101,124
-
-[DBPath]
-Coordinates=210,144,59,58
 
 [Menu]
 Coordinates=23,183,46,36
@@ -35,22 +20,8 @@ Coordinates=35,279,55,36
 [t1]
 Coordinates=460,331,40,36
 
-[Label1]
-Coordinates=401,353,53,58
-Visible=True
-
-[StartLine]
-Coordinates=332,353,66,58
-
-[btnAbrirOrigem]
-Coordinates=141,183,61,58
-
 [opnDadosOrigem]
 Coordinates=82,77,89,36
-
-[btnLoadOrigem]
-Coordinates=320,0,62,58
-Visible=True
 
 [btnSalvar]
 Coordinates=109,78,63,58

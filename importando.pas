@@ -57,6 +57,7 @@ procedure TfrmImportando.BitBtn1Click(Sender: TObject);
 var
   i: Integer;
 begin
+  //Se deu erro, setar foco na linha que deu erro
   if erro then begin
     frmPrinc.StringGrid1.Row := linha;
     frmPrinc.StringGrid1.SetFocus;
