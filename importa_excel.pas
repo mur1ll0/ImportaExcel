@@ -1772,7 +1772,7 @@ begin
               Break;
             end;
           end;
-          if k=0 then begin
+          if (k = 0) and (SelectImport.Text <> 'CUSTOM') then begin
             ShowMessage('Coluna não pode ser usada como Update.');
             Exit;
           end;

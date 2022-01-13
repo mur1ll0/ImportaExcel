@@ -52,6 +52,12 @@ begin
       Continue;
     end;
 
+    //Ignorar coluna de número da linha
+    if StringGrid1.Cells[i,0] = '0' then
+    begin
+      Continue;
+    end;
+
     if col = '' then
     begin
       col := StringGrid1.Cells[i,0];
