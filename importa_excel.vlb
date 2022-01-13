@@ -2,7 +2,7 @@
 Coordinates=10,10,80,58
 
 []
-Coordinates=332,353,66,58
+Coordinates=109,78,63,58
 Visible=True
 
 [SaveDialog1]
@@ -22,9 +22,6 @@ Coordinates=460,331,40,36
 
 [opnDadosOrigem]
 Coordinates=82,77,89,36
-
-[btnSalvar]
-Coordinates=109,78,63,58
 
 [opnDadosDestino]
 Coordinates=322,56,89,36

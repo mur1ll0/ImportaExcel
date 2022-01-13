@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, Vcl.Buttons, ComObj, IniFiles,
   Vcl.FileCtrl, Data.DBXFirebird, Data.DB, Data.SqlExpr, importando, OleAuto, Vcl.Menus, System.StrUtils,
-  empresa, Colunas, uSubstituir, uUtil, uProcurar, Vcl.ExtCtrls;
+  empresa, Colunas, uSubstituir, uUtil, uProcurar, Vcl.ExtCtrls, uDividir;
 
 type
   TfrmPrinc = class(TForm)
@@ -14,7 +14,6 @@ type
     StringGrid1: TStringGrid;
     opnDadosDestino: TOpenDialog;
     conDestino: TSQLConnection;
-    btnSalvar: TBitBtn;
     SaveDialog1: TSaveDialog;
     Menu: TMainMenu;
     t1: TMenuItem;
@@ -55,6 +54,7 @@ type
     StartLine: TEdit;
     btnTXT: TBitBtn;
     edtTableName: TEdit;
+    btnSalvar: TBitBtn;
 
     function quantidadeEmpresas(colEmpr: Integer): Integer;
     procedure btnAbrirOrigemClick(Sender: TObject);
@@ -88,6 +88,7 @@ type
     function getProdCodUpdate(line: Integer) : string;
     procedure SelectImportChange(Sender: TObject);
     procedure mnuProcurarClick(Sender: TObject);
+    procedure mnuDividirClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -146,7 +147,7 @@ begin
     arquivo := ExtractFilePath(Application.ExeName);
     FilePath.Text := opnDadosOrigem.FileName;
   end;
-
+  btnLoadOrigem.SetFocus;
 end;
 
 
@@ -1477,6 +1478,12 @@ begin
     mnuProcurar.Click;
    end;
 
+   //RECONHECER CTRL+D
+   if ((Shift = [ssCtrl]) and (Key = $44)) then
+   begin
+    mnuDividir.Click;
+   end;
+
    //RECONHECER CTRL+Z
    if ((Shift = [ssCtrl]) and (Key = 90)) then
    begin
@@ -1609,6 +1616,11 @@ begin
   DeleteRow(StringGrid1, StringGrid1.Row);
 end;
 
+
+procedure TfrmPrinc.mnuDividirClick(Sender: TObject);
+begin
+  frmDividir.Show;
+end;
 
 //Reconhecer Right Click na celula
 procedure TfrmPrinc.StringGrid1MouseDown(Sender: TObject; Button: TMouseButton;
