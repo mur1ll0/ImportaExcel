@@ -137,8 +137,8 @@ begin
         begin
           for j := 0 to frmPrinc.StringGrid1.ColCount-1 do
           begin
-            if (frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col, i].IndexOf(edtSearch.Text) > 0) or
-               (frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col, i] = edtSearch.Text) then
+            if (frmPrinc.StringGrid1.Cells[j, i].IndexOf(edtSearch.Text) > 0) or
+               (frmPrinc.StringGrid1.Cells[j, i] = edtSearch.Text) then
             begin
               //Setar foco na linha e coluna encontrada
               frmPrinc.StringGrid1.Row := i;
@@ -147,10 +147,9 @@ begin
               encontrou := True;
               Break;
             end;
-
-            if encontrou then
-              Break;
           end;
+          if encontrou then
+            Break;
         end;
       end;
     end;
@@ -180,8 +179,8 @@ begin
         begin
           for j := 0 to frmPrinc.StringGrid1.ColCount-1 do
           begin
-            if (frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col, i].IndexOf(edtSearch.Text) > 0) or
-               (frmPrinc.StringGrid1.Cells[frmPrinc.StringGrid1.Col, i] = edtSearch.Text) then
+            if (frmPrinc.StringGrid1.Cells[j, i].IndexOf(edtSearch.Text) > 0) or
+               (frmPrinc.StringGrid1.Cells[j, i] = edtSearch.Text) then
             begin
               //Setar foco na linha e coluna encontrada
               frmPrinc.StringGrid1.Row := i;
@@ -190,10 +189,9 @@ begin
               encontrou := True;
               Break;
             end;
-
-            if encontrou then
-              Break;
           end;
+          if encontrou then
+            Break;
         end;
       end;
     end;
