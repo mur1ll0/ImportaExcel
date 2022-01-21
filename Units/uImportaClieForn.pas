@@ -318,7 +318,7 @@ begin
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + 'cpf=' + '''' + temp + '''';
-          dadosUpdateClieForn := dadosUpdateClieForn + 'tipo=' + '''' + 'F' + '''';
+          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + '''' + 'F' + '''';
         end;
       end;
     end
@@ -345,7 +345,7 @@ begin
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + 'cnpj=' + '''' + temp + '''';
-          dadosUpdateClieForn := dadosUpdateClieForn + 'tipo=' + '''' + 'J' + '''';
+          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + '''' + 'J' + '''';
         end;
       end;
     end
@@ -372,7 +372,7 @@ begin
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + 'cpf=' + '''' + temp2 + '''';
-          dadosUpdateClieForn := dadosUpdateClieForn + 'tipo=' + '''' + 'F' + '''';
+          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + '''' + 'F' + '''';
         end;
       end
       else if temp.Length = 14 then
@@ -391,7 +391,44 @@ begin
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + 'cnpj=' + '''' + temp2 + '''';
-          dadosUpdateClieForn := dadosUpdateClieForn + 'tipo=' + '''' + 'F' + '''';
+          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + '''' + 'F' + '''';
+        end;
+      end
+      else
+      begin
+        //CPF NULL
+        colClieForn := colClieForn + ',cpf';
+        dadosClieForn := dadosClieForn + ',' + 'null';
+        //Setar tipo (Fisca ou Juridica)
+        colClieForn := colClieForn + ',tipo';
+        dadosClieForn := dadosClieForn + ',' + 'null';
+        //Testa se é Update
+        if VerificaUpdate('cpf_cnpj') = 1 then begin
+          if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+          condUpdateClieForn := condUpdateClieForn + 'cpf is null';
+        end
+        else begin
+          if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+          dadosUpdateClieForn := dadosUpdateClieForn + 'cpf=' + 'null';
+          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + 'null';
+        end;
+
+        //CNPJ null
+        //Trazer em branco
+        colClieForn := colClieForn + ',cnpj';
+        dadosClieForn := dadosClieForn + ',' + 'null';
+        //Setar tipo (Fisca ou Juridica)
+        colClieForn := colClieForn + ',tipo';
+        dadosClieForn := dadosClieForn + ',' + 'null';
+        //Testa se é Update
+        if VerificaUpdate('cpf_cnpj') = 1 then begin
+          if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+          condUpdateClieForn := condUpdateClieForn + 'cnpj if null';
+        end
+        else begin
+          if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
+          dadosUpdateClieForn := dadosUpdateClieForn + 'cnpj=' + 'null';
+          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + 'null';
         end;
       end;
     end
