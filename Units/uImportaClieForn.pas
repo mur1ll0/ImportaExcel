@@ -367,11 +367,11 @@ begin
         //Testa se é Update
         if VerificaUpdate('cpf_cnpj') = 1 then begin
           if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
-          condUpdateClieForn := condUpdateClieForn + 'cpf=' + '''' + temp + '''';
+          condUpdateClieForn := condUpdateClieForn + 'cpf=' + '''' + temp2 + '''';
         end
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-          dadosUpdateClieForn := dadosUpdateClieForn + 'cpf=' + '''' + temp + '''';
+          dadosUpdateClieForn := dadosUpdateClieForn + 'cpf=' + '''' + temp2 + '''';
           dadosUpdateClieForn := dadosUpdateClieForn + 'tipo=' + '''' + 'F' + '''';
         end;
       end
@@ -386,11 +386,11 @@ begin
         //Testa se é Update
         if VerificaUpdate('cpf_cnpj') = 1 then begin
           if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
-          condUpdateClieForn := condUpdateClieForn + 'cnpj=' + '''' + temp + '''';
+          condUpdateClieForn := condUpdateClieForn + 'cnpj=' + '''' + temp2 + '''';
         end
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
-          dadosUpdateClieForn := dadosUpdateClieForn + 'cnpj=' + '''' + temp + '''';
+          dadosUpdateClieForn := dadosUpdateClieForn + 'cnpj=' + '''' + temp2 + '''';
           dadosUpdateClieForn := dadosUpdateClieForn + 'tipo=' + '''' + 'F' + '''';
         end;
       end;
