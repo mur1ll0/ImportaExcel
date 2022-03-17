@@ -320,6 +320,7 @@ object frmPrinc: TfrmPrinc
         'Produtos'
         'T'#237'tulos a Pagar'
         'T'#237'tulos a Receber'
+        'Grades'
         'CUSTOM')
     end
     object ButImport: TBitBtn

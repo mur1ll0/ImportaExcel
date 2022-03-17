@@ -119,7 +119,8 @@ implementation
 
 uses
   uImportaClieForn, uImportaProduto, uImportaGrupo, uImportaSubGrupo,
-  uImportaMarca, uImportaTituP, uImportaTituR, uImportaCUSTOM;
+  uImportaMarca, uImportaTituP, uImportaTituR, uImportaCUSTOM,
+  uImportaGrade;
 
 //Função para definir a quantidade de empresas
 function TfrmPrinc.quantidadeEmpresas(colEmpr: Integer): Integer;
@@ -275,7 +276,6 @@ end;
 class function TfrmPrinc.buscaCidade(Cidade, UF: string): String;
 var
   queryTemp: TSQLQuery;
-
 begin
   if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
      (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
@@ -722,6 +722,17 @@ begin
         end
 
         //----------------------------------------------------------------------------
+        //Importar Grades
+        else if SelectImport.Text = 'Grades' then
+        begin
+          cImportaGrades.ImportaRegistro(k, StringGrid1);
+
+          //Verificar se deu erro
+          if status = 0 then
+            Break; //Quebra o for
+        end
+
+        //----------------------------------------------------------------------------
         //OUTRAS OPÇÕES DE IMPORTAÇÃO COLOCAR AQUI
 
 
@@ -886,6 +897,13 @@ begin
           end;
         end
 
+        else if SelectImport.Text='Grades' then
+        begin
+          frmImportando.atualizaStatus('Inserindo dados na tabela GRADE_AJUS.');
+          SQL.CommandText := 'insert into grade_ajus (codi,data) values (gen_id(gen_grade_ajus_id,1),CURRENT_DATE);';
+          SQL.ExecSQL;
+        end
+
         ;
         //Fechar conexoes
         SQL.Free;
@@ -1015,6 +1033,14 @@ begin
           frmImportando.atualizaStatus('Alterar Generator das Marcas.');
           WriteLn(fileTXT, 'select gen_id(GEN_MARCA_ID, abs((select max(CODI) from marca) - (select gen_id(GEN_MARCA_ID,0) from RDB$DATABASE)) ) from RDB$DATABASE;');
           WriteLn(fileTXT, 'COMMIT WORK;');
+        end
+
+        else if SelectImport.Text='Grades' then
+        begin
+          //Criar registro na GRADE_AJUS
+          frmImportando.atualizaStatus('Inserindo dados na tabela GRADE_AJUS.');
+          WriteLn(fileTXT, 'insert into GRADE_AJUS (codi,data) values (gen_id(gen_grade_ajus_id,1),CURRENT_DATE);');
+          WriteLn(fileTXT, 'COMMIT WORK;')
         end
 
         ;

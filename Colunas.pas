@@ -186,20 +186,14 @@ begin
     ListColunas.Items.add('HIST');
     ListColunas.Items.add('DATA_BAIXA');
   end
-  else if LabelTipoImp.Caption = 'Marcas' then
+  else if LabelTipoImp.Caption = 'Grades' then
   begin
-    ListColunas.Items.add('CODI');
+    ListColunas.Items.add('GRADE');
+    ListColunas.Items.add('PROD');
     ListColunas.Items.add('EMPR');
-    ListColunas.Items.add('CLIE');
-    ListColunas.Items.add('LOCA_COBR');
-    ListColunas.Items.add('CART');
-    ListColunas.Items.add('OPER');
-    ListColunas.Items.add('C_FUNC');
-    ListColunas.Items.add('DATA');
-    ListColunas.Items.add('VENC');
-    ListColunas.Items.add('VALOR');
-    ListColunas.Items.add('SALD');
-    ListColunas.Items.add('HIST');
+    ListColunas.Items.add('LINHA');
+    ListColunas.Items.add('COLUNA');
+    ListColunas.Items.add('QTD');
   end
   ;
 end;

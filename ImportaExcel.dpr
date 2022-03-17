@@ -17,7 +17,8 @@ uses
   uImportaCUSTOM in 'Units\uImportaCUSTOM.pas',
   uSubstituir in 'Units\uSubstituir.pas' {frmSubstituir},
   uProcurar in 'Units\uProcurar.pas' {frmProcurar},
-  uDividir in 'Units\uDividir.pas' {frmDividir};
+  uDividir in 'Units\uDividir.pas' {frmDividir},
+  uImportaGrade in 'Units\uImportaGrade.pas';
 
 {$R *.res}
 
