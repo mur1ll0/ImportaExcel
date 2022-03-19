@@ -15,6 +15,7 @@ type
 
       function VerificaLinha(linhaDesc: string; gradeId: string): string;
       function VerificaColuna(colunaDesc: string; gradeId: string): string;
+      procedure VerificaGradeEstoque(grade: string; prod: string; linha: string; coluna: string; empr: string);
     public
       k: Integer;
       StringGrid1: TStringGrid;
@@ -105,7 +106,7 @@ begin
       queryTemp := TSQLQuery.Create(nil);
       queryTemp.SQLConnection := frmPrinc.conDestino;
       queryTemp.SQL.Clear;
-      queryTemp.SQL.Add('select gc1.grco_id from grade_coluna gc1 where gc1.grad_id= :PGRADE and gc1.grco_descricao='':PDESC''');
+      queryTemp.SQL.Add('select gc1.grco_id from grade_coluna gc1 where gc1.grad_id= :PGRADE and gc1.grco_descricao= :PDESC');
       queryTemp.ParamByName('PGRADE').AsString := gradeId;
       queryTemp.ParamByName('PDESC').AsString := colunaDesc;
       queryTemp.Open;
@@ -120,7 +121,7 @@ begin
             SQL := TSQLDataSet.Create(Nil);
             SQL.SQLConnection := frmPrinc.conDestino;
 
-            SQL.CommandText := 'insert into grade_coluna (grco_id,grad_id,grco_descricao) values (gen_id(GEN_GRADE_COLUNA_ID,1),'+gradeId+','+colunaDesc+');';
+            SQL.CommandText := 'insert into grade_coluna (grco_id,grad_id,grco_descricao) values (gen_id(GEN_GRADE_COLUNA_ID,1),'+gradeId+','+QuotedStr(colunaDesc)+');';
             SQL.ExecSQL;
 
           except
@@ -144,6 +145,107 @@ begin
       else begin
         //Carregar código
         Result := queryTemp.FieldByName('grco_id').AsString;
+      end;
+      queryTemp.Close;
+      frmPrinc.conDestino.Close;
+    end;
+  end;
+end;
+
+procedure cImportaGrades.VerificaGradeEstoque(grade, prod, linha,
+  coluna: string; empr: string);
+var
+  queryTemp: TSQLQuery;
+  str: string;
+  fileTXT: TextFile;
+  SQL: TSQLDataSet;
+begin
+  //Salvar em arquivo
+  if (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.TXT') or
+     (UpperCase( ExtractFileExt(frmPrinc.DBPath.Text) ) = '.SQL')
+  then
+  begin
+    //Comando para tentar inserir na GRADE_ESTOQUE
+    //Se já existir o registro, vai dar erro e não executar o comando apenas.
+    str := 'insert into grade_estoque (gres_id, gres_qtd, gres_qtd_max, grad_id, prod_codi, prod_empr, grli_id, grco_id, empr) '+
+      'select '+
+      '    case '+
+      '        when (select ge.gres_id from grade_estoque ge where ge.grad_id='+grade+' and ge.prod_codi='+prod+' and ge.empr='+empr+' and ge.grli_id='+linha+' and ge.grco_id='+coluna+') is null '+
+      '            then gen_id(GEN_GRADE_ESTOQUE_ID,1) '+
+      '        else '+
+      '            (select ge.gres_id from grade_estoque ge where ge.grad_id='+grade+' and ge.prod_codi='+prod+' and ge.empr='+empr+' and ge.grli_id='+linha+' and ge.grco_id='+coluna+') '+
+      '    end ID, '+
+      '    0.0 QTD, '+
+      '    0.0 QTD_MAX, '+
+      '    '+grade+' GRADE_ID, '+
+      '    '+prod+' PROD_CODI, '+
+      '    '+empr+' PROD_EMPR, '+
+      '    '+linha+' LINHA, '+
+      '    '+coluna+' COLUNA, '+
+      '    '+empr+' EMPR '+
+      'from RDB$DATABASE ';
+    try
+      try
+        //Carregar arquivo TXT
+        AssignFile(fileTXT, frmPrinc.DBPath.Text);
+        if not FileExists(frmPrinc.DBPath.Text) then ReWrite(fileTXT)
+        else append(fileTXT);
+
+        frmImportando.atualizaStatus('Inserindo registro na GRADE_ESTOQUE');
+        WriteLn(fileTXT, '----------Inserindo registro na GRADE_ESTOQUE----------');
+
+        WriteLn(fileTXT, str);
+        WriteLn(fileTXT, 'COMMIT WORK;');
+      except
+        on e: exception do
+        begin
+          ShowMessage('Erro TXT: '+e.message);
+          status := 0;
+          CloseFile(fileTXT);
+          Exit;
+        end;
+      end;
+    finally
+      CloseFile(fileTXT);
+    end;
+  end
+  //Executar no banco de dados
+  else
+  begin
+    try
+      frmPrinc.conDestino.Open;
+      queryTemp := TSQLQuery.Create(nil);
+      queryTemp.SQLConnection := frmPrinc.conDestino;
+      queryTemp.SQL.Clear;
+      queryTemp.SQL.Add('select ge.gres_id from grade_estoque ge where ge.grad_id='+grade+' and ge.prod_codi='+prod+' and ge.empr='+empr+' and ge.grli_id='+linha+' and ge.grco_id='+coluna);
+      queryTemp.Open;
+    finally
+      if queryTemp.IsEmpty then
+      begin
+        //Se não existir, inserir registro
+        try
+          try
+            //Abrir conexoes
+            frmPrinc.conDestino.Open;
+            SQL := TSQLDataSet.Create(Nil);
+            SQL.SQLConnection := frmPrinc.conDestino;
+
+            SQL.CommandText := 'insert into grade_estoque (gres_id, gres_qtd, gres_qtd_max, grad_id, prod_codi, prod_empr, grli_id, grco_id, empr) values '+
+              ' (gen_id(GEN_GRADE_ESTOQUE_ID,1),0.0,0.0,'+grade+','+prod+','+empr+','+linha+','+coluna+','+empr+');';
+            SQL.ExecSQL;
+
+          except
+            on e: exception do
+            begin
+              ShowMessage('Erro SQL: '+e.message+sLineBreak+SQL.CommandText);
+              status := 0;
+            end;
+          end;
+
+        finally
+          SQL.Free;
+          frmPrinc.conDestino.Close;
+        end;
       end;
       queryTemp.Close;
       frmPrinc.conDestino.Close;
@@ -219,7 +321,7 @@ begin
       queryTemp := TSQLQuery.Create(nil);
       queryTemp.SQLConnection := frmPrinc.conDestino;
       queryTemp.SQL.Clear;
-      queryTemp.SQL.Add('select gl1.grli_id from grade_linha gl1 where gl1.grad_id= :PGRADE and gl1.grli_descricao='':PDESC''');
+      queryTemp.SQL.Add('select gl1.grli_id from grade_linha gl1 where gl1.grad_id= :PGRADE and gl1.grli_descricao= :PDESC');
       queryTemp.ParamByName('PGRADE').AsString := gradeId;
       queryTemp.ParamByName('PDESC').AsString := linhaDesc;
       queryTemp.Open;
@@ -234,7 +336,7 @@ begin
             SQL := TSQLDataSet.Create(Nil);
             SQL.SQLConnection := frmPrinc.conDestino;
 
-            SQL.CommandText := 'insert into grade_linha (grli_id,grad_id,grli_descricao) values (gen_id(GEN_GRADE_LINHA_ID,1),'+gradeId+','+linhaDesc+');';
+            SQL.CommandText := 'insert into grade_linha (grli_id,grad_id,grli_descricao) values (gen_id(GEN_GRADE_LINHA_ID,1),'+gradeId+','+QuotedStr(linhaDesc)+');';
             SQL.ExecSQL;
 
           except
@@ -267,11 +369,13 @@ end;
 
 procedure cImportaGrades.CarregaColunas;
 var
-  i, l, j, count: Integer;
-  temp, temp2: string;
+  i: Integer;
+  temp: string;
   gradeId: string;
   prodId: string;
   linhaId, colunaId: string;
+  but: Integer;
+  empr: string;
 begin
   frmImportando.atualizaStatus('Grades '+IntToStr(k));
 
@@ -298,8 +402,24 @@ begin
   begin
     StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
     prodId := StringGrid1.Cells[i,k];
-    if StringGrid1.Cells[i,k] <> '' then
-      gradeId := '(select grade_grad_id from prod where codi='+StringGrid1.Cells[i,k]+')';
+
+    //Se não tiver código do produto sair
+    if prodId = '' then
+    begin
+      ShowMessage('Nenhum produto informado.');
+      status := 0;
+      Exit;
+    end;
+
+    //Se não tiver gradeId informado, carregado do produto
+    if gradeId = '' then
+      gradeId := '(select grade_grad_id from prod where codi='+prodId+')';
+  end
+  else
+  begin
+    ShowMessage('Nenhum produto informado.');
+    status := 0;
+    Exit;
   end;
 
   //Generators
@@ -333,10 +453,14 @@ begin
   i:=BuscaColuna(StringGrid1,'empr');
   if (i<>-1) then
   begin
+    temp := StringGrid1.Cells[i,k];
+    if temp = '' then
+      temp := '1';
+    empr := temp;
     colLanc := colLanc + ',prod_empr';
-    dadosLanc := dadosLanc + ',''' + StringGrid1.Cells[i,k] + '''';
+    dadosLanc := dadosLanc + ',''' + empr + '''';
     colLanc := colLanc + ',grla_empr';
-    dadosLanc := dadosLanc + ',''' + StringGrid1.Cells[i,k] + '''';
+    dadosLanc := dadosLanc + ',''' + empr + '''';
   end
   else begin
     colLanc := colLanc + ',prod_empr';
@@ -388,6 +512,9 @@ begin
       dadosLancItems := dadosLancItems + ',' + colunaId;
     end;
   end;
+
+  //Verificar se existe registro na tebela GRADE_ESTOQUE, sen criar
+  VerificaGradeEstoque(gradeId,prodId,linhaId,colunaId,empr);
 
   //Quantidade é obrigatório, se não tiver põe 0
   //QTD
