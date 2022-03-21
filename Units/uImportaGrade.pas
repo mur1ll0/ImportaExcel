@@ -62,7 +62,7 @@ begin
       '    end CODI_COLUNA, '+
       '    '+gradeId+' CODI_GRADE, '+
       '    '+QuotedStr(colunaDesc)+' DESCR '+
-      'from RDB$DATABASE ';
+      'from RDB$DATABASE; ';
     try
       try
         //Carregar arquivo TXT
@@ -183,7 +183,7 @@ begin
       '    '+linha+' LINHA, '+
       '    '+coluna+' COLUNA, '+
       '    '+empr+' EMPR '+
-      'from RDB$DATABASE ';
+      'from RDB$DATABASE; ';
     try
       try
         //Carregar arquivo TXT
@@ -277,7 +277,7 @@ begin
       '    end CODI_LINHA, '+
       '    '+gradeId+' CODI_GRADE, '+
       '    '+QuotedStr(linhaDesc)+' DESCR '+
-      'from RDB$DATABASE ';
+      'from RDB$DATABASE; ';
     try
       try
         //Carregar arquivo TXT

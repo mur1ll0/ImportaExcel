@@ -900,7 +900,7 @@ begin
         else if SelectImport.Text='Grades' then
         begin
           frmImportando.atualizaStatus('Inserindo dados na tabela GRAD_AJUS.');
-          SQL.CommandText := 'insert into grad_ajus (codi,data) values (gen_id(gen_grade_ajus_id,1),CURRENT_DATE);';
+          SQL.CommandText := 'insert into grad_ajus (graj_id,graj_data) values (gen_id(gen_grade_ajus_id,1),CURRENT_DATE);';
           SQL.ExecSQL;
         end
 
@@ -1039,7 +1039,7 @@ begin
         begin
           //Criar registro na GRAD_AJUS
           frmImportando.atualizaStatus('Inserindo dados na tabela GRAD_AJUS.');
-          WriteLn(fileTXT, 'insert into GRAD_AJUS (codi,data) values (gen_id(gen_grade_ajus_id,1),CURRENT_DATE);');
+          WriteLn(fileTXT, 'insert into GRAD_AJUS (graj_id,graj_data) values (gen_id(gen_grade_ajus_id,1),CURRENT_DATE);');
           WriteLn(fileTXT, 'COMMIT WORK;')
         end
 
