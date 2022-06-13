@@ -399,9 +399,6 @@ begin
         //CPF NULL
         colClieForn := colClieForn + ',cpf';
         dadosClieForn := dadosClieForn + ',' + 'null';
-        //Setar tipo (Fisca ou Juridica)
-        colClieForn := colClieForn + ',tipo';
-        dadosClieForn := dadosClieForn + ',' + 'null';
         //Testa se é Update
         if VerificaUpdate('cpf_cnpj') = 1 then begin
           if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
@@ -410,15 +407,11 @@ begin
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + 'cpf=' + 'null';
-          dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + 'null';
         end;
 
         //CNPJ null
         //Trazer em branco
         colClieForn := colClieForn + ',cnpj';
-        dadosClieForn := dadosClieForn + ',' + 'null';
-        //Setar tipo (Fisca ou Juridica)
-        colClieForn := colClieForn + ',tipo';
         dadosClieForn := dadosClieForn + ',' + 'null';
         //Testa se é Update
         if VerificaUpdate('cpf_cnpj') = 1 then begin
@@ -428,6 +421,20 @@ begin
         else begin
           if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + 'cnpj=' + 'null';
+        end;
+
+        //TIPO null
+        //Trazer em branco
+        //Setar tipo (Fisca ou Juridica)
+        colClieForn := colClieForn + ',tipo';
+        dadosClieForn := dadosClieForn + ',' + 'null';
+        //Testa se é Update
+        if VerificaUpdate('cpf_cnpj') = 1 then begin
+          if condUpdateClieForn <> '' then condUpdateClieForn := condUpdateClieForn + ' and ';
+          condUpdateClieForn := condUpdateClieForn + 'tipo is null';
+        end
+        else begin
+          if dadosUpdateClieForn <> '' then dadosUpdateClieForn := dadosUpdateClieForn + ', ';
           dadosUpdateClieForn := dadosUpdateClieForn + ',tipo=' + 'null';
         end;
       end;
