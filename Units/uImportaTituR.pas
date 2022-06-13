@@ -55,7 +55,7 @@ begin
   if (i<>-1) then
   begin
     StringGrid1.Cells[i,k] := stringreplace(StringGrid1.Cells[i,k], '.', '',[rfReplaceAll, rfIgnoreCase]);
-    StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,12));
+    StringGrid1.Cells[i,k] := (Copy(StringGrid1.Cells[i,k],1,15));
     l := Length(StringGrid1.Cells[i,k]);
     //Testar se ja existir o código do título e inserir uma barra.
     count := 0;
