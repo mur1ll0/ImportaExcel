@@ -844,7 +844,7 @@ begin
     dadosItens := dadosItens + ',' + temp;
     colItens := colItens + ',qtd';
     //Testa se é Update
-    if VerificaUpdate('est') = 1 then begin
+    if VerificaUpdate('max') = 1 then begin
       if condUpdateProd <> '' then condUpdateProd := condUpdateProd + ' and ';
       condUpdateProd := condUpdateProd + 'codi in (select cod_prod from prod_esto where qtd_max = '+temp+')';
       if condUpdateProdTrib <> '' then condUpdateProdTrib := condUpdateProdTrib + ' and ';
@@ -867,14 +867,14 @@ begin
           '        '+prodCod+' PRODCOD, '+
           '        gen_id(gen_prod_ajus_id,0)+1 NUME, '+
           '        case '+
-          '            when ('+temp+'-pe.qtd) > 0 then 4 '+
-          '            when ('+temp+'-pe.qtd) < 0 then 1 '+
+          '            when ('+temp+'-pe.qtd_max) > 0 then 4 '+
+          '            when ('+temp+'-pe.qtd_max) < 0 then 1 '+
           '        end TIPO, '+
           '        ''A'' EPV, '+
-          '        ABS('+temp+'-pe.qtd) QTD, '+
+          '        ABS('+temp+'-pe.qtd_max) QTD, '+
           '        '+prodEmpr+' EMPR '+
           '    from prod_esto pe '+
-          '    where ('+temp+'-pe.qtd) <> 0 ';
+          '    where ('+temp+'-pe.qtd_max) <> 0 ';
     end;
     //Setar tipo do item
     colItens := colItens + ',tipo';
